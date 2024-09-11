@@ -1,0 +1,50 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.9.34902.65
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowgic.API", "Meowgic.API\Meowgic.API.csproj", "{4B0F5553-9F68-4D6E-BD9E-18885C7BB5A6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A6EFF2CF-30BB-4055-9429-34225ACACFB1} = {A6EFF2CF-30BB-4055-9429-34225ACACFB1}
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1} = {E58CA4F1-4DFF-4C09-B24C-9D30447627B1}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowgic.Data", "Meowgic_Data\Meowgic.Data.csproj", "{E58CA4F1-4DFF-4C09-B24C-9D30447627B1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowgic.Business", "Meowgic_Business\Meowgic.Business.csproj", "{A6EFF2CF-30BB-4055-9429-34225ACACFB1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1} = {E58CA4F1-4DFF-4C09-B24C-9D30447627B1}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Meowgic.Shares", "Meowgic.Shares\Meowgic.Shares.csproj", "{7641DEB8-AAFD-4153-9746-EBE7AACA2F23}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4B0F5553-9F68-4D6E-BD9E-18885C7BB5A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4B0F5553-9F68-4D6E-BD9E-18885C7BB5A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4B0F5553-9F68-4D6E-BD9E-18885C7BB5A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4B0F5553-9F68-4D6E-BD9E-18885C7BB5A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E58CA4F1-4DFF-4C09-B24C-9D30447627B1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A6EFF2CF-30BB-4055-9429-34225ACACFB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A6EFF2CF-30BB-4055-9429-34225ACACFB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A6EFF2CF-30BB-4055-9429-34225ACACFB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A6EFF2CF-30BB-4055-9429-34225ACACFB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7641DEB8-AAFD-4153-9746-EBE7AACA2F23}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7641DEB8-AAFD-4153-9746-EBE7AACA2F23}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7641DEB8-AAFD-4153-9746-EBE7AACA2F23}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7641DEB8-AAFD-4153-9746-EBE7AACA2F23}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {5753F1C4-38AC-480A-9560-2C7BEB10E771}
+	EndGlobalSection
+EndGlobal
