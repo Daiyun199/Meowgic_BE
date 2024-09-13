@@ -21,7 +21,7 @@ namespace Meowgic.Business.Services
             _configuration = configuration;
         }
 
-        public string GenerateAccessToken(int accountId, string role)
+        public string GenerateAccessToken(string accountId, string role)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

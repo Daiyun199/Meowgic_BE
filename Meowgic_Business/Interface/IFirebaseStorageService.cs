@@ -9,14 +9,6 @@ namespace Meowgic.Business.Interface
 {
     public interface IFirebaseStorageService
     {
-        Task<string> UploadImageAsync(IFormFile imageFile, string? imageName = default);
-
-        string GetImageUrl(string imageName);
-
-        Task<string> UpdateImageAsync(IFormFile imageFile, string imageName);
-
-        Task DeleteImageAsync(string imageName);
-
-        Task<string[]> UploadImagesAsync(IFormFileCollection files);
+        public Task<string> Push(IFormFile file, FileStream data);
     }
 }

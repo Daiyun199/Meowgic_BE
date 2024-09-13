@@ -27,7 +27,7 @@ namespace Meowgic.API.Extensions
 
         private static IServiceCollection AddDbContextWithConfigurations(this IServiceCollection services, IConfiguration configuration)
         {
-            string connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            string connectionString = configuration.GetConnectionString("Default")!;
             services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionString));
             return services;

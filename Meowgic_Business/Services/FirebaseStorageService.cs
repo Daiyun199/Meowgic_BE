@@ -8,81 +8,56 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Firebase.Auth;
+using Firebase.Storage;
 
 namespace Meowgic.Business.Services
 {
     public class FirebaseStorageService : IFirebaseStorageService
     {
-        private readonly StorageClient _storageClient;
         private readonly IConfiguration _configuration;
-        private readonly string _bucketName;
 
-        public FirebaseStorageService(StorageClient storageClient, IConfiguration configuration)
+        public FirebaseStorageService(IConfiguration configuration)
         {
-            _storageClient = storageClient;
             _configuration = configuration;
-            _bucketName = _configuration["Firebase:Bucket"]!;
         }
 
-        public async Task DeleteImageAsync(string imageName)
+        public async Task<string> Push(IFormFile file, FileStream data)
         {
-            await _storageClient.DeleteObjectAsync(_bucketName, imageName, cancellationToken: CancellationToken.None);
-        }
+            var apiKey = _configuration["Firebase:apiKey"];
+            var authEmail = _configuration["Firebase:authEmail"];
+            var authPassword = _configuration["Firebase:authPassword"];
+            var storageBucket = _configuration["Firebase:bucket"];
 
-        public string GetImageUrl(string imageName)
-        {
+            var authProvider = new FirebaseAuthProvider(new FirebaseConfig(apiKey));
+            var auth = await authProvider.SignInWithEmailAndPasswordAsync(authEmail, authPassword);
 
-            string imageUrl = $"https://firebasestorage.googleapis.com/v0/b/{_bucketName}/o/{Uri.EscapeDataString(imageName)}?alt=media";
-            return imageUrl;
-        }
+            var cancellationToken = new CancellationTokenSource();
 
-        public async Task<string> UpdateImageAsync(IFormFile imageFile, string imageName)
-        {
+            var storage = new FirebaseStorage(
+                storageBucket,
+                new FirebaseStorageOptions
+                {
+                    AuthTokenAsyncFactory = () => Task.FromResult(auth.FirebaseToken),
+                    ThrowOnCancel = true
+                });
 
-            using var stream = new MemoryStream();
+            var task = storage
+                .Child("assets")
+                .Child($"{file.FileName}.{Path.GetExtension(file.FileName).Substring(1)}")
+                .PutAsync(data, cancellationToken.Token);
 
-            await imageFile.CopyToAsync(stream);
-
-            stream.Position = 0;
-
-            // Re-upload the image with the same name to update it
-            var blob = await _storageClient.UploadObjectAsync(_bucketName, imageName, imageFile.ContentType, stream, cancellationToken: CancellationToken.None);
-
-            return GetImageUrl(imageName);
-        }
-
-
-        public async Task<string> UploadImageAsync(IFormFile imageFile, string? imageName = default)
-        {
-            imageName ??= imageFile.FileName;
-
-            using var stream = new MemoryStream();
-
-            await imageFile.CopyToAsync(stream);
-
-            var blob = await _storageClient.UploadObjectAsync(_bucketName, imageName, imageFile.ContentType, stream, cancellationToken: CancellationToken.None);
-
-            if (blob is null)
+            try
             {
-                throw new BadRequestException("Upload failed");
+                var downloadUrl = await task;
+                Console.WriteLine($"File uploaded to Firebase Storage. Download URL: {downloadUrl}");
+                return downloadUrl;
             }
-
-            return GetImageUrl(imageFile.FileName);
-
-        }
-
-        public async Task<string[]> UploadImagesAsync(IFormFileCollection files)
-        {
-            var uploadTasks = new List<Task<string>>();
-
-            foreach (var file in files)
+            catch (Exception ex)
             {
-                uploadTasks.Add(UploadImageAsync(file));
+                Console.WriteLine($"Failed to upload file to Firebase Storage: {ex.Message}");
+                return "";
             }
-
-            var imageUrls = await Task.WhenAll(uploadTasks);
-
-            return imageUrls;
         }
     }
 }

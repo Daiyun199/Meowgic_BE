@@ -22,10 +22,22 @@ namespace Meowgic.Business.Extension
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddServicesDependencies(this IServiceCollection services, IConfiguration configuration)
+        public static IServiceCollection AddBusinessLogicDependencies(this IServiceCollection services)
         {
-            services.AddMapsterConfigurations();
-            services.AddSingleton(opt => StorageClient.Create());
+            services.AddMapsterConfigurations()
+                    .AddServices();
+            return services;
+        }
+
+        private static IServiceCollection AddMapsterConfigurations(this IServiceCollection services)
+        {
+            services.AddMapster();
+            return services;
+        }
+
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.AddScoped<IServiceFactory, ServiceFactory>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ICardMeaningService, CardMeaningService>();
@@ -38,17 +50,6 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IServiceService, ServiceService>();
             return services;
-        }
-
-        private static void AddMapsterConfigurations(this IServiceCollection services)
-        {
-            TypeAdapterConfig<Register, Account>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<CardRequest, Card>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<CardMeaningRequest, CardMeaning>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<CategoryRequest, Category>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<CreatePromotion, Promotion>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<QuestionRequest, Question>.NewConfig().IgnoreNullValues(true);
-            TypeAdapterConfig<ServiceRequest, TarotService>.NewConfig().IgnoreNullValues(true);
         }
     }
 }
