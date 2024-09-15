@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext;
 using Meowgic.Business.Extension;
 using Meowgic.Data.Extension;
+using Meowgic.API.Middlewares;
 
 namespace Meowgic.API
 {
@@ -22,8 +23,8 @@ namespace Meowgic.API
 
             var configuration = builder.Configuration;
             builder.Services.AddApiDependencies(configuration)
-                            .AddServicesDependencies(configuration)
-                            .AddRepositoriesDependencies();
+                            .AddBusinessLogicDependencies()
+                            .AddDataAccessDependencies();
 
             //Add serilog
             builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
@@ -39,19 +40,19 @@ namespace Meowgic.API
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.Configure<IdentityOptions>(options =>
-            {
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequiredLength = 8;
-                options.Password.RequiredUniqueChars = 1;
-                options.User.RequireUniqueEmail = false;
-                options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
-                options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
-            }).Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromMinutes(15));
-            builder.Services.AddDataProtection();
+            //builder.Services.Configure<IdentityOptions>(options =>
+            //{
+            //    options.Password.RequireDigit = true;
+            //    options.Password.RequireLowercase = true;
+            //    options.Password.RequireUppercase = true;
+            //    options.Password.RequireNonAlphanumeric = true;
+            //    options.Password.RequiredLength = 8;
+            //    options.Password.RequiredUniqueChars = 1;
+            //    options.User.RequireUniqueEmail = false;
+            //    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+            //    options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+            //}).Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromMinutes(15));
+            //builder.Services.AddDataProtection();
 
             builder.Services.AddSignalR();
             var app = builder.Build();
@@ -67,6 +68,7 @@ namespace Meowgic.API
 
             app.UseAuthorization();
 
+            app.UseMiddleware<GlobalExceptionMiddleware>();
 
             app.MapControllers();
 

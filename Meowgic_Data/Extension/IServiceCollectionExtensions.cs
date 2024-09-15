@@ -11,8 +11,16 @@ namespace Meowgic.Data.Extension
 {
     public static class IServiceCollectionExtensions
     {
-        public static IServiceCollection AddRepositoriesDependencies(this IServiceCollection services)
+        public static IServiceCollection AddDataAccessDependencies(this IServiceCollection services)
         {
+            services.AddRepositories();
+            return services;
+        }
+
+        private static IServiceCollection AddRepositories(this IServiceCollection services)
+        {
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();

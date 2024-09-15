@@ -9,7 +9,7 @@ namespace Meowgic.Business.Interface
 {
     public interface ITokenService
     {
-        string GenerateAccessToken(int accountId, string role);
+        string GenerateAccessToken(string accountId, string role);
 
         string GenerateRefreshToken();
 

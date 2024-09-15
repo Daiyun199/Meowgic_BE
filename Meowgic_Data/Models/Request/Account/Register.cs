@@ -22,17 +22,16 @@ namespace Meowgic.Data.Models.Request.Account
 
         [Required]
         [DataType(DataType.Password)]
-        [RegularExpression(@"^{8,}$", ErrorMessage = "Password must have minimum 8 characters")]
         public required string Password { get; set; }
 
-        [JsonConverter(typeof(DateOnlyJsonConverter))]
-        public required DateOnly? Dob { get; set; }
+        public required DateTime? Dob { get; set; }
 
         [EnumDataType(typeof(Gender), ErrorMessage = "Invalid gender")]
-        public string Gender { get; set; } = "Other";
+        [Required]
+        public required string Gender { get; set; }
 
         public string? Phone { get; set; }
 
-        public IFormFile? Images { get; set; }
+        //public IFormFile? Images { get; set; }
     }
 }
