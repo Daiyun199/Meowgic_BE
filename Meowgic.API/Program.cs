@@ -64,6 +64,7 @@ namespace Meowgic.API
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
+            app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 
