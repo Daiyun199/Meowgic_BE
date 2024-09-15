@@ -52,5 +52,6 @@ namespace Meowgic.Data.Entities
         public virtual ICollection<Order> Orders { get; set; } = new List<Order>();
 
         public virtual ICollection<TarotService> Services { get; set; } = new List<TarotService>();
+        public virtual ICollection<ScheduleReader> ScheduleReaders { get; set; } = new List<ScheduleReader>();
     }
 }
