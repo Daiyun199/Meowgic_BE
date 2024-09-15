@@ -30,6 +30,7 @@ namespace Meowgic.Data.Extension
             services.AddScoped<IPromotionRepository, PromotionRepository>();
             services.AddScoped<IQuestionRepository, QuestionRepository>();
             services.AddScoped<IServiceRepository, ServiceRepository>();
+            services.AddScoped<IZodiacRepository, ZodiacRepository>();
             return services;
         }
     }

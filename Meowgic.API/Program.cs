@@ -9,6 +9,7 @@ using static Microsoft.ApplicationInsights.MetricDimensionNames.TelemetryContext
 using Meowgic.Business.Extension;
 using Meowgic.Data.Extension;
 using Meowgic.API.Middlewares;
+using Meowgic.Business.Mapper;
 
 namespace Meowgic.API
 {
@@ -28,7 +29,7 @@ namespace Meowgic.API
 
             //Add serilog
             builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
-
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
             builder.Services.AddIdentity<Account, IdentityRole>()

@@ -49,6 +49,7 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IPromotionService, PromotionService>();
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IZodiacService, ZodiacService>();
             return services;
         }
     }

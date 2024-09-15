@@ -1,5 +1,4 @@
 ﻿using Meowgic.Business.Interface;
-using Meowgic.Business.Services;
 using Meowgic.Data.Interfaces;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -8,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meowgic.Business
+namespace Meowgic.Business.Services
 {
     public class ServiceFactory : IServiceFactory
     {
