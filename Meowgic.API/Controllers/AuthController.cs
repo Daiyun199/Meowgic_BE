@@ -1,7 +1,7 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
-using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.Auth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
