@@ -3,7 +3,7 @@ using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Account;
-using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.Auth;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
 using System;

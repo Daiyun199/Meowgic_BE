@@ -10,6 +10,7 @@ namespace Meowgic.Data.Interfaces
 {
     public interface IAccountRepository : IGenericRepository<Account>
     {
-
+        Task<List<Account>> GetAllAcountCustomer();
+        Task<Account?> GetCustomerDetailsInfo(string id);
     }
 }

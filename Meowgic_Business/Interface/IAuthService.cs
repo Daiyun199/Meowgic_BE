@@ -1,5 +1,5 @@
 ﻿using Meowgic.Data.Models.Request.Account;
-using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.Auth;
 using System;
 using System.Collections.Generic;
 using System.Linq;

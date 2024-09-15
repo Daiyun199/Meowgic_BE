@@ -17,6 +17,24 @@ namespace Meowgic.Data.Repositories
 
         public AccountRepository(AppDbContext context) : base(context)
         {
+            _context = context;
+        }
+        public async Task<List<Account>> GetAllAcountCustomer()
+        {
+            var getAll = await _context.Accounts.AsNoTracking().Where(p => p.Role == "Customer").ToListAsync();
+            return getAll;
+        }
+
+        public async Task<Account?> GetCustomerDetailsInfo(string id)
+        {
+            return await _context.Accounts
+                            .AsNoTracking()
+                            .Include(a => a.Orders)
+                            .ThenInclude(o => o.OrderDetails)
+                            .ThenInclude(od => od.Service)
+                            .ThenInclude(s => s.Promotion)
+                            .AsSplitQuery()
+                            .SingleOrDefaultAsync(a => a.Id == id);
         }
     }
 }
