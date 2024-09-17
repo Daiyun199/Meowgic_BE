@@ -3,6 +3,7 @@ using Mapster;
 using Meowgic.Business.Interface;
 using Meowgic.Business.Services;
 using Meowgic.Data.Entities;
+using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.CardMeaning;
@@ -50,6 +51,7 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IQuestionService, QuestionService>();
             services.AddScoped<IServiceService, ServiceService>();
             services.AddScoped<IZodiacService, ZodiacService>();
+            services.AddScoped<IZodiacColorService, ZodiacColorService>();
             return services;
         }
     }
