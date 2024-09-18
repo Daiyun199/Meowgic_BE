@@ -15,7 +15,7 @@ namespace Meowgic.Data.Interfaces
 
         Task<T?> FindOneAsync(Expression<Func<T, bool>> expression, bool hasTrackings = true);
 
-        Task<T?> GetByIdAsync(int id);
+        Task<T?> GetByIdAsync(string id);
 
         Task<List<T>> GetAllAsync();
 
@@ -24,5 +24,6 @@ namespace Meowgic.Data.Interfaces
         Task UpdateAsync(T TEntity);
 
         Task DeleteAsync(T TEntity);
+        Task<bool> AnyAsync(Expression<Func<T, bool>> expression);
     }
 }

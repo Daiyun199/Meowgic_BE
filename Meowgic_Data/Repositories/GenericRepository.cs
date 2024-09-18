@@ -49,7 +49,7 @@ namespace Meowgic.Data.Repositories
             return await _context.Set<T>().ToListAsync();
         }
 
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(string id)
         {
             return await _context.Set<T>().FindAsync(id);
         }
@@ -58,6 +58,10 @@ namespace Meowgic.Data.Repositories
         {
             _context.Set<T>().Update(TEntity);
             return Task.CompletedTask;
+        }
+        public async Task<bool> AnyAsync(Expression<Func<T, bool>> expression)
+        {
+            return await _context.Set<T>().AnyAsync(expression);
         }
     }
 }
