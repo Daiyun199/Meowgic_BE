@@ -31,6 +31,7 @@ namespace Meowgic.Data.Extension
             services.AddScoped<IQuestionRepository, QuestionRepository>();
             services.AddScoped<IServiceRepository, ServiceRepository>();
             services.AddScoped<IZodiacRepository, ZodiacRepository>();
+            services.AddScoped<IZodiacColorRepository, ZodiacColorRepository>();
             return services;
         }
     }
