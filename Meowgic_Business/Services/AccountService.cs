@@ -4,6 +4,7 @@ using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
 using Meowgic.Data.Repositories;
 using Meowgic.Shares.Exceptions;
@@ -87,6 +88,11 @@ namespace Meowgic.Business.Services
             //account.Password = pass;
 
             return account.Adapt<AccountResponse>();
+        }
+
+        public async Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request)
+        {
+            return (await _unitOfWork.GetAccountRepository().GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
         }
     }
 }
