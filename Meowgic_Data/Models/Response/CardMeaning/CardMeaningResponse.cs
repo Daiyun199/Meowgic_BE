@@ -5,24 +5,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meowgic.Data.Entities
+namespace Meowgic.Data.Models.Response.CardMeaning
 {
-    public partial class CardMeaning : AbstractEntity
+    public class CardMeaningResponse
     {
-        public string Id { get; set; } = Guid.NewGuid().ToString();
-
-        [ForeignKey("Category")]
+        public string Id { get; set; } = null!;
         public string CategoryId { get; set; } = null!;
-        [ForeignKey("Card")]
         public string CardId { get; set; } = null!;
-
         public string Meaning { get; set; } = null!;
-
         public string? ReMeaning { get; set; }
-
-        public virtual Card Card { get; set; } = null!;
-
-        public virtual Category Category { get; set; } = null!;
     }
-
 }

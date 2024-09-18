@@ -10,10 +10,10 @@ namespace Meowgic.Data.Models.Request.CardMeaning
     public class CardMeaningRequest
     {
         [Required]
-        public int CardId { get; set; }
+        public string CardId { get; set; }
 
         [Required]
-        public int CategoryId { get; set; }
+        public string CategoryId { get; set; }
 
         [Required]
         public required string Meaning { get; set; }

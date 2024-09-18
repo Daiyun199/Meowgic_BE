@@ -1,5 +1,8 @@
 ﻿using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
+using Meowgic.Data.Models.Request.CardMeaning;
+using Meowgic.Data.Models.Request.Category;
+using Meowgic.Data.Models.Request.Question;
 using Meowgic.Data.Models.Response;
 using Meowgic.Shares.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +27,43 @@ namespace Meowgic.Data.Extension
                 PageSize = pageSize,
                 Items = await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync()
             };
+        }
+
+        public static IQueryable<Card> ApplyPagedCardFilter(this IQueryable<Card> query, QueryPagedCard request)
+        {
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                query = query.Where(s => s.Name != null && s.Name.ToLower().Contains(request.Name.ToLower()));
+            }
+            return query;
+        }
+        public static IQueryable<CardMeaning> ApplyPagedCardMeaningFilter(this IQueryable<CardMeaning> query, QueryPagedCardMeaning request)
+        {
+            if (!string.IsNullOrEmpty(request.CardId))
+            {
+                query = query.Where(s => s.CardId != null && s.CardId.ToLower().Contains(request.CardId.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(request.CategoryId))
+            {
+                query = query.Where(s => s.CategoryId != null && s.CategoryId.ToLower().Contains(request.CategoryId.ToLower()));
+            }
+            return query;
+        }
+        public static IQueryable<Category> ApplyPagedCategoryFilter(this IQueryable<Category> query, QueryPagedCategory request)
+        {
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                query = query.Where(s => s.Name != null && s.Name.ToLower().Contains(request.Name.ToLower()));
+            }
+            return query;
+        }
+        public static IQueryable<Question> ApplyPagedQuestionFilter(this IQueryable<Question> query, QueryPagedQuestion request)
+        {
+            if (!string.IsNullOrEmpty(request.Desciption))
+            {
+                query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Desciption.ToLower()));
+            }
+            return query;
         }
     }
 }
