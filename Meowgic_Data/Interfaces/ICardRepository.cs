@@ -14,5 +14,10 @@ namespace Meowgic.Data.Interfaces
         Task<PagedResultResponse<Card>> GetPagedCard(QueryPagedCard queryPagedClubDto);
         Task<Card?> GetCardDetailById(string id);
         Task<List<Card>> GetAll();
+        Task<Card> CreateCardAsync(Card card);
+        Task<Card?> GetCardByIdAsync(string id);
+        Task<IEnumerable<Card>> GetAllCardsAsync();
+        Task<Card?> UpdateCardAsync(string id, Card card);
+        Task<bool> DeleteCardAsync(string id);
     }
 }

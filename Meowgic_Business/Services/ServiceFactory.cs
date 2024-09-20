@@ -33,9 +33,9 @@ namespace Meowgic.Business.Services
             _accountService = new Lazy<IAccountService>(() => new AccountService(unitOfWork));
             _tokenService = new Lazy<ITokenService>(() => new TokenService(configuration));
             _authService = new Lazy<IAuthService>(() => new AuthService(unitOfWork, this));
-            _cardMeaningService = new Lazy<ICardMeaningService>(() => new CardMeaningService(unitOfWork));
-            _cardService = new Lazy<ICardService>(() => new CardService(unitOfWork));
-            _categoryService = new Lazy<ICategoryService>(() => new CategoryService(unitOfWork));
+            //_cardMeaningService = new Lazy<ICardMeaningService>(() => new CardMeaningService(unitOfWork));
+            //_cardService = new Lazy<ICardService>(() => new CardService(unitOfWork));
+            //_categoryService = new Lazy<ICategoryService>(() => new CategoryService(unitOfWork));
             _firebaseStorageService = new Lazy<IFirebaseStorageService>(() => new FirebaseStorageService(configuration));
             _orderDetailService = new Lazy<IOrderDetailService>(() => new OrderDetailService(unitOfWork));
             _orderService = new Lazy<IOrderService>(() => new OrderService(unitOfWork));
