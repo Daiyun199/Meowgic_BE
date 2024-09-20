@@ -1,4 +1,5 @@
-﻿using Meowgic.Data.Data;
+﻿using Azure.Core;
+using Meowgic.Data.Data;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Extension;
 using Meowgic.Data.Interfaces;
@@ -34,39 +35,33 @@ namespace Meowgic.Data.Repositories
 
         public async Task<PagedResultResponse<Card>> GetPagedCard(QueryPagedCard queryPagedCardDto)
         {
-            int pageNumber = queryPagedCardDto.PageNumber;
-            int pageSize = queryPagedCardDto.PageSize;
-            string sortColumn = queryPagedCardDto.SortColumn;
-            bool sortByDesc = queryPagedCardDto.OrderByDesc;
-
-            var query = _context.Cards
-                    .AsNoTracking()
-                    .Include(s => s.CardMeanings)
-                    .AsQueryable();
-
+            var query = _context.Cards.AsQueryable();
+            query = query.ApplyPagedCardFilter(queryPagedCardDto);
             //Sort
-            query = sortByDesc ? query.OrderByDescending(GetSortProperty(sortColumn))
-                                : query.OrderBy(GetSortProperty(sortColumn));
-
-
+            query = queryPagedCardDto.OrderByDesc ? query.OrderByDescending(GetSortProperty(queryPagedCardDto.SortColumn))
+                                        : query.OrderBy(GetSortProperty(queryPagedCardDto.SortColumn));
             //Paging
-            return await query.ToPagedResultResponseAsync(pageNumber, pageSize);
+            return await query.ToPagedResultResponseAsync(queryPagedCardDto.PageNumber, queryPagedCardDto.PageSize);
         }
 
         public async Task<Card?> GetCardDetailById(string id)
         {
-            var club = await _context.Cards.AsNoTracking()
+            var card = await _context.Cards.AsNoTracking()
                                             .Include(s => s.CardMeanings)
+                                            .AsSplitQuery()
                                             .SingleOrDefaultAsync(s => s.Id == id);
 
 
-            return club;
+            return card;
         }
 
         public async Task<List<Card>> GetAll()
         {
             return await _context.Cards.ToListAsync();
-
+        }
+        public void Update(Card card)
+        {
+            _context.Cards.Update(card);
         }
         public async Task<Card> CreateCardAsync(Card card)
         {

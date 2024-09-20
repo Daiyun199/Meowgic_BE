@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Interfaces
 {
-    public interface ICardRepository
+    public interface ICardRepository : IGenericRepository<Card>
     {
-        Task<PagedResultResponse<Card>> GetPagedCard(QueryPagedCard queryPagedClubDto);
+        Task<PagedResultResponse<Card>> GetPagedCard(QueryPagedCard queryPagedCardDto);
         Task<Card?> GetCardDetailById(string id);
+        void Update(Card card);
         Task<List<Card>> GetAll();
         Task<Card> CreateCardAsync(Card card);
         Task<Card?> GetCardByIdAsync(string id);

@@ -11,16 +11,11 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Business.Services
 {
-    public class ZodiacService : IZodiacService
+    public class ZodiacService(IZodiacRepository zodiacRepository, IMapper mapper) : IZodiacService
     {
-        private readonly IZodiacRepository _zodiacRepository;
-        private readonly IMapper _mapper;
+        private readonly IZodiacRepository _zodiacRepository = zodiacRepository;
+        private readonly IMapper _mapper = mapper;
 
-        public ZodiacService(IZodiacRepository zodiacRepository, IMapper mapper)
-        {
-            _zodiacRepository = zodiacRepository;
-            _mapper = mapper;
-        }
         public async Task<Zodiac> CreateZodiacAsync(ZodiacRequestDTO zodiacDto)
         {
             var zodiacExist = await _zodiacRepository.GetZodiacByNameAsync(zodiacDto.Name);
@@ -37,12 +32,12 @@ namespace Meowgic.Business.Services
         // Read (Get by ID)
         public async Task<Zodiac?> GetZodiacByIdAsync(string id)
         {
-            var zodiac = _zodiacRepository.GetZodiacByIdAsync(id).Result; 
-            if(zodiac == null)
+            var zodiac = _zodiacRepository.GetZodiacByIdAsync(id).Result;
+            if (zodiac != null)
             {
-                throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
+                return zodiac;
             }// Trả về entity Zodiac
-            return zodiac;
+            throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
         }
 
         // Read (Get all)
@@ -55,25 +50,25 @@ namespace Meowgic.Business.Services
         public async Task<Zodiac?> UpdateZodiacAsync(string id, ZodiacRequestDTO zodiacDto)
         {
             var existingZodiac = await _zodiacRepository.GetZodiacByIdAsync(id);
-            if (existingZodiac == null)
+            if (existingZodiac != null)
             {
-                throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
+                _mapper.Map(zodiacDto, existingZodiac);
+                var updatedZodiac = await _zodiacRepository.UpdateZodiacAsync(existingZodiac);
+                return updatedZodiac;
             }
 
-            _mapper.Map(zodiacDto, existingZodiac); 
-            var updatedZodiac = await _zodiacRepository.UpdateZodiacAsync(existingZodiac);
-            return updatedZodiac;  
+            throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
         }
 
         // Delete
         public async Task<bool> DeleteZodiacAsync(string id)
         {
             var existingZodiac = await _zodiacRepository.GetZodiacByIdAsync(id);
-            if (existingZodiac == null)
+            if (existingZodiac != null)
             {
-                throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
+                return await _zodiacRepository.DeleteZodiacAsync(id);
             }
-            return await _zodiacRepository.DeleteZodiacAsync(id);
+            throw new Exception($"Zodiac with ID ( {id} ) NOT FOUND");
         }
     }
 }

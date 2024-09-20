@@ -1,5 +1,6 @@
 ﻿using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
 using System;
 using System.Collections.Generic;
@@ -14,5 +15,6 @@ namespace Meowgic.Business.Interface
     {
         Task UpdateCustomerInfo(string id, UpdateAccount request);
         Task<AccountResponse> GetCustomerInfo(string id);
+        Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
     }
 }

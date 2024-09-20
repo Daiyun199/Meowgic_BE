@@ -22,9 +22,9 @@ namespace Meowgic.Data.Models.Request.CardMeaning
         public bool OrderByDesc { get; set; } = true;
 
         [FromQuery(Name = "cardId")]
-        public int? CardId { get; set; }
+        public string? CardId { get; set; }
 
         [FromQuery(Name = "categoryId")]
-        public int? CategoryId { get; set; }
+        public string? CategoryId { get; set; }
     }
 }

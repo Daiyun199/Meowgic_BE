@@ -6,16 +6,17 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Meowgic.Data.Repositories
 {
-    public class CardMeaningRepository : ICardMeaningRepository
+    public class CardMeaningRepository : GenericRepository<CardMeaning>, ICardMeaningRepository
     {
         private readonly AppDbContext _context;
 
-        public CardMeaningRepository(AppDbContext context)
+        public CardMeaningRepository(AppDbContext context) : base(context)
         {
             _context = context;
 

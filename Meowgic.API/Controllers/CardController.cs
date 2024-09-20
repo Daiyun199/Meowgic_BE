@@ -1,4 +1,10 @@
 ﻿using Meowgic.Business.Interface;
+using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response.Account;
+using Meowgic.Data.Models.Response;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
 using Microsoft.AspNetCore.Mvc;
 
@@ -29,7 +35,7 @@ namespace Meowgic.API.Controllers
             if (card == null)
             {
                 return NotFound();
-            }
+        }
             return Ok(card);
         }
 
@@ -37,7 +43,7 @@ namespace Meowgic.API.Controllers
         public async Task<IActionResult> CreateCard([FromBody] CardRequest cardRequest)
         {
             if (!ModelState.IsValid)
-            {
+        {
                 return BadRequest(ModelState);
             }
 
@@ -49,7 +55,7 @@ namespace Meowgic.API.Controllers
         public async Task<IActionResult> UpdateCard(string id, [FromBody] CardRequest cardRequest)
         {
             if (!ModelState.IsValid)
-            {
+        {
                 return BadRequest(ModelState);
             }
 
@@ -67,7 +73,7 @@ namespace Meowgic.API.Controllers
         {
             var success = await _cardService.DeleteCardAsync(id);
             if (!success)
-            {
+        {
                 return NotFound();
             }
 

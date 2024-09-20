@@ -5,18 +5,39 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Meowgic.Data.Repositories
 {
-    public class CategoryRepository : ICategoryRepository
+    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
         private readonly AppDbContext _context;
 
-        public CategoryRepository(AppDbContext context)
+        public CategoryRepository(AppDbContext context) : base(context)
         {
             _context = context;
+        }
+        private Expression<Func<Category, object>> GetSortProperty(string sortColumn)
+        {
+            return sortColumn.ToLower() switch
+            {
+                "name" => card => card.Name == null ? card.Id : card.Name,
+                _ => card => card.Id,
+            };
+        }
+
+        public async Task<PagedResultResponse<Category>> GetPagedCategory(QueryPagedCategory request)
+        {
+            var query = _context.Categories.AsQueryable();
+            query = query.ApplyPagedCategoryFilter(request);
+            //Sort
+            query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
+                                        : query.OrderBy(GetSortProperty(request.SortColumn));
+            //Paging
+            return await query.ToPagedResultResponseAsync(request.PageNumber, request.PageSize);
+        }
 
         }
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()

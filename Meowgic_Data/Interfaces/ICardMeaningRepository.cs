@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Interfaces
 {
-    public interface ICardMeaningRepository
+    public interface ICardMeaningRepository : IGenericRepository<CardMeaning>
     {
         Task<CardMeaning> CreateCardMeaningAsync(CardMeaning cardMeaning);
         Task<CardMeaningResponseDTO?> GetCardMeaningByIdAsync(string id);

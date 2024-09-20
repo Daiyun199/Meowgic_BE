@@ -15,35 +15,29 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Business.Services
 {
-    public class AuthService : IAuthService
+    public class AuthService(IUnitOfWork unitOfWork, IServiceFactory serviceFactory) : IAuthService
     {
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly IServiceFactory _serviceFactory;
-
-        public AuthService(IUnitOfWork unitOfWork, IServiceFactory serviceFactory)
-        {
-            _unitOfWork = unitOfWork;
-            _serviceFactory = serviceFactory;
-        }
+        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IServiceFactory _serviceFactory = serviceFactory;
 
         public async Task<GetAuthTokens> Login(Login loginDto)
         {
             var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Email == loginDto.Email
             && a.Password == HashPassword(loginDto.Password));
 
-            if (account is null)
+            if (account is not null)
             {
-                throw new UnauthorizedException("Wrong email or password");
+                string accessToken = _serviceFactory.GetTokenService().GenerateAccessToken(account.Id, account.Role);
+                string refreshToken = _serviceFactory.GetTokenService().GenerateRefreshToken();
+
+                return new GetAuthTokens
+                {
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                };
             }
 
-            string accessToken = _serviceFactory.GetTokenService().GenerateAccessToken(account.Id, account.Role);
-            string refreshToken = _serviceFactory.GetTokenService().GenerateRefreshToken();
-
-            return new GetAuthTokens
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
+            throw new UnauthorizedException("Wrong email or password");
 
         }
 
@@ -55,12 +49,14 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException($"Account with email {registerDto.Email} is already exists");
             }
 
-            var account = new Account();
-            account.Email = registerDto.Email;
-            account.Password = registerDto.Password;
-            account.Name = registerDto.Name;
-            account.Phone = registerDto.Phone;
-            account.Gender = registerDto.Gender;
+            var account = new Account
+            {
+                Email = registerDto.Email,
+                Password = registerDto.Password,
+                Name = registerDto.Name,
+                Phone = registerDto.Phone,
+                Gender = registerDto.Gender
+            };
             if (registerDto.Dob != null)
             {
                 DateTime? dateTime = registerDto.Dob;
@@ -83,14 +79,13 @@ namespace Meowgic.Business.Services
 
         }
 
-        private string HashPassword(string password)
+        private static string HashPassword(string password)
         {
-            using var sha256 = SHA256.Create();
             // Convert the password string to bytes
             byte[] passwordBytes = Encoding.UTF8.GetBytes(password);
 
             // Compute the hash
-            byte[] hashBytes = sha256.ComputeHash(passwordBytes);
+            byte[] hashBytes = SHA256.HashData(passwordBytes);
 
             // Convert the hash to a hexadecimal string
             string hashedPassword = string.Concat(hashBytes.Select(b => $"{b:x2}"));

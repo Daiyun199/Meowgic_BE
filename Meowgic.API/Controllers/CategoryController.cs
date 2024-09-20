@@ -1,6 +1,9 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
+using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.Category;
+using Meowgic.Data.Models.Response;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Meowgic.API.Controllers
@@ -49,7 +52,7 @@ namespace Meowgic.API.Controllers
         // PUT: api/Category/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateCategory(string id, [FromBody] CategoryRequestDTO category)
-        {
+            {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -58,7 +61,7 @@ namespace Meowgic.API.Controllers
                 return NotFound();
 
             return Ok(updatedCategory);
-        }
+            }
 
         // DELETE: api/Category/{id}
         [HttpDelete("{id}")]
