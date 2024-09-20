@@ -1,10 +1,7 @@
 ﻿using Meowgic.Data.Data;
 using Meowgic.Data.Entities;
-using Meowgic.Data.Extension;
 using Meowgic.Data.Interfaces;
-using Meowgic.Data.Models.Request.Card;
-using Meowgic.Data.Models.Request.CardMeaning;
-using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.CardMeaning;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -24,43 +21,75 @@ namespace Meowgic.Data.Repositories
             _context = context;
 
         }
-        private Expression<Func<CardMeaning, object>> GetSortProperty(string sortColumn)
+        public async Task<CardMeaning> CreateCardMeaningAsync(CardMeaning cardMeaning)
         {
-            return sortColumn.ToLower() switch
-            {
-                "cardId" => card => card.CardId == null ? card.Id : card.CardId, 
-                "categoryId" => card => card.CategoryId == null ? card.Id : card.CategoryId,
-                _ => card => card.Id,
-            };
-        }
-        public async Task<PagedResultResponse<CardMeaning>> GetPagedCardMeaning(QueryPagedCardMeaning request)
-        {
-            var query = _context.CardMeanings.AsQueryable();
-            query = query.ApplyPagedCardMeaningFilter(request);
-            //Sort
-            query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
-                                        : query.OrderBy(GetSortProperty(request.SortColumn));
-            //Paging
-            return await query.ToPagedResultResponseAsync(request.PageNumber, request.PageSize);
+            _context.CardMeanings.Add(cardMeaning);
+            await _context.SaveChangesAsync();
+            return cardMeaning;
         }
 
-        public async Task<CardMeaning?> GetCardMeaningById(string id)
+        public async Task<CardMeaningResponseDTO?> GetCardMeaningByIdAsync(string id)
         {
-            var card = await _context.CardMeanings.AsNoTracking()
-                                            .AsSplitQuery()
-                                            .SingleOrDefaultAsync(s => s.Id == id);
-
-
-            return card;
+            return await _context.CardMeanings
+                .Include(cm => cm.Card)
+                .Include(cm => cm.Category)
+                .Where(cm => cm.Id == id)
+                .Select(cm => new CardMeaningResponseDTO
+                {
+                    Id = cm.Id,
+                    CategoryId = cm.CategoryId,
+                    CardId = cm.CardId,
+                    Meaning = cm.Meaning,
+                    ReMeaning = cm.ReMeaning,
+                    CardName = cm.Card.Name, // assuming 'Name' is the property in 'Card'
+                    LinkUrl = cm.Card.ImgUrl, // assuming 'LinkUrl' is the property in 'Card'
+                    CategoryName = cm.Category.Name // assuming 'Name' is the property in 'Category'
+                })
+                .FirstOrDefaultAsync();
         }
 
-        public async Task<List<CardMeaning>> GetAll()
+
+        public async Task<IEnumerable<CardMeaning>> GetAllCardMeaningsAsync()
         {
-            return await _context.CardMeanings.ToListAsync();
+            return await _context.CardMeanings
+                .Include(cm => cm.Card)
+                .Include(cm => cm.Category)
+                .ToListAsync();
         }
-        public void Update(CardMeaning card)
+
+        public async Task<CardMeaning?> UpdateCardMeaningAsync(string id, CardMeaning cardMeaning)
         {
-            _context.CardMeanings.Update(card);
+            var existingCardMeaning = await _context.CardMeanings.FindAsync(id);
+            if (existingCardMeaning == null)
+                return null;
+
+            // Update properties
+            existingCardMeaning.CategoryId = cardMeaning.CategoryId;
+            existingCardMeaning.CardId = cardMeaning.CardId;
+            existingCardMeaning.Meaning = cardMeaning.Meaning;
+            existingCardMeaning.ReMeaning = cardMeaning.ReMeaning;
+
+            await _context.SaveChangesAsync();
+            return existingCardMeaning;
+        }
+
+        public async Task<bool> DeleteCardMeaningAsync(string id)
+        {
+            var cardMeaning = await _context.CardMeanings.FindAsync(id);
+            if (cardMeaning == null)
+                return false;
+
+            _context.CardMeanings.Remove(cardMeaning);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        public async Task<IEnumerable<CardMeaning>> GetCardMeaningsByCategoryAsync(string categoryName)
+        {
+            return await _context.CardMeanings
+                .Include(cm => cm.Card)
+                .Include(cm => cm.Category)
+                .Where(cm => cm.Category.Name == categoryName)
+                .ToListAsync();
         }
     }
 }

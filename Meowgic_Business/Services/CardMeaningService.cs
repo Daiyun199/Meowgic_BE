@@ -1,12 +1,9 @@
-﻿using Mapster;
+﻿using AutoMapper;
 using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
-using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.CardMeaning;
-using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.CardMeaning;
-using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,69 +12,92 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Business.Services
 {
-    public class CardMeaningService(IUnitOfWork unitOfWork) : ICardMeaningService
+    public class CardMeaningService : ICardMeaningService
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly ICardMeaningRepository _cardMeaningRepository;
+        private readonly IMapper _mapper;
 
-        public async Task<PagedResultResponse<CardMeaning>> GetPagedCardMeanings(QueryPagedCardMeaning request)
+        public CardMeaningService(ICardMeaningRepository cardMeaningRepository, IMapper mapper)
         {
-            return (await _unitOfWork.GetCardMeaningRepository().GetPagedCardMeaning(request)).Adapt<PagedResultResponse<CardMeaning>>();
+            _cardMeaningRepository = cardMeaningRepository;
+            _mapper = mapper;
         }
 
-        public async Task<CardMeaning> CreateCardMeaning(CardMeaningRequest request)
+
+        public async Task<CardMeaningResponseDTO> CreateCardMeaningAsync(CardMeaningRequestDTO cardMeaningRequest)
         {
-            if (await _unitOfWork.GetCardMeaningRepository().AnyAsync(s => s.CardId == request.CardId && s.CategoryId == request.CategoryId))
-            {
-                throw new BadRequestException("This card meaning already exists");
-            }
-
-            var card = request.Adapt<CardMeaning>();
-
-            await _unitOfWork.GetCardMeaningRepository().AddAsync(card);
-            await _unitOfWork.SaveChangesAsync();
-
-            return card.Adapt<CardMeaning>();
+            var cardMeaning = _mapper.Map<CardMeaning>(cardMeaningRequest);
+            var createdCardMeaning = await _cardMeaningRepository.CreateCardMeaningAsync(cardMeaning);
+            return _mapper.Map<CardMeaningResponseDTO>(createdCardMeaning);
         }
 
-        public async Task UpdateCardMeaning(string id, CardMeaningRequest request)
+        public async Task<CardMeaningResponseDTO?> GetCardMeaningByIdAsync(string id)
         {
-            var card = await _unitOfWork.GetCardMeaningRepository().FindOneAsync(s => s.Id == id);
+            return await _cardMeaningRepository.GetCardMeaningByIdAsync(id);
+        }
 
-            if (card is not null)
+        public async Task<IEnumerable<CardMeaningResponseDTO>> GetAllCardMeaningsAsync()
+        {
+            var cardMeanings = await _cardMeaningRepository.GetAllCardMeaningsAsync();
+            return cardMeanings.Select(cm => new CardMeaningResponseDTO
             {
-                card = request.Adapt<CardMeaning>();
+                Id = cm.Id,
+                CategoryId = cm.CategoryId,
+                CardId = cm.CardId,
+                Meaning = cm.Meaning,
+                ReMeaning = cm.ReMeaning,
+                CardName = cm.Card.Name, // assuming 'Name' is the property in 'Card'
+                LinkUrl = cm.Card.ImgUrl, // assuming 'LinkUrl' is the property in 'Card'
+                CategoryName = cm.Category.Name // assuming 'Name' is the property in 'Category'
+            });
+        }
 
-                await _unitOfWork.GetCardMeaningRepository().UpdateAsync(card);
-                await _unitOfWork.SaveChangesAsync();
-            }
-            else
-            {
-                throw new NotFoundException("Card not found");
-            }
+        public async Task<CardMeaningResponseDTO?> UpdateCardMeaningAsync(string id, CardMeaningRequestDTO cardMeaningRequest)
+        {
+            var cardMeaning = _mapper.Map<CardMeaning>(cardMeaningRequest);
+            var updatedCardMeaning = await _cardMeaningRepository.UpdateCardMeaningAsync(id, cardMeaning);
+            return _mapper.Map<CardMeaningResponseDTO>(updatedCardMeaning);
         }
 
         public async Task<bool> DeleteCardMeaningAsync(string id)
         {
-            var card = await _unitOfWork.GetCardMeaningRepository().GetByIdAsync(id);
-            if (card == null)
-            {
-                return false;
-            }
-            await _unitOfWork.GetCardMeaningRepository().DeleteAsync(card);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
+            return await _cardMeaningRepository.DeleteCardMeaningAsync(id);
         }
 
-        public async Task<List<CardMeaningResponse>> GetAll()
+        public async Task<IEnumerable<CardMeaningResponseDTO>> GetRandomCardMeaningsAsync()
         {
-            var cards = (await _unitOfWork.GetCardMeaningRepository().GetAll());
-            if (cards != null)
+            // Lấy tất cả CardMeaning có Category là General
+            var allCardMeanings = await _cardMeaningRepository.GetCardMeaningsByCategoryAsync("General");
+
+            // Nhóm CardMeaning theo CardId
+            var groupedByCard = allCardMeanings
+                .GroupBy(cm => cm.CardId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Chọn ngẫu nhiên 1 CardMeaning từ mỗi CardId
+            var randomCardMeanings = new List<CardMeaning>();
+            var random = new Random();
+
+            foreach (var group in groupedByCard)
             {
-                return cards.Adapt<List<CardMeaningResponse>>();
-
-
+                var cardMeanings = group.Value;
+                if (cardMeanings.Any())
+                {
+                    // Chọn ngẫu nhiên 1 CardMeaning từ danh sách
+                    var randomCardMeaning = cardMeanings[random.Next(cardMeanings.Count)];
+                    randomCardMeanings.Add(randomCardMeaning);
+                }
             }
-            throw new NotFoundException("No card was found");
+
+            // Nếu có nhiều hơn 3 CardMeaning, chọn ngẫu nhiên 3 CardMeaning khác nhau
+            if (randomCardMeanings.Count > 3)
+            {
+                randomCardMeanings = randomCardMeanings.OrderBy(_ => random.Next()).Take(3).ToList();
+            }
+
+            // Chuyển đổi CardMeaning thành DTO
+            var cardMeaningDtos = _mapper.Map<IEnumerable<CardMeaningResponseDTO>>(randomCardMeanings);
+            return cardMeaningDtos;
         }
     }
 }

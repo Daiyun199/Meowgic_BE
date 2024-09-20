@@ -1,12 +1,8 @@
-﻿using Mapster;
+﻿using AutoMapper;
 using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Card;
-using Meowgic.Data.Models.Response;
-using Meowgic.Data.Models.Response.Card;
-using Meowgic.Data.Repositories;
-using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,69 +12,45 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Business.Services
 {
-    public class CardService(IUnitOfWork unitOfWork) : ICardService
+    public class CardService : ICardService
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly ICardRepository _cardRepository;
+        private readonly IMapper _mapper;
 
-        public async Task<PagedResultResponse<Card>> GetPagedCards(QueryPagedCard request)
+
+        public CardService(ICardRepository cardRepository, IMapper mapper)
         {
-            return (await _unitOfWork.GetCardRepository().GetPagedCard(request)).Adapt<PagedResultResponse<Card>>();
+            
+            _cardRepository = cardRepository;
+            _mapper = mapper;
         }
 
-        public async Task<Card> CreateCard(CardRequest request)
+        public async Task<Card> CreateCardAsync(CardRequest cardRequest)
         {
-            if (await _unitOfWork.GetCardRepository().AnyAsync(s => s.Name == request.Name))
-            {
-                throw new BadRequestException("This card already exists");
-            }
-
-            var card = request.Adapt<Card>();
-
-            await _unitOfWork.GetCardRepository().AddAsync(card);
-            await _unitOfWork.SaveChangesAsync();
-
-            return card.Adapt<Card>();
+            var card = _mapper.Map<Card>(cardRequest);
+            return await _cardRepository.CreateCardAsync(card);
         }
 
-        public async Task UpdateCard(string id, CardRequest request)
+        public async Task<Card?> GetCardByIdAsync(string id)
         {
-            var card = await _unitOfWork.GetCardRepository().FindOneAsync(s => s.Id == id);
+            return await _cardRepository.GetCardByIdAsync(id);
+        }
 
-            if (card is not null)
-            {
-                card = request.Adapt<Card>();
+        public async Task<IEnumerable<Card>> GetAllCardsAsync()
+        {
+            return await _cardRepository.GetAllCardsAsync();
+        }
 
-                await _unitOfWork.GetCardRepository().UpdateAsync(card);
-                await _unitOfWork.SaveChangesAsync();
-            }
-            else
-            {
-                throw new NotFoundException("Card not found");
-            }
+        public async Task<Card?> UpdateCardAsync(string id, CardRequest cardRequest)
+        {
+            var card = _mapper.Map<Card>(cardRequest);
+            return await _cardRepository.UpdateCardAsync(id, card);
         }
 
         public async Task<bool> DeleteCardAsync(string id)
         {
-            var card = await _unitOfWork.GetCardRepository().GetByIdAsync(id);
-            if (card == null)
-            {
-                return false;
-            }
-            await _unitOfWork.GetCardRepository().DeleteAsync(card);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<List<CardResponse>> GetAll()
-        {
-            var cards = (await _unitOfWork.GetCardRepository().GetAll());
-            if (cards != null)
-            {
-                return cards.Adapt<List<CardResponse>>();
-
-
-            }
-            throw new NotFoundException("No card was found");
+            return await _cardRepository.DeleteCardAsync(id);
         }
     }
 }

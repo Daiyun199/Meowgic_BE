@@ -6,49 +6,78 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
-using Meowgic.Data.Models.Response.Card;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CardController(IServiceFactory serviceFactory) : ControllerBase
+    public class CardController : Controller
     {
-        private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly ICardService _cardService;
+
+        public CardController(ICardService cardService)
+        {
+            _cardService = cardService;
+        }
 
         [HttpGet]
-        public async Task<ActionResult<PagedResultResponse<Card>>> GetPagedCard([FromQuery] QueryPagedCard query)
+        public async Task<IActionResult> GetAllCards()
         {
-            return await _serviceFactory.GetCardService().GetPagedCards(query);
+            var cards = await _cardService.GetAllCardsAsync();
+            return Ok(cards);
         }
-        [HttpPost("create-card")]
-        public async Task<ActionResult<Card>> CreateCard([FromForm] CardRequest request)
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCardById(string id)
         {
-            await _serviceFactory.GetCardService().CreateCard(request);
-            return Ok();
+            var card = await _cardService.GetCardByIdAsync(id);
+            if (card == null)
+            {
+                return NotFound();
         }
-        [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateCard([FromRoute] string id, [FromBody] CardRequest request)
-        {
-            await _serviceFactory.GetCardService().UpdateCard(id, request);
-            return Ok();
+            return Ok(card);
         }
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteCard([FromRoute] string id)
+
+        [HttpPost]
+        public async Task<IActionResult> CreateCard([FromBody] CardRequest cardRequest)
         {
-            var result = await _serviceFactory.GetCardService().DeleteCardAsync(id);
-            if (!result)
+            if (!ModelState.IsValid)
+        {
+                return BadRequest(ModelState);
+            }
+
+            var createdCard = await _cardService.CreateCardAsync(cardRequest);
+            return CreatedAtAction(nameof(GetCardById), new { id = createdCard.Id }, createdCard);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCard(string id, [FromBody] CardRequest cardRequest)
+        {
+            if (!ModelState.IsValid)
+        {
+                return BadRequest(ModelState);
+            }
+
+            var updatedCard = await _cardService.UpdateCardAsync(id, cardRequest);
+            if (updatedCard == null)
             {
                 return NotFound();
             }
 
-            return Ok();
+            return Ok(updatedCard);
         }
-        [HttpGet]
-        [Route("getall")]
-        public async Task<ActionResult<List<CardResponse>>> GetAllCard()
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCard(string id)
         {
-            return await _serviceFactory.GetCardService().GetAll();
+            var success = await _cardService.DeleteCardAsync(id);
+            if (!success)
+        {
+                return NotFound();
+            }
+
+            return NoContent();
         }
     }
 }

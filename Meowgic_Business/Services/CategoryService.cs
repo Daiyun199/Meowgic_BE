@@ -1,12 +1,9 @@
-﻿using Mapster;
+﻿using AutoMapper;
 using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
-using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.Category;
-using Meowgic.Data.Models.Response;
 using Meowgic.Data.Repositories;
-using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,69 +12,46 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Business.Services
 {
-    public class CategoryService(IUnitOfWork unitOfWork) : ICategoryService
+    public class CategoryService : ICategoryService
     {
-        private readonly IUnitOfWork _unitOfWork = unitOfWork;
-
-        public async Task<PagedResultResponse<Category>> GetPagedCategory(QueryPagedCategory request)
+   
+        private readonly ICategoryRepository _categoryRepository;
+        private readonly IMapper _mapper;
+        public CategoryService( ICategoryRepository categoryRepository,IMapper mapper)
         {
-            return (await _unitOfWork.GetCategoryRepository().GetPagedCategory(request)).Adapt<PagedResultResponse<Category>>();
+            _categoryRepository = categoryRepository;
+            _mapper = mapper;
+        }
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        {
+            return await _categoryRepository.GetAllCategoriesAsync();
         }
 
-        public async Task<Category> CreateCategory(CategoryRequest request)
+        public async Task<Category?> GetCategoryByIdAsync(string id)
         {
-            if (await _unitOfWork.GetCategoryRepository().AnyAsync(s => s.Name == request.Name))
-            {
-                throw new BadRequestException("This categỏy already exists");
-            }
-
-            var category = request.Adapt<Category>();
-
-            await _unitOfWork.GetCategoryRepository().AddAsync(category);
-            await _unitOfWork.SaveChangesAsync();
-
-            return category.Adapt<Category>();
+            return await _categoryRepository.GetCategoryByIdAsync(id);
         }
 
-        public async Task UpdateCategory(string id, CategoryRequest request)
+        public async Task<Category> CreateCategoryAsync(CategoryRequestDTO categoryRequest)
         {
-            var category = await _unitOfWork.GetCategoryRepository().FindOneAsync(s => s.Id == id);
+            // Chuyển đổi từ CategoryRequestDTO sang Category
+            var category = _mapper.Map<Category>(categoryRequest);
+        
 
-            if (category is not null)
-            {
-                category = request.Adapt<Category>();
+            // Gọi repository để lưu category vào cơ sở dữ liệu
+            return await _categoryRepository.CreateCategoryAsync(category);
+        }
 
-                await _unitOfWork.GetCategoryRepository().UpdateAsync(category);
-                await _unitOfWork.SaveChangesAsync();
-            }
-            else
-            {
-                throw new NotFoundException("Not found");
-            }
+        public async Task<Category?> UpdateCategoryAsync(string id, CategoryRequestDTO categoryRequest)
+        {
+            var category = _mapper.Map<Category>(categoryRequest);
+            return await _categoryRepository.UpdateCategoryAsync(id, category);
         }
 
         public async Task<bool> DeleteCategoryAsync(string id)
         {
-            var category = await _unitOfWork.GetCategoryRepository().GetByIdAsync(id);
-            if (category == null)
-            {
-                return false;
-            }
-            await _unitOfWork.GetCategoryRepository().DeleteAsync(category);
-            await _unitOfWork.SaveChangesAsync();
-            return true;
-        }
-
-        public async Task<List<CategoryResponse>> GetAll()
-        {
-            var categories = (await _unitOfWork.GetCategoryRepository().GetAll());
-            if (categories != null)
-            {
-                return categories.Adapt<List<CategoryResponse>>();
-
-
-            }
-            throw new NotFoundException("No category was found");
+            // Có thể thêm logic nghiệp vụ nếu cần
+            return await _categoryRepository.DeleteCategoryAsync(id);
         }
     }
 }

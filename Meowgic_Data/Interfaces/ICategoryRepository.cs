@@ -1,7 +1,4 @@
 ﻿using Meowgic.Data.Entities;
-using Meowgic.Data.Models.Request.Card;
-using Meowgic.Data.Models.Request.Category;
-using Meowgic.Data.Models.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,10 +7,17 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Interfaces
 {
-    public interface ICategoryRepository : IGenericRepository<Category>
+    public interface ICategoryRepository 
     {
-        Task<PagedResultResponse<Category>> GetPagedCategory(QueryPagedCategory request);
-        void Update(Category category);
-        Task<List<Category>> GetAll();
+        //Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        //Task<Category?> GetCategoryByIdAsync(string id);
+        //Task<Category> CreateCategoryAsync(Category category);
+        //Task<Category?> UpdateCategoryAsync(string id, Category category);
+        //Task<bool> DeleteCategoryAsync(string id);
+        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<Category?> GetCategoryByIdAsync(string id);
+        Task<Category> CreateCategoryAsync(Category category);
+        Task<Category?> UpdateCategoryAsync(string id, Category category);
+        Task<bool> DeleteCategoryAsync(string id);
     }
 }

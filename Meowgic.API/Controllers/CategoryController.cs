@@ -10,43 +10,69 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController(IServiceFactory serviceFactory) : ControllerBase
+    public class CategoryController : Controller
     {
-        private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly ICategoryService _categoryService;
 
+        public CategoryController(ICategoryService categoryService)
+        {
+            _categoryService = categoryService;
+        }
+
+        // GET: api/Category
         [HttpGet]
-        public async Task<ActionResult<PagedResultResponse<Category>>> GetPagedCategory([FromQuery] QueryPagedCategory query)
+        public async Task<IActionResult> GetAllCategories()
         {
-            return await _serviceFactory.GetCategoryService().GetPagedCategory(query);
+            var categories = await _categoryService.GetAllCategoriesAsync();
+            return Ok(categories);
         }
-        [HttpPost("create")]
-        public async Task<ActionResult<Category>> CreateCategoryt([FromBody] CategoryRequest request)
+
+        // GET: api/Category/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCategoryById(string id)
         {
-            await _serviceFactory.GetCategoryService().CreateCategory(request);
-            return Ok();
-        }
-        [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateCategory([FromRoute] string id, [FromBody] CategoryRequest request)
-        {
-            await _serviceFactory.GetCategoryService().UpdateCategory(id, request);
-            return Ok();
-        }
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteCatregory([FromRoute] string id)
-        {
-            var result = await _serviceFactory.GetCategoryService().DeleteCategoryAsync(id);
-            if (!result)
-            {
+            var category = await _categoryService.GetCategoryByIdAsync(id);
+            if (category == null)
                 return NotFound();
+
+            return Ok(category);
+        }
+
+        // POST: api/Category
+        [HttpPost]
+        public async Task<IActionResult> CreateCategory([FromBody] CategoryRequestDTO category)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var createdCategory = await _categoryService.CreateCategoryAsync(category);
+            return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+        }
+
+        // PUT: api/Category/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCategory(string id, [FromBody] CategoryRequestDTO category)
+            {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, category);
+            if (updatedCategory == null)
+                return NotFound();
+
+            return Ok(updatedCategory);
             }
 
-            return Ok();
-        }
-        [HttpGet]
-        [Route("getall")]
-        public async Task<ActionResult<List<CategoryResponse>>> GetAllCategory()
+        // DELETE: api/Category/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCategory(string id)
         {
-            return await _serviceFactory.GetCategoryService().GetAll();
+            var success = await _categoryService.DeleteCategoryAsync(id);
+            if (!success)
+                return NotFound();
+
+            return NoContent();
         }
+
     }
 }

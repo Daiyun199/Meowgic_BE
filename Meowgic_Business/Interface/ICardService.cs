@@ -1,8 +1,5 @@
 ﻿using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
-using Meowgic.Data.Models.Response;
-using Meowgic.Data.Models.Response.Card;
-using Meowgic.Data.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,13 +11,10 @@ namespace Meowgic.Business.Interface
 {
     public interface ICardService
     {
-        Task<PagedResultResponse<Card>> GetPagedCards(QueryPagedCard request);
-
-        Task<Card> CreateCard(CardRequest request);
-
-        Task UpdateCard(string id, CardRequest request);
-
+        Task<Card> CreateCardAsync(CardRequest card);
+        Task<Card?> GetCardByIdAsync(string id);
+        Task<IEnumerable<Card>> GetAllCardsAsync();
+        Task<Card?> UpdateCardAsync(string id, CardRequest card);
         Task<bool> DeleteCardAsync(string id);
-        Task<List<CardResponse>> GetAll();
     }
 }
