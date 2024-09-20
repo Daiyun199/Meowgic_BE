@@ -11,35 +11,15 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Repositories
 {
-    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
+    public class CategoryRepository : ICategoryRepository
     {
         private readonly AppDbContext _context;
 
-        public CategoryRepository(AppDbContext context) : base(context)
+        public CategoryRepository(AppDbContext context)
         {
             _context = context;
         }
-        private Expression<Func<Category, object>> GetSortProperty(string sortColumn)
-        {
-            return sortColumn.ToLower() switch
-            {
-                "name" => card => card.Name == null ? card.Id : card.Name,
-                _ => card => card.Id,
-            };
-        }
 
-        public async Task<PagedResultResponse<Category>> GetPagedCategory(QueryPagedCategory request)
-        {
-            var query = _context.Categories.AsQueryable();
-            query = query.ApplyPagedCategoryFilter(request);
-            //Sort
-            query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
-                                        : query.OrderBy(GetSortProperty(request.SortColumn));
-            //Paging
-            return await query.ToPagedResultResponseAsync(request.PageNumber, request.PageSize);
-        }
-
-        }
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
         {
             return await _context.Categories.ToListAsync();
@@ -92,4 +72,5 @@ namespace Meowgic.Data.Repositories
             return true;
         }
     }
+
 }
