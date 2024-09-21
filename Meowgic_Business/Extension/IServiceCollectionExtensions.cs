@@ -51,7 +51,7 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPromotionService, PromotionService>();
             services.AddScoped<IQuestionService, QuestionService>();
-            services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IServiceService, TarotServiceService>();
             services.AddScoped<IZodiacService, ZodiacService>();
             services.AddScoped<IZodiacColorService, ZodiacColorService>();
             return services;

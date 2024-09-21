@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Category;
+using Meowgic.Data.Models.Request.Service;
 using Meowgic.Data.Models.Request.Zodiac;
 using Meowgic.Data.Models.Response.CardMeaning;
 using System;
@@ -21,6 +22,7 @@ namespace Meowgic.Business.Mapper
            .ForMember(dest => dest.CardName, opt => opt.MapFrom(src => src.Card.Name))
            .ForMember(dest => dest.LinkUrl, opt => opt.MapFrom(src => src.Card.ImgUrl))
            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+            CreateMap<TarotService, ServiceRequest>().ReverseMap();
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Meowgic.Shares.Enum;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,7 +28,7 @@ namespace Meowgic.Data.Entities
 
         public string? Phone { get; set; }
 
-        public string Role { get; set; } = null!;
+        public Roles Role { get; set; } 
 
         public string Status { get; set; } = null!;
 

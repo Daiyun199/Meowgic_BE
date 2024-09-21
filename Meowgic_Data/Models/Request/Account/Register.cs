@@ -32,6 +32,7 @@ namespace Meowgic.Data.Models.Request.Account
 
         public string? Phone { get; set; }
 
-        public string? Images { get; set; }
+        public Roles Roles { get; set; }
+        //public IFormFile? Images { get; set; }
     }
 }

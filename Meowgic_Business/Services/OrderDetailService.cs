@@ -39,7 +39,7 @@ namespace Meowgic.Business.Services
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            var service = await _unitOfWork.GetServiceRepository().GetService(serviceId);
+            var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
 
             if (service is null)
             {
@@ -56,7 +56,15 @@ namespace Meowgic.Business.Services
                     OrderId = order.Id,
                     ServiceId = service.Id,
                 };
-                order.TotalPrice += service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
+                double totalPrice = (double)order.TotalPrice;
+
+
+                totalPrice -= service.PromotionId != null
+                    ? (double)service.Price * (1 - (double)service.Promotion.DiscountPercent)
+                    : (double)service.Price;
+
+
+                order.TotalPrice = (decimal)totalPrice;
                 await _unitOfWork.GetOrderRepository().UpdateAsync(order);
                 await _unitOfWork.GetOrderDetailRepository().AddAsync(orderDetail);
                 await _unitOfWork.SaveChangesAsync();
@@ -73,7 +81,7 @@ namespace Meowgic.Business.Services
             var orderDetailResponses = orderDetails.Adapt<List<OrderDetailResponse>>();
             foreach (var orderDetailResponse in orderDetailResponses)
             {
-                var service = await _unitOfWork.GetServiceRepository().FindOneAsync(s => s.Id == orderDetailResponse.ServiceId);
+                var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync( orderDetailResponse.ServiceId);
                 orderDetailResponse.Subtotal = service.PromotionId != null ? service.Price*(1 - service.Promotion.DiscountPercent) : service.Price;
             }
             return orderDetailResponses;
@@ -91,9 +99,16 @@ namespace Meowgic.Business.Services
             }
             else
             {
-                var service = await _unitOfWork.GetServiceRepository().GetService(serviceId);
-                order.TotalPrice -= service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
+                var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
+                double totalPrice = (double)order.TotalPrice;
 
+             
+                totalPrice -= service.PromotionId != null
+                    ? (double)service.Price * (1 - (double)service.Promotion.DiscountPercent)
+                    : (double)service.Price;
+
+                
+                order.TotalPrice = (decimal)totalPrice;
                 await _unitOfWork.GetOrderRepository().UpdateAsync(order);
                 await _unitOfWork.GetOrderDetailRepository().DeleteAsync(orderDetail);
                 await _unitOfWork.SaveChangesAsync();

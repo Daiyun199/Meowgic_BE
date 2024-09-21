@@ -59,7 +59,8 @@ namespace Meowgic.Business.Services
                 Password = registerDto.Password,
                 Name = registerDto.Name,
                 Phone = registerDto.Phone,
-                Gender = registerDto.Gender
+                Gender = registerDto.Gender,
+                Role = registerDto.Roles 
             };
             if (registerDto.Dob != null)
             {
@@ -67,7 +68,7 @@ namespace Meowgic.Business.Services
                 account.Dob = dateTime.HasValue ? new DateOnly(dateTime.Value.Year, dateTime.Value.Month, dateTime.Value.Day) : null;
             }
             
-            account.Role = Roles.Customer.ToString();
+            //account.Role = Roles.Customer.ToString();
             account.Premium = false;
             account.IsDeleted = false;
             account.isConfirmed = true;
@@ -83,6 +84,7 @@ namespace Meowgic.Business.Services
 
             return registerDto;
         }
+
 
         private static string HashPassword(string password)
         {

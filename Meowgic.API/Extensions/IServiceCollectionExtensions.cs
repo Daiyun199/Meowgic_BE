@@ -80,6 +80,7 @@ namespace Meowgic.API.Extensions
                         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtAuth:Key"]!))
                 };
             });
+            services.AddHttpContextAccessor();
             return services;
         }
 
