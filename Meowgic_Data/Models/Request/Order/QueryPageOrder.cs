@@ -26,7 +26,9 @@ namespace Meowgic.Data.Models.Request.Order {
         [FromQuery(Name = "endDate")]
         public DateTime? EndDate { get; set; }
 
-        [FromQuery(Name = "createdAccountId")]
-        public int? CreatedAccountId { get; set; }
+        [FromQuery(Name = "accountId")]
+        public string? AccountId { get; set; }
+        [FromQuery(Name = "status")]
+        public string? Status { get; set; }
     }
 }

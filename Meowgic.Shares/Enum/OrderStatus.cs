@@ -8,9 +8,9 @@ namespace Meowgic.Shares.Enum
 {
     public enum OrderStatus
     {
+        Incart,
         Unpaid,
         Paid,
-        Done,
         Cancel
     }
 }

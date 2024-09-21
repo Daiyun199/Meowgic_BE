@@ -13,6 +13,7 @@ using Meowgic.Data.Models.Request.Question;
 using Meowgic.Data.Models.Request.Service;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,11 +39,12 @@ namespace Meowgic.Business.Extension
 
         public static IServiceCollection AddServices(this IServiceCollection services)
         {
+            services.AddHostedService<BackgroundWorkerService>();
             services.AddScoped<IServiceFactory, ServiceFactory>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ICardMeaningService, CardMeaningService>();
-            services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
+            //services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
             services.AddScoped<ICardService, CardService>();
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IOrderDetailService, OrderDetailService>();

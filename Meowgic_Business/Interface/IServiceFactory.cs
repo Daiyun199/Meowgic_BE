@@ -18,7 +18,7 @@ namespace Meowgic.Business.Interface
         IPromotionService GetPromotionService();
         IQuestionService GetQuestionService();
         IServiceService GetServiceService();
-        IFirebaseStorageService GetFirebaseStorageService();
+        //IFirebaseStorageService GetFirebaseStorageService();
         ITokenService GetTokenService();
 
     }

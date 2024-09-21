@@ -2,6 +2,7 @@
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response.Auth;
+using Meowgic.Shares.Enum;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
@@ -27,9 +28,14 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<GetAuthTokens>> Login([FromBody] Login loginDto)
+        public async Task<ActionResult> Login([FromBody] Login loginDto)
         {
-            return await _serviceFactory.GetAuthService().Login(loginDto);
+            var user = await _serviceFactory.GetAuthService().Login(loginDto);
+            if (user.Status == UserStatus.Unactive.ToString())
+            {
+                return BadRequest("Your Account have been banned!!!");
+            }
+            return Ok(user);
         }
     }
 }

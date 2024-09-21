@@ -14,10 +14,11 @@ namespace Meowgic.Data.Models.Request.Account
 {
     public class UpdateAccount
     {
-        public string Name { get; set; }
+        [Required]
+        public required string Name { get; set; }
 
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         public DateTime? Dob { get; set; }
 
@@ -26,7 +27,7 @@ namespace Meowgic.Data.Models.Request.Account
 
         public string? Phone { get; set; }
 
-        //public IFormFile? Images { get; set; }
+        public string? Images { get; set; }
 
         [EnumDataType(typeof(Roles), ErrorMessage = "Invalid role")]
         public string Role { get; set; } = null!;

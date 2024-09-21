@@ -12,7 +12,5 @@ namespace Meowgic.Business.Interface
         string GenerateAccessToken(string accountId, string role);
 
         string GenerateRefreshToken();
-
-        ClaimsPrincipal GetClaimsPrincipalFromExpiredToken(string expiredAccessToken);
     }
 }
