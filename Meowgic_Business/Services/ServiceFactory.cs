@@ -17,7 +17,7 @@ namespace Meowgic.Business.Services
         private readonly Lazy<ICardMeaningService> _cardMeaningService;
         private readonly Lazy<ICardService> _cardService;
         private readonly Lazy<ICategoryService> _categoryService;
-        //private readonly Lazy<IFirebaseStorageService> _firebaseStorageService;
+        private readonly Lazy<IFirebaseStorageService> _firebaseStorageService;
         private readonly Lazy<IOrderDetailService> _orderDetailService;
         private readonly Lazy<IOrderService> _orderService;
         private readonly Lazy<IPromotionService> _promotionService;
@@ -33,10 +33,10 @@ namespace Meowgic.Business.Services
             _accountService = new Lazy<IAccountService>(() => new AccountService(unitOfWork));
             _tokenService = new Lazy<ITokenService>(() => new TokenService(configuration));
             _authService = new Lazy<IAuthService>(() => new AuthService(unitOfWork, this));
-            _cardMeaningService = new Lazy<ICardMeaningService>(() => new CardMeaningService(unitOfWork));
-            _cardService = new Lazy<ICardService>(() => new CardService(unitOfWork));
-            _categoryService = new Lazy<ICategoryService>(() => new CategoryService(unitOfWork));
-           //_firebaseStorageService = new Lazy<IFirebaseStorageService>(() => new FirebaseStorageService(configuration));
+            //_cardMeaningService = new Lazy<ICardMeaningService>(() => new CardMeaningService(unitOfWork));
+            //_cardService = new Lazy<ICardService>(() => new CardService(unitOfWork));
+            //_categoryService = new Lazy<ICategoryService>(() => new CategoryService(unitOfWork));
+            _firebaseStorageService = new Lazy<IFirebaseStorageService>(() => new FirebaseStorageService(configuration));
             _orderDetailService = new Lazy<IOrderDetailService>(() => new OrderDetailService(unitOfWork));
             _orderService = new Lazy<IOrderService>(() => new OrderService(unitOfWork));
             _promotionService = new Lazy<IPromotionService>(() => new PromotionService(unitOfWork));
@@ -70,10 +70,10 @@ namespace Meowgic.Business.Services
         {
             return _categoryService.Value;
         }
-        //public IFirebaseStorageService GetFirebaseStorageService()
-        //{
-        //    return _firebaseStorageService.Value;
-        //}
+        public IFirebaseStorageService GetFirebaseStorageService()
+        {
+            return _firebaseStorageService.Value;
+        }
         public IOrderDetailService GetOrderDetailService()
         {
             return _orderDetailService.Value;

@@ -3,6 +3,7 @@ using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Category;
 using Meowgic.Data.Models.Request.Question;
 using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.Question;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

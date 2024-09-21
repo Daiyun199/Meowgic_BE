@@ -11,43 +11,90 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CardMeaningController(IServiceFactory serviceFactory) : ControllerBase
+    public class CardMeaningController : Controller
     {
-        private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly ICardMeaningService _cardMeaningService;
 
+        public CardMeaningController(ICardMeaningService cardMeaningService)
+        {
+            _cardMeaningService = cardMeaningService;
+        }
+
+        // GET: api/CardMeaning/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCardMeaningById(string id)
+        {
+            var cardMeaning = await _cardMeaningService.GetCardMeaningByIdAsync(id);
+            if (cardMeaning == null)
+            {
+                return NotFound();
+            }
+            return Ok(cardMeaning);
+        }
+
+        // GET: api/CardMeaning
         [HttpGet]
-        public async Task<ActionResult<PagedResultResponse<CardMeaning>>> GetPagedCardMeaning([FromQuery] QueryPagedCardMeaning query)
+        public async Task<IActionResult> GetAllCardMeanings()
         {
-            return await _serviceFactory.GetCardMeaningService().GetPagedCardMeanings(query);
+            var cardMeanings = await _cardMeaningService.GetAllCardMeaningsAsync();
+            return Ok(cardMeanings);
         }
-        [HttpPost("create")]
-        public async Task<ActionResult<CardMeaning>> CreateCard([FromBody] CardMeaningRequest request)
+
+        // POST: api/CardMeaning
+        [HttpPost]
+        public async Task<IActionResult> CreateCardMeaning([FromBody] CardMeaningRequestDTO cardMeaningRequest)
         {
-            await _serviceFactory.GetCardMeaningService().CreateCardMeaning(request);
-            return Ok();
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var createdCardMeaning = await _cardMeaningService.CreateCardMeaningAsync(cardMeaningRequest);
+            return CreatedAtAction(nameof(GetCardMeaningById), new { id = createdCardMeaning.Id }, createdCardMeaning);
         }
-        [HttpPut("update/{id}")]
-        public async Task<ActionResult> UpdateCardMeaning([FromRoute] string id, [FromBody] CardMeaningRequest request)
+
+        // PUT: api/CardMeaning/{id}
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCardMeaning(string id, [FromBody] CardMeaningRequestDTO cardMeaningRequest)
         {
-            await _serviceFactory.GetCardMeaningService().UpdateCardMeaning(id, request);
-            return Ok();
+            if (!ModelState.IsValid)
+        {
+                return BadRequest(ModelState);
         }
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> DeleteCardMeaning([FromRoute] string id)
+
+            var updatedCardMeaning = await _cardMeaningService.UpdateCardMeaningAsync(id, cardMeaningRequest);
+            if (updatedCardMeaning == null)
         {
-            var result = await _serviceFactory.GetCardMeaningService().DeleteCardMeaningAsync(id);
+                return NotFound();
+            }
+            return Ok(updatedCardMeaning);
+        }
+
+        // DELETE: api/CardMeaning/{id}
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCardMeaning(string id)
+        {
+            var result = await _cardMeaningService.DeleteCardMeaningAsync(id);
             if (!result)
             {
                 return NotFound();
             }
-
-            return Ok();
+            return NoContent();
         }
-        [HttpGet]
-        [Route("getall")]
-        public async Task<ActionResult<List<CardMeaningResponse>>> GetAllCard()
+        [HttpGet("random")]
+        public async Task<IActionResult> GetRandomCardMeanings()
         {
-            return await _serviceFactory.GetCardMeaningService().GetAll();
+            try
+            {
+                IEnumerable<CardMeaningResponseDTO> cardMeanings = await _cardMeaningService.GetRandomCardMeaningsAsync();
+                return Ok(cardMeanings);
+        }
+            catch (Exception ex)
+        {
+                // Xử lý lỗi tùy ý
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
         }
     }
+
 }
