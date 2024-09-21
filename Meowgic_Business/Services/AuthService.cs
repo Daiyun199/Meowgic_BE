@@ -79,6 +79,7 @@ namespace Meowgic.Business.Services
 
         }
 
+
         private static string HashPassword(string password)
         {
             // Convert the password string to bytes

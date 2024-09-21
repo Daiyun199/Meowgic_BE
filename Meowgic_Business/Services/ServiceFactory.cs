@@ -41,7 +41,7 @@ namespace Meowgic.Business.Services
             _orderService = new Lazy<IOrderService>(() => new OrderService(unitOfWork));
             _promotionService = new Lazy<IPromotionService>(() => new PromotionService(unitOfWork));
             _questionService = new Lazy<IQuestionService>(() => new QuestionService(unitOfWork));
-            _serviceService = new Lazy<IServiceService>(() => new ServiceService(unitOfWork));
+            //_serviceService = new Lazy<IServiceService>(() => new ServiceService(unitOfWork));
         }
 
         public IAuthService GetAuthService()

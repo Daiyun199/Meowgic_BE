@@ -27,6 +27,7 @@ namespace Meowgic.Business.Services
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>(){
+                //new(ClaimTypes.NameIdentifier,accountId),
                 new(ClaimTypes.Role, role),
                 new("aid", accountId.ToString())
             };

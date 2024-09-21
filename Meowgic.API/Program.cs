@@ -27,6 +27,7 @@ namespace Meowgic.API
                             .AddBusinessLogicDependencies()
                             .AddDataAccessDependencies();
 
+         
             //Add serilog
             builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
