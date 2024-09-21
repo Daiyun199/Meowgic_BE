@@ -1,4 +1,5 @@
 ﻿using Meowgic.Data.Data;
+using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -8,14 +9,8 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Repositories
 {
-    public class OrderDetailRepository : IOrderDetailRepository
+    public class OrderDetailRepository(AppDbContext context) : GenericRepository<OrderDetail>(context), IOrderDetailRepository
     {
-        private readonly AppDbContext _context;
-
-        public OrderDetailRepository(AppDbContext context)
-        {
-            _context = context;
-
-        }
+        private readonly AppDbContext _context = context;
     }
 }

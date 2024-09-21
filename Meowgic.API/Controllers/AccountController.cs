@@ -28,7 +28,7 @@ namespace Meowgic.API.Controllers
 
         [HttpGet]
         [Route("basic-info/{id}")]
-        public async Task<ActionResult<AccountResponse>> GetCustomerBasicInfo([FromRoute] string id)
+        public async Task<ActionResult<Account>> GetCustomerBasicInfo([FromRoute] string id)
         {
             return await _serviceFactory.GetAccountService().GetCustomerInfo(id);
         }

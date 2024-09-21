@@ -14,7 +14,8 @@ namespace Meowgic.Business.Interface
     public interface IAccountService
     {
         Task UpdateCustomerInfo(string id, UpdateAccount request);
-        Task<AccountResponse> GetCustomerInfo(string id);
+        Task<bool> DeleteAccountAsync(string id);
+        Task<Account> GetCustomerInfo(string id);
         Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
     }
 }

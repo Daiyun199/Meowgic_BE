@@ -20,5 +20,6 @@ namespace Meowgic.Data.Models.Request.Promotion
 
         [Required]
         public DateTime ExpireTime { get; set; }
+        public string? UserId { get; set; }
     }
 }

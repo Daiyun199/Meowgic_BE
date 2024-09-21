@@ -7,6 +7,7 @@ using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
 using Meowgic.Data.Repositories;
+using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -72,11 +73,27 @@ namespace Meowgic.Business.Services
             {
                 account.Role = request.Role;
             }
+            account.LastUpdatedTime = DateTime.Now;
+
             await _unitOfWork.GetAccountRepository().UpdateAsync(account);
             await _unitOfWork.SaveChangesAsync();
         }
+        public async Task<bool> DeleteAccountAsync(string id)
+        {
+            var account = await _unitOfWork.GetAccountRepository().GetByIdAsync(id);
+            if (account == null)
+            {
+                return false;
+            }
+            account.Status = UserStatus.Unactive.ToString();
+            account.DeletedTime = DateTime.Now;
+            account.IsDeleted = true;
+            await _unitOfWork.GetAccountRepository().UpdateAsync(account);
+            await _unitOfWork.SaveChangesAsync();
+            return true;
+        }
 
-        public async Task<AccountResponse> GetCustomerInfo(string id)
+        public async Task<Account> GetCustomerInfo(string id)
         {
             var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == id);
 
@@ -87,7 +104,7 @@ namespace Meowgic.Business.Services
             //string pass = HashPassword(account.Password);
             //account.Password = pass;
 
-            return account.Adapt<AccountResponse>();
+            return account.Adapt<Account>();
         }
 
         public async Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request)

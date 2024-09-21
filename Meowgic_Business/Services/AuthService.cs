@@ -32,6 +32,10 @@ namespace Meowgic.Business.Services
 
                 return new GetAuthTokens
                 {
+                    Id = account.Id,
+                    Name = account.Name,
+                    Role = account.Role,
+                    Status = account.Status,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 };
@@ -41,7 +45,7 @@ namespace Meowgic.Business.Services
 
         }
 
-        public async Task Register(Register registerDto)
+        public async Task<Register> Register(Register registerDto)
         {
             var accountWithEmail = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Email == registerDto.Email);
             if (accountWithEmail is not null)
@@ -77,6 +81,7 @@ namespace Meowgic.Business.Services
             await _unitOfWork.GetAccountRepository().AddAsync(account);
             await _unitOfWork.SaveChangesAsync();
 
+            return registerDto;
         }
 
 

@@ -11,6 +11,6 @@ namespace Meowgic.Business.Interface
     public interface IAuthService
     {
         Task<GetAuthTokens> Login(Login loginDto);
-        Task Register(Register registerDto);
+        Task<Register> Register(Register registerDto);
     }
 }

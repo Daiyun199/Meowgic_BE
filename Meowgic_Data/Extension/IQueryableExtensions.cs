@@ -2,7 +2,10 @@
 using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.CardMeaning;
 using Meowgic.Data.Models.Request.Category;
+using Meowgic.Data.Models.Request.Order;
+using Meowgic.Data.Models.Request.Promotion;
 using Meowgic.Data.Models.Request.Question;
+using Meowgic.Data.Models.Request.Service;
 using Meowgic.Data.Models.Response;
 using Meowgic.Shares.Enum;
 using Microsoft.EntityFrameworkCore;
@@ -63,6 +66,54 @@ namespace Meowgic.Data.Extension
             {
                 query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Desciption.ToLower()));
             }
+            return query;
+        }
+        public static IQueryable<Promotion> ApplyPagedPromotionFilter(this IQueryable<Promotion> query, QueryPagedPromotion request)
+        {
+            if (!string.IsNullOrEmpty(request.Description))
+            {
+                query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Description.ToLower()));
+            }
+            return query;
+        }
+        public static IQueryable<TarotService> ApplyPagedTarotServiceFilter(this IQueryable<TarotService> query, QueryPagedService request)
+        {
+            if (!string.IsNullOrEmpty(request.Name))
+            {
+                query = query.Where(s => s.Name != null && s.Name.ToLower().Contains(request.Name.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(request.Description))
+            {
+                query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Description.ToLower()));
+            }
+            return query;
+        }
+        public static IQueryable<Order> ApplyPagedOrdersFilter(this IQueryable<Order> query, QueryPageOrder request)
+        {
+            query = query.Where(o => o.Status != OrderStatus.Incart.ToString());
+
+            if (request.StartDate.HasValue)
+            {
+                query = query.Where(o => o.OrderDate >= request.StartDate.Value);
+            }
+
+            if (request.EndDate.HasValue)
+            {
+                query = query.Where(o => o.OrderDate <= request.EndDate.Value);
+            }
+
+            if (!string.IsNullOrEmpty(request.AccountId))
+            {
+                query = query.Where(o => o.AccountId == request.AccountId);
+            }
+
+            if (!string.IsNullOrEmpty(request.Status))
+            {
+                query = query.Where(o => request.Status == o.Status);
+            }
+
+
+
             return query;
         }
     }
