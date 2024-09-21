@@ -80,7 +80,7 @@ namespace Meowgic.Business.Services
             foreach (var serviceId in serviceIds)
             {
                 var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
-                var serviceDetail = await _unitOfWork.GetServiceRepository().GetService(serviceId);
+                var serviceDetail = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
 
                 if (orderDetail is null)
                 {
@@ -91,7 +91,9 @@ namespace Meowgic.Business.Services
                     throw new NotFoundException("Service not found.");
                 }
                 orderDetails.Remove(orderDetails.First(o => o.OrderId == orderDetail.OrderId && o.ServiceId == orderDetail.ServiceId));
-                order.TotalPrice += orderDetail.Service.PromotionId != null ? orderDetail.Service.Price*(1 - orderDetail.Service.Promotion.DiscountPercent) : orderDetail.Service.Price;
+                order.TotalPrice += (orderDetail.Service.PromotionId != null
+                ? (decimal)(orderDetail.Service.Price * (1 - orderDetail.Service.Promotion.DiscountPercent))
+                : (decimal)orderDetail.Service.Price);
             }
             await _unitOfWork.SaveChangesAsync();
 
@@ -128,7 +130,7 @@ namespace Meowgic.Business.Services
                 throw new NotFoundException("Order not found");
             }
 
-            if (order.AccountId != userId && account.Role != "Staff")
+            if (order.AccountId != userId && account.Role != Roles.Staff)
             {
                 throw new BadRequestException("The order does not belong to this account.");
             }

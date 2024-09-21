@@ -15,7 +15,6 @@ using Meowgic.Data.Models.Request.Promotion;
 using Meowgic.Shares.Enum;
 using Meowgic.Data.Models.Response.Promotion;
 using Firebase.Auth;
-using Meowgic.Data.Models.Response.TarotService;
 
 namespace Meowgic.Business.Services
 {
@@ -81,13 +80,13 @@ namespace Meowgic.Business.Services
                 promotion.DeletedBy = userId;
             }
             promotion.DeletedTime = DateTime.Now;
-            List<TarotService> services = await _unitOfWork.GetServiceRepository().GetAll();
+            var services = await _unitOfWork.GetServiceRepository().GetAllTarotServicesAsync();
             foreach (var service in services)
             {
                 if (service.PromotionId == id)
                 {
                     service.PromotionId = null;
-                    await _unitOfWork.GetServiceRepository().UpdateAsync(service);
+                    await _unitOfWork.GetServiceRepository().UpdateTarotServiceAsync(service.Id,service);
                 }
             }
             await _unitOfWork.GetPromotionRepository().UpdateAsync(promotion);

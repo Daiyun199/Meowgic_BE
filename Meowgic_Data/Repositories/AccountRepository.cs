@@ -26,7 +26,7 @@ namespace Meowgic.Data.Repositories
         }
         public async Task<List<Account>> GetAllAcountCustomer()
         {
-            var getAll = await _context.Accounts.AsNoTracking().Where(p => p.Role == "Customer").ToListAsync();
+            var getAll = await _context.Accounts.AsNoTracking().Where(p => p.Role == Roles.Customer).ToListAsync();
             return getAll;
         }
 

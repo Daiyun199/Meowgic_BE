@@ -1,4 +1,5 @@
 ﻿using Meowgic.Business.Interface;
+using Meowgic.Shares.Enum;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -16,13 +17,13 @@ namespace Meowgic.Business.Services
     {
         private readonly IConfiguration _configuration = configuration;
 
-        public string GenerateAccessToken(string accountId, string role)
+        public string GenerateAccessToken(string accountId, Roles role)
         {
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MeowgicTeamASPAPIEntityFrameworkCore"));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>(){
-                new("role", role),
+                new("role",role.ToString()),
                 new("aid", accountId)
             };
 

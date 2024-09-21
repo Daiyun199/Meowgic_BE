@@ -30,6 +30,6 @@ namespace Meowgic.Data.Models.Request.Account
         public string? Images { get; set; }
 
         [EnumDataType(typeof(Roles), ErrorMessage = "Invalid role")]
-        public string Role { get; set; } = null!;
+        public Roles Role { get; set; } 
     }
 }
