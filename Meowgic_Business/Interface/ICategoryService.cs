@@ -2,6 +2,7 @@
 using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.Category;
 using Meowgic.Data.Models.Response;
+using Meowgic.Data.Models.Response.Category;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,13 +13,14 @@ namespace Meowgic.Business.Interface
 {
     public interface ICategoryService
     {
-        Task<PagedResultResponse<Category>> GetPagedCategory(QueryPagedCategory request);
+        Task<PagedResultResponse<ListCategoryResponse>> GetPagedCategory(QueryPagedCategory request);
 
-        Task<Category> CreateCategory(CategoryRequest request);
+        Task<Category> GetDetailCategory(string id);
+        Task<CategoryRequest> CreateCategory(CategoryRequest request);
 
-        Task UpdateCategory(string id, CategoryRequest request);
+        Task<CategoryRequest> UpdateCategory(string id, CategoryRequest request);
 
-        Task<bool> DeleteCategoryAsync(string id);
+        Task<bool> DeleteCategoryAsync(string id, string userId);
         Task<List<CategoryResponse>> GetAll();
     }
 }
