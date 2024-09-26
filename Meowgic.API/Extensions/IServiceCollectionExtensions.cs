@@ -96,23 +96,23 @@ namespace Meowgic.API.Extensions
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtAuth:Key"]!))
                 };
             });
-            //services.AddAuthorizationBuilder()
-            //    .AddPolicy("Admin", policy =>
-            //    {
-            //        policy.RequireClaim(ClaimTypes.Role, Roles.Admin.ToString());
-            //    })
-            //    .AddPolicy("Customer", policy =>
-            //    {
-            //        policy.RequireClaim(ClaimTypes.Role, Roles.Customer.ToString());
-            //    })
-            //    .AddPolicy("Staff", policy =>
-            //    {
-            //        policy.RequireClaim(ClaimTypes.Role, Roles.Staff.ToString());
-            //    })
-            //    .AddPolicy("Reader", policy =>
-            //    {
-            //        policy.RequireClaim(ClaimTypes.Role, Roles.Reader.ToString());
-            //    });
+            services.AddAuthorizationBuilder()
+                .AddPolicy("Admin", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Admin.ToString());
+                })
+                .AddPolicy("Customer", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Customer.ToString());
+                })
+                .AddPolicy("Staff", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Staff.ToString());
+                })
+                .AddPolicy("Reader", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Reader.ToString());
+                });
             return services;
         }
 
