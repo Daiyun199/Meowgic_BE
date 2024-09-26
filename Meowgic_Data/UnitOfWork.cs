@@ -37,46 +37,19 @@ namespace Meowgic.Data
             _serviceRepository = new Lazy<IServiceRepository>(() => new ServiceRepository(context));
         }
 
-        public IAccountRepository GetAccountRepository()
-        {
-            return _accountRepository.Value;
-        }
+        public IAccountRepository GetAccountRepository => _accountRepository.Value;
 
-        public ICardRepository GetCardRepository()
-        {
-            return _cardRepository.Value;
-        }
+        public ICardRepository GetCardRepository => _cardRepository.Value;
 
-        public ICardMeaningRepository GetCardMeaningRepository()
-        {
-            return _cardMeaningRepository.Value;
-        }
+        public ICardMeaningRepository GetCardMeaningRepository => _cardMeaningRepository.Value;
 
-        public ICategoryRepository GetCategoryRepository()
-        {
-            return _categoryRepository.Value;
-        }
+        public ICategoryRepository GetCategoryRepository =>  _categoryRepository.Value;
 
-        public IOrderDetailRepository GetOrderDetailRepository()
-        {
-            return _orderDetailRepository.Value;
-        }
-        public IOrderRepository GetOrderRepository()
-        {
-            return _orderRepository.Value;
-        }
-        public IPromotionRepository GetPromotionRepository()
-        {
-            return _promotionRepository.Value;
-        }
-        public IQuestionRepository GetQuestionRepository()
-        {
-            return _questionRepository.Value;
-        }
-        public IServiceRepository GetServiceRepository()
-        {
-            return _serviceRepository.Value;
-        }
+        public IOrderDetailRepository GetOrderDetailRepository => _orderDetailRepository.Value;
+        public IOrderRepository GetOrderRepository => _orderRepository.Value;
+        public IPromotionRepository GetPromotionRepository => _promotionRepository.Value;
+        public IQuestionRepository GetQuestionRepository => _questionRepository.Value;
+        public IServiceRepository GetServiceRepository => _serviceRepository.Value;
 
         public async Task<int> SaveChangesAsync()
         {

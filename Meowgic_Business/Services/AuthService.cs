@@ -3,12 +3,14 @@ using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response.Account;
 using Meowgic.Data.Models.Response.Auth;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,13 +24,13 @@ namespace Meowgic.Business.Services
 
         public async Task<GetAuthTokens> Login(Login loginDto)
         {
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Email == loginDto.Email
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == loginDto.Email
             && a.Password == HashPassword(loginDto.Password));
 
             if (account is not null)
             {
-                string accessToken = _serviceFactory.GetTokenService().GenerateAccessToken(account.Id, account.Role);
-                string refreshToken = _serviceFactory.GetTokenService().GenerateRefreshToken();
+                string accessToken = _serviceFactory.GetTokenService.GenerateAccessToken(account.Id, account.Role, account.Name);
+                string refreshToken = _serviceFactory.GetTokenService.GenerateRefreshToken();
 
                 return new GetAuthTokens
                 {
@@ -47,7 +49,7 @@ namespace Meowgic.Business.Services
 
         public async Task<Register> Register(Register registerDto)
         {
-            var accountWithEmail = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Email == registerDto.Email);
+            var accountWithEmail = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == registerDto.Email);
             if (accountWithEmail is not null)
             {
                 throw new BadRequestException($"Account with email {registerDto.Email} is already exists");
@@ -79,10 +81,29 @@ namespace Meowgic.Business.Services
             account.Status = UserStatus.Active.ToString();
             account.Password = HashPassword(registerDto.Password);
 
-            await _unitOfWork.GetAccountRepository().AddAsync(account);
+            await _unitOfWork.GetAccountRepository.AddAsync(account);
             await _unitOfWork.SaveChangesAsync();
 
             return registerDto;
+        }
+
+        public async Task<AccountResponse> GetAuthAccountInfo(ClaimsPrincipal claims)
+        {
+            var accountId = claims.FindFirst(c => c.Type == "aid")?.Value;
+
+            if (accountId is null)
+            {
+                throw new UnauthorizedException("Unauthorized ");
+            }
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
+
+            if (account is null)
+            {
+                throw new UnauthorizedException("Account not found");
+            }
+
+            return account.Adapt<AccountResponse>();
         }
 
 

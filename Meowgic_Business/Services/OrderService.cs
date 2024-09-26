@@ -22,12 +22,12 @@ namespace Meowgic.Business.Services
 
         public async Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request)
         {
-            return (await _unitOfWork.GetOrderRepository().GetPagedOrders(request)).Adapt<PagedResultResponse<OrderResponses>>();
+            return (await _unitOfWork.GetOrderRepository.GetPagedOrders(request)).Adapt<PagedResultResponse<OrderResponses>>();
         }
 
         public async Task<Order> GetOrderDetailsInfoById(string orderId)
         {
-            var order = await _unitOfWork.GetOrderRepository().GetOrderDetailsInfoById(orderId);
+            var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
 
             if (order is null)
             {
@@ -38,7 +38,7 @@ namespace Meowgic.Business.Services
         }
         public async Task<Order> GetCartInfo(string userId)
         {
-            var order = await _unitOfWork.GetOrderRepository().GetCustomerCartInfo(userId);
+            var order = await _unitOfWork.GetOrderRepository.GetCustomerCartInfo(userId);
             if (order is null)
             {
                 throw new NotFoundException("Empty cart");
@@ -47,7 +47,7 @@ namespace Meowgic.Business.Services
         }
         public async Task ConfirmOrder(string userId, string orderId, List<string> serviceIds)
         {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -64,7 +64,7 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException("The order status must be 'InCart'.");
             }
 
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == orderId);
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == orderId);
             if (orderDetails is [])
             {
                 throw new NotFoundException("There are no items in cart.");
@@ -79,8 +79,8 @@ namespace Meowgic.Business.Services
 
             foreach (var serviceId in serviceIds)
             {
-                var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
-                var serviceDetail = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
+                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
+                var serviceDetail = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(serviceId);
 
                 if (orderDetail is null)
                 {
@@ -99,7 +99,7 @@ namespace Meowgic.Business.Services
 
             if (orderDetails is not [])
             {
-                await _unitOfWork.GetOrderRepository().AddAsync(new Order
+                await _unitOfWork.GetOrderRepository.AddAsync(new Order
                 {
                     AccountId = userId,
                     Status = OrderStatus.Incart.ToString(),
@@ -110,8 +110,8 @@ namespace Meowgic.Business.Services
 
                 foreach (var item in orderDetails)
                 {
-                    await _unitOfWork.GetOrderDetailRepository().DeleteAsync(item);
-                    await _unitOfWork.GetOrderDetailRepository().AddAsync(new OrderDetail
+                    await _unitOfWork.GetOrderDetailRepository.DeleteAsync(item);
+                    await _unitOfWork.GetOrderDetailRepository.AddAsync(new OrderDetail
                     {
                         OrderId = order.Id,
                         ServiceId = item.ServiceId
@@ -123,8 +123,8 @@ namespace Meowgic.Business.Services
         }
         public async Task CancelOrder(string userId, string orderId)
         {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == userId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -142,12 +142,12 @@ namespace Meowgic.Business.Services
 
             order.Status = OrderStatus.Cancel.ToString();
 
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == order.Id);
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
             await _unitOfWork.SaveChangesAsync();
         }
         public async Task UpdateOrderDetail(string userId, string orderId, string serviceId)
         {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -158,7 +158,7 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException("The order status must be 'InCart'.");
             }
 
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
+            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
             if (orderDetail is null)
             {
                 throw new NotFoundException("Service not found in the order.");
@@ -168,7 +168,7 @@ namespace Meowgic.Business.Services
         }
         public async Task DeleteServiceFromCart(string userId, string orderId, string serviceId)
         {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -179,19 +179,19 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException("The order status must be 'InCart'.");
             }
 
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
+            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
             if (orderDetail is null)
             {
                 throw new NotFoundException("Shirt not found in the order.");
             }
 
-            await _unitOfWork.GetOrderDetailRepository().DeleteAsync(orderDetail);
+            await _unitOfWork.GetOrderDetailRepository.DeleteAsync(orderDetail);
             await _unitOfWork.SaveChangesAsync();
         }
         public async Task DeleteOrder(string userId, string orderId)
         {    
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == userId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -205,15 +205,15 @@ namespace Meowgic.Business.Services
                 }
             }
 
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == order.Id);
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
             if (orderDetails is not [])
             {
                 foreach (var item in orderDetails)
                 {
-                    await _unitOfWork.GetOrderDetailRepository().DeleteAsync(item);
+                    await _unitOfWork.GetOrderDetailRepository.DeleteAsync(item);
                 }
             }
-            await _unitOfWork.GetOrderRepository().DeleteAsync(order);
+            await _unitOfWork.GetOrderRepository.DeleteAsync(order);
 
             await _unitOfWork.SaveChangesAsync();
         }

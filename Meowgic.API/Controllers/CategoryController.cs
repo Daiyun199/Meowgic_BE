@@ -3,6 +3,8 @@ using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.Category;
 using Meowgic.Data.Models.Response;
+using Meowgic.Shares.Enum;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

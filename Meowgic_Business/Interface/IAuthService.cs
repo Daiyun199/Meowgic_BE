@@ -1,10 +1,7 @@
 ﻿using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response.Account;
 using Meowgic.Data.Models.Response.Auth;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace Meowgic.Business.Interface
 {
@@ -12,5 +9,6 @@ namespace Meowgic.Business.Interface
     {
         Task<GetAuthTokens> Login(Login loginDto);
         Task<Register> Register(Register registerDto);
+        Task<AccountResponse> GetAuthAccountInfo(ClaimsPrincipal claims);
     }
 }

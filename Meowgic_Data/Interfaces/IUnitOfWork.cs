@@ -10,14 +10,14 @@ namespace Meowgic.Data.Interfaces
     {
         Task<int> SaveChangesAsync();
 
-        IAccountRepository GetAccountRepository();
-        ICardMeaningRepository GetCardMeaningRepository();
-        ICardRepository GetCardRepository();
-        ICategoryRepository GetCategoryRepository();
-        IOrderDetailRepository GetOrderDetailRepository();
-        IOrderRepository GetOrderRepository();
-        IPromotionRepository GetPromotionRepository();
-        IQuestionRepository GetQuestionRepository();
-        IServiceRepository GetServiceRepository();
+        IAccountRepository GetAccountRepository { get; }
+        ICardMeaningRepository GetCardMeaningRepository { get; }
+        ICardRepository GetCardRepository { get; }
+        ICategoryRepository GetCategoryRepository {  get; }
+        IOrderDetailRepository GetOrderDetailRepository { get; }
+        IOrderRepository GetOrderRepository { get; }
+        IPromotionRepository GetPromotionRepository { get; }
+        IQuestionRepository GetQuestionRepository { get; }
+        IServiceRepository GetServiceRepository { get; }
     }
 }

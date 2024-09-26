@@ -1,41 +1,50 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
+using Meowgic.Data.Models.Response.Account;
 using Meowgic.Data.Models.Response.Auth;
 using Meowgic.Shares.Enum;
+using Meowgic.Shares.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class AuthController(IServiceFactory serviceFactory) : ControllerBase
     {
-        private readonly IServiceFactory _serviceFactory;
-
-        public AuthController(IServiceFactory serviceFactory)
-        {
-            _serviceFactory = serviceFactory;
-        }
+        private readonly IServiceFactory _serviceFactory = serviceFactory;
 
         [HttpPost("register")]
         public async Task<ActionResult> RegisterAccount([FromBody] Register request)
         {
-            await _serviceFactory.GetAuthService().Register(request);
+            await _serviceFactory.GetAuthService.Register(request);
             return Ok();
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult> Login([FromBody] Login loginDto)
+        public async Task<ActionResult<GetAuthTokens>> Login([FromBody] Login loginDto)
         {
-            var user = await _serviceFactory.GetAuthService().Login(loginDto);
+            var user = await _serviceFactory.GetAuthService.Login(loginDto);
             if (user.Status == UserStatus.Unactive.ToString())
             {
                 return BadRequest("Your Account have been banned!!!");
             }
-            return Ok(user);
+            return Created(nameof(Login), user) ;
+        }
+
+        [HttpGet("who-am-i")]
+        [Authorize]
+        public async Task<ActionResult<AccountResponse>> WhoAmI()
+        {
+            return await _serviceFactory.GetAuthService.GetAuthAccountInfo(HttpContext.User);
         }
     }
 }

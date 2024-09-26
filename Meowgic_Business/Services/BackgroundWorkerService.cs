@@ -1,5 +1,4 @@
-﻿using Google.Apis.Logging;
-using Meowgic.Business.Interface;
+﻿using Meowgic.Business.Interface;
 using Meowgic.Data;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Promotion;

@@ -18,24 +18,24 @@ namespace Meowgic.API.Controllers
         [HttpGet]
         public async Task<ActionResult<PagedResultResponse<Question>>> GetPagedQuestion([FromQuery] QueryPagedQuestion query)
         {
-            return await _serviceFactory.GetQuestionService().GetPagedQuestion(query);
+            return await _serviceFactory.GetQuestionService.GetPagedQuestion(query);
         }
         [HttpPost("create")]
         public async Task<ActionResult<Question>> CreateQuestion([FromBody] QuestionRequest request)
         {
-            await _serviceFactory.GetQuestionService().CreateQuestion(request);
+            await _serviceFactory.GetQuestionService.CreateQuestion(request);
             return Ok();
         }
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateQuestion([FromRoute] string id, [FromBody] QuestionRequest request)
         {
-            await _serviceFactory.GetQuestionService().UpdateQuestion(id, request);
+            await _serviceFactory.GetQuestionService.UpdateQuestion(id, request);
             return Ok();
         }
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeleteQuestion([FromRoute] string id)
         {
-            var result = await _serviceFactory.GetQuestionService().DeleteQuestion(id);
+            var result = await _serviceFactory.GetQuestionService.DeleteQuestion(id);
             if (!result)
             {
                 return NotFound();
@@ -47,7 +47,7 @@ namespace Meowgic.API.Controllers
         [Route("getall")]
         public async Task<ActionResult<List<QuestionResponse>>> GetAllQuestion()
         {
-            return await _serviceFactory.GetQuestionService().GetAll();
+            return await _serviceFactory.GetQuestionService.GetAll();
         }
     }
 }

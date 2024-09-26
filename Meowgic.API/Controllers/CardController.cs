@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Card;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Meowgic.API.Controllers
 {

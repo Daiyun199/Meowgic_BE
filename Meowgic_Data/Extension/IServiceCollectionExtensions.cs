@@ -18,9 +18,9 @@ namespace Meowgic.Data.Extension
         }
 
         private static IServiceCollection AddRepositories(this IServiceCollection services)
-        {
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+        {            
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IAccountRepository, AccountRepository>();
             services.AddScoped<ICardRepository, CardRepository>();
             services.AddScoped<ICategoryRepository, CategoryRepository>();

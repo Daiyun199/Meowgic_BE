@@ -1,5 +1,4 @@
-﻿using Firebase.Auth;
-using Mapster;
+﻿using Mapster;
 using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
@@ -42,7 +41,7 @@ namespace Meowgic.Business.Services
 
         public async Task UpdateCustomerInfo(string id, UpdateAccount request)
         {
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == id);
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
 
             if (account is null)
             {
@@ -69,18 +68,18 @@ namespace Meowgic.Business.Services
             {
                 account.Phone = request.Phone;
             }
-            if (request.Role != null)
+            if (string.IsNullOrEmpty(account.Role.ToString()))
             {
                 account.Role = request.Role;
             }
             account.LastUpdatedTime = DateTime.Now;
 
-            await _unitOfWork.GetAccountRepository().UpdateAsync(account);
+            await _unitOfWork.GetAccountRepository.UpdateAsync(account);
             await _unitOfWork.SaveChangesAsync();
         }
         public async Task<bool> DeleteAccountAsync(string id)
         {
-            var account = await _unitOfWork.GetAccountRepository().GetByIdAsync(id);
+            var account = await _unitOfWork.GetAccountRepository.GetByIdAsync(id);
             if (account == null)
             {
                 return false;
@@ -88,14 +87,14 @@ namespace Meowgic.Business.Services
             account.Status = UserStatus.Unactive.ToString();
             account.DeletedTime = DateTime.Now;
             account.IsDeleted = true;
-            await _unitOfWork.GetAccountRepository().UpdateAsync(account);
+            await _unitOfWork.GetAccountRepository.UpdateAsync(account);
             await _unitOfWork.SaveChangesAsync();
             return true;
         }
 
         public async Task<Account> GetCustomerInfo(string id)
         {
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == id);
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
 
             if (account is null)
             {
@@ -109,7 +108,7 @@ namespace Meowgic.Business.Services
 
         public async Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request)
         {
-            return (await _unitOfWork.GetAccountRepository().GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
+            return (await _unitOfWork.GetAccountRepository.GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
         }
     }
 }

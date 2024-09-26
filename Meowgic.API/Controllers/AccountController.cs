@@ -3,8 +3,12 @@ using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
+using Meowgic.Shares.Enum;
+using Meowgic.Shares.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Meowgic.API.Controllers
 {
@@ -22,7 +26,7 @@ namespace Meowgic.API.Controllers
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateCustomerAccountInfo([FromRoute] string id, [FromBody] UpdateAccount request)
         {
-            await _serviceFactory.GetAccountService().UpdateCustomerInfo(id, request);
+            await _serviceFactory.GetAccountService.UpdateCustomerInfo(id, request);
             return Ok();
         }
 
@@ -30,13 +34,13 @@ namespace Meowgic.API.Controllers
         [Route("basic-info/{id}")]
         public async Task<ActionResult<Account>> GetCustomerBasicInfo([FromRoute] string id)
         {
-            return await _serviceFactory.GetAccountService().GetCustomerInfo(id);
+            return await _serviceFactory.GetAccountService.GetCustomerInfo(id);
         }
 
         [HttpGet]
         public async Task<ActionResult<PagedResultResponse<AccountResponse>>> GetPagedAccounts([FromQuery] QueryPagedAccount query)
         {
-            return await _serviceFactory.GetAccountService().GetPagedAccounts(query);
+            return await _serviceFactory.GetAccountService.GetPagedAccounts(query);
         }
     }
 }

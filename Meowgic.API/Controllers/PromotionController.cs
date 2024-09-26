@@ -22,22 +22,22 @@ namespace Meowgic.API.Controllers
         [HttpGet]
         public async Task<ActionResult<PagedResultResponse<ListPromotionResponse>>> GetPagedPromotion([FromQuery] QueryPagedPromotion query)
         {
-            return await _serviceFactory.GetPromotionService().GetPagedPromotion(query);
+            return await _serviceFactory.GetPromotionService.GetPagedPromotion(query);
         }
         [HttpPost("create")]
         public async Task<ActionResult<CreatePromotion>> CreatePromotion([FromBody] CreatePromotion request)
         {
-            return Ok(await _serviceFactory.GetPromotionService().CreatePromotion(request));
+            return Ok(await _serviceFactory.GetPromotionService.CreatePromotion(request));
         }
         [HttpPut("update/{id}")]
         public async Task<ActionResult<CreatePromotion>> UpdatePromotion([FromRoute] string id, [FromBody] CreatePromotion request)
         {
-            return Ok(await _serviceFactory.GetPromotionService().UpdatePromotion(id, request));
+            return Ok(await _serviceFactory.GetPromotionService.UpdatePromotion(id, request));
         }
         [HttpDelete("delete/{id}")]
         public async Task<IActionResult> DeletePromotion([FromRoute] string id, [FromForm] string userId)
         {
-            var result = await _serviceFactory.GetPromotionService().DeletePromotion(id, userId);
+            var result = await _serviceFactory.GetPromotionService.DeletePromotion(id, userId);
             if (!result)
             {
                 return NotFound();
@@ -49,7 +49,7 @@ namespace Meowgic.API.Controllers
         [Route("getall")]
         public async Task<ActionResult<List<PromotionResponse>>> GetAllPromotion()
         {
-            return await _serviceFactory.GetPromotionService().GetAll();
+            return await _serviceFactory.GetPromotionService.GetAll();
         }
     }
 }

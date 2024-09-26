@@ -14,7 +14,7 @@ namespace Meowgic.Business.Services
 {
     public class CardService : ICardService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        //private readonly IUnitOfWork _unitOfWork;
         private readonly ICardRepository _cardRepository;
         private readonly IMapper _mapper;
 

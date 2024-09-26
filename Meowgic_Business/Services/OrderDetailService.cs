@@ -23,7 +23,7 @@ namespace Meowgic.Business.Services
 
         public async Task AddToCart(string userId, string serviceId)
         {    
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.AccountId == userId && o.Status == OrderStatus.Incart.ToString());
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.AccountId == userId && o.Status == OrderStatus.Incart.ToString());
 
             if (order is null)
             {
@@ -35,18 +35,18 @@ namespace Meowgic.Business.Services
                     OrderDate = DateTime.Now
                 };
 
-                await _unitOfWork.GetOrderRepository().AddAsync(order);
+                await _unitOfWork.GetOrderRepository.AddAsync(order);
                 await _unitOfWork.SaveChangesAsync();
             }
 
-            var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
+            var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(serviceId);
 
             if (service is null)
             {
                 throw new NotFoundException("Service not found");
             }
 
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == order.Id && od.ServiceId == service.Id);
+            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == order.Id && od.ServiceId == service.Id);
 
             if (orderDetail is null)
             {
@@ -65,8 +65,8 @@ namespace Meowgic.Business.Services
 
 
                 order.TotalPrice = (decimal)totalPrice;
-                await _unitOfWork.GetOrderRepository().UpdateAsync(order);
-                await _unitOfWork.GetOrderDetailRepository().AddAsync(orderDetail);
+                await _unitOfWork.GetOrderRepository.UpdateAsync(order);
+                await _unitOfWork.GetOrderDetailRepository.AddAsync(orderDetail);
                 await _unitOfWork.SaveChangesAsync();
             }
             else
@@ -77,11 +77,11 @@ namespace Meowgic.Business.Services
 
         public async Task<List<OrderDetailResponse>> GetList()
         {
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().GetAllAsync();
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetAllAsync();
             var orderDetailResponses = orderDetails.Adapt<List<OrderDetailResponse>>();
             foreach (var orderDetailResponse in orderDetailResponses)
             {
-                var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync( orderDetailResponse.ServiceId);
+                var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync( orderDetailResponse.ServiceId);
                 orderDetailResponse.Subtotal = service.PromotionId != null ? service.Price*(1 - service.Promotion.DiscountPercent) : service.Price;
             }
             return orderDetailResponses;
@@ -89,9 +89,9 @@ namespace Meowgic.Business.Services
 
         public async Task RemoveFromCart(string userId, string serviceId)
         {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.AccountId == userId && o.Status == OrderStatus.Incart.ToString());
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.AccountId == userId && o.Status == OrderStatus.Incart.ToString());
 
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == order.Id && od.ServiceId == serviceId);
+            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == order.Id && od.ServiceId == serviceId);
 
             if (orderDetail is null)
             {
@@ -99,7 +99,7 @@ namespace Meowgic.Business.Services
             }
             else
             {
-                var service = await _unitOfWork.GetServiceRepository().GetTarotServiceByIdAsync(serviceId);
+                var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(serviceId);
                 double totalPrice = (double)order.TotalPrice;
 
              
@@ -109,8 +109,8 @@ namespace Meowgic.Business.Services
 
                 
                 order.TotalPrice = (decimal)totalPrice;
-                await _unitOfWork.GetOrderRepository().UpdateAsync(order);
-                await _unitOfWork.GetOrderDetailRepository().DeleteAsync(orderDetail);
+                await _unitOfWork.GetOrderRepository.UpdateAsync(order);
+                await _unitOfWork.GetOrderDetailRepository.DeleteAsync(orderDetail);
                 await _unitOfWork.SaveChangesAsync();
             }
         }

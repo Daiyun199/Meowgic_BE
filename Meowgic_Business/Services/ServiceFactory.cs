@@ -17,7 +17,7 @@ namespace Meowgic.Business.Services
         private readonly Lazy<ICardMeaningService> _cardMeaningService;
         private readonly Lazy<ICardService> _cardService;
         private readonly Lazy<ICategoryService> _categoryService;
-        private readonly Lazy<IFirebaseStorageService> _firebaseStorageService;
+        //private readonly Lazy<IFirebaseStorageService> _firebaseStorageService;
         private readonly Lazy<IOrderDetailService> _orderDetailService;
         private readonly Lazy<IOrderService> _orderService;
         private readonly Lazy<IPromotionService> _promotionService;
@@ -36,7 +36,7 @@ namespace Meowgic.Business.Services
             //_cardMeaningService = new Lazy<ICardMeaningService>(() => new CardMeaningService(unitOfWork));
             //_cardService = new Lazy<ICardService>(() => new CardService(unitOfWork));
             //_categoryService = new Lazy<ICategoryService>(() => new CategoryService(unitOfWork));
-            _firebaseStorageService = new Lazy<IFirebaseStorageService>(() => new FirebaseStorageService(configuration));
+            //_firebaseStorageService = new Lazy<IFirebaseStorageService>(() => new FirebaseStorageService(configuration));
             _orderDetailService = new Lazy<IOrderDetailService>(() => new OrderDetailService(unitOfWork));
             _orderService = new Lazy<IOrderService>(() => new OrderService(unitOfWork));
             _promotionService = new Lazy<IPromotionService>(() => new PromotionService(unitOfWork));
@@ -44,55 +44,19 @@ namespace Meowgic.Business.Services
             //_serviceService = new Lazy<IServiceService>(() => new ServiceService(unitOfWork));
         }
 
-        public IAuthService GetAuthService()
-        {
-            return _authService.Value;
-        }
+        public IAuthService GetAuthService => _authService.Value;
 
-        public IAccountService GetAccountService()
-        {
-            return _accountService.Value;
-        }
+        public IAccountService GetAccountService => _accountService.Value;
 
-        public ITokenService GetTokenService()
-        {
-            return _tokenService.Value;
-        }
-        public ICardMeaningService GetCardMeaningService()
-        {
-            return _cardMeaningService.Value;
-        }
-        public ICardService GetCardService()
-        {
-            return _cardService.Value;
-        }
-        public ICategoryService GetCategoryService()
-        {
-            return _categoryService.Value;
-        }
-        public IFirebaseStorageService GetFirebaseStorageService()
-        {
-            return _firebaseStorageService.Value;
-        }
-        public IOrderDetailService GetOrderDetailService()
-        {
-            return _orderDetailService.Value;
-        }
-        public IOrderService GetOrderService()
-        {
-            return _orderService.Value;
-        }
-        public IPromotionService GetPromotionService()
-        {
-            return _promotionService.Value;
-        }
-        public IQuestionService GetQuestionService()
-        {
-            return _questionService.Value;
-        }
-        public IServiceService GetServiceService()
-        {
-            return _serviceService.Value;
-        }
+        public ITokenService GetTokenService => _tokenService.Value;
+        //public ICardMeaningService GetCardMeaningService => _cardMeaningService.Value;
+        //public ICardService GetCardService => _cardService.Value;
+        //public ICategoryService GetCategoryService => _categoryService.Value;
+        //public IFirebaseStorageService GetFirebaseStorageService => _firebaseStorageService.Value;
+        public IOrderDetailService GetOrderDetailService => _orderDetailService.Value;
+        public IOrderService GetOrderService => _orderService.Value;
+        public IPromotionService GetPromotionService => _promotionService.Value;
+        public IQuestionService GetQuestionService => _questionService.Value;
+        //public IServiceService GetServiceService => _serviceService.Value;
     }
 }
