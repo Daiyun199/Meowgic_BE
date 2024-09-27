@@ -37,6 +37,7 @@ namespace Meowgic.Data.Entities
         public bool Premium { get; set; }
 
         public string? ImgUrl { get; set; }
+        public int? countTarot { get; set; } 
         public bool IsDeleted { get; set; } = false;
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [DefaultValue("GETDATE()")]
@@ -54,5 +55,6 @@ namespace Meowgic.Data.Entities
 
         public virtual ICollection<TarotService> Services { get; set; } = new List<TarotService>();
         public virtual ICollection<ScheduleReader> ScheduleReaders { get; set; } = new List<ScheduleReader>();
+        public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     }
 }
