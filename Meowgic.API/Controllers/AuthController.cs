@@ -18,14 +18,16 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IServiceFactory serviceFactory) : ControllerBase
+    public class AuthController(IServiceFactory serviceFactory,IEmailService emailService) : ControllerBase
     {
         private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly IEmailService _emailService = emailService;
 
         [HttpPost("register")]
         public async Task<ActionResult> RegisterAccount([FromBody] Register request)
         {
             await _serviceFactory.GetAuthService.Register(request);
+            await _emailService.SendConfirmEmailAsync(request.Email);
             return Ok();
         }
 

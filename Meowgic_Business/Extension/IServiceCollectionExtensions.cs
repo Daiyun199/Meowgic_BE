@@ -42,6 +42,7 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IZodiacService, ZodiacService>();
             services.AddScoped<IZodiacColorService, ZodiacColorService>();  
             services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<IEmailService, EmailService>();  
             return services;
         }
     }

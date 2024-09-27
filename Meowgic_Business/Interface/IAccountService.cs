@@ -1,4 +1,5 @@
 ﻿using Meowgic.Data.Entities;
+using Meowgic.Data.Models;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
@@ -17,5 +18,6 @@ namespace Meowgic.Business.Interface
         Task<bool> DeleteAccountAsync(string id);
         Task<Account> GetCustomerInfo(string id);
         Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
+        Task<ServiceResult<string>> ConfirmEmailUser(string userId);
     }
 }

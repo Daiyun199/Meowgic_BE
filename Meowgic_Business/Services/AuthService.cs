@@ -73,8 +73,8 @@ namespace Meowgic.Business.Services
             //account.Role = Roles.Customer.ToString();
             account.Premium = false;
             account.IsDeleted = false;
-            account.isConfirmed = true;
-            account.EmailConfirmed = true;
+            account.isConfirmed = false;
+            account.EmailConfirmed = false;
             account.PhoneNumberConfirmed = true;
             account.TwoFactorEnabled = true;
             account.LockoutEnabled = true;
