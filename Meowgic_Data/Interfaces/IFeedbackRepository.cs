@@ -22,6 +22,8 @@ namespace Meowgic.Data.Interfaces
         /// <returns>Đối tượng feedback hoặc null nếu không tìm thấy.</returns>
         Task<Feedback?> GetByIdAsync(string id);
 
+        Task<List<Feedback>> GetAllByServiceId(string serviceId);
+
         /// <summary>
         /// Thêm một feedback mới.
         /// </summary>

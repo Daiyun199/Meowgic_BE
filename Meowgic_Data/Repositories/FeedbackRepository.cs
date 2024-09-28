@@ -32,6 +32,12 @@ namespace Meowgic.Data.Repositories
                                            .FirstOrDefaultAsync(f => f.Id == id);
         }
 
+        // Get all feedbacks by order detail Id
+        public async Task<List<Feedback>> GetAllByServiceId(string serviceId)
+        {
+            return await _context.Feedbacks.Where(fb => fb.OrderDetail.ServiceId == serviceId).ToListAsync();
+        }
+
         // Create feedback
         public async Task<Feedback> AddAsync(Feedback feedback)
         {

@@ -11,10 +11,10 @@ namespace Meowgic.Business.Interface
 {
     public interface ICardService
     {
-        Task<Card> CreateCardAsync(CardRequest card);
+        Task<Card> CreateCardAsync(CardRequest card, ClaimsPrincipal claim);
         Task<Card?> GetCardByIdAsync(string id);
         Task<IEnumerable<Card>> GetAllCardsAsync();
-        Task<Card?> UpdateCardAsync(string id, CardRequest card);
-        Task<bool> DeleteCardAsync(string id);
+        Task<Card?> UpdateCardAsync(string id, CardRequest card, ClaimsPrincipal claim);
+        Task<bool> DeleteCardAsync(string id, ClaimsPrincipal claim);
     }
 }

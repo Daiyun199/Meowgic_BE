@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Meowgic.Business.Interface;
+using Meowgic.Data;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.CardMeaning;
 using Meowgic.Data.Models.Response.CardMeaning;
+using Meowgic.Shares.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,18 +18,35 @@ namespace Meowgic.Business.Services
     public class CardMeaningService : ICardMeaningService
     {
         private readonly ICardMeaningRepository _cardMeaningRepository;
+        private readonly IAccountRepository _accountReposiotory;
         private readonly IMapper _mapper;
 
-        public CardMeaningService(ICardMeaningRepository cardMeaningRepository, IMapper mapper)
+        public CardMeaningService(ICardMeaningRepository cardMeaningRepository, IMapper mapper, IAccountRepository accountReposiotory)
         {
             _cardMeaningRepository = cardMeaningRepository;
             _mapper = mapper;
+            _accountReposiotory = accountReposiotory;
         }
 
 
-        public async Task<CardMeaningResponseDTO> CreateCardMeaningAsync(CardMeaningRequestDTO cardMeaningRequest)
+        public async Task<CardMeaningResponseDTO> CreateCardMeaningAsync(CardMeaningRequestDTO cardMeaningRequest, ClaimsPrincipal claim)
         {
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _accountReposiotory.GetCustomerDetailsInfo(accountId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
+            var existingCardMeaning = _cardMeaningRepository.FindAsync(cm => cm.CardId == cardMeaningRequest.CardId && cm.CategoryId == cardMeaningRequest.CategoryId);
+            if (existingCardMeaning is not null)
+            {
+                throw new BadRequestException("This card meaning has aldready exist!!");
+            }
             var cardMeaning = _mapper.Map<CardMeaning>(cardMeaningRequest);
+            cardMeaning.CreatedBy = accountId;
+            cardMeaning.CreatedTime = DateTime.Now;
             var createdCardMeaning = await _cardMeaningRepository.CreateCardMeaningAsync(cardMeaning);
             return _mapper.Map<CardMeaningResponseDTO>(createdCardMeaning);
         }
@@ -52,16 +72,48 @@ namespace Meowgic.Business.Services
             });
         }
 
-        public async Task<CardMeaningResponseDTO?> UpdateCardMeaningAsync(string id, CardMeaningRequestDTO cardMeaningRequest)
+        public async Task<CardMeaningResponseDTO?> UpdateCardMeaningAsync(string id, CardMeaningRequestDTO cardMeaningRequest, ClaimsPrincipal claim)
         {
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _accountReposiotory.GetCustomerDetailsInfo(accountId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
+            var existingCardMeaning = await _cardMeaningRepository.GetCardMeaningByIdAsync(id);
+            if (existingCardMeaning is null)
+            {
+                throw new BadRequestException("Card meaning not found!");
+            }
             var cardMeaning = _mapper.Map<CardMeaning>(cardMeaningRequest);
+            cardMeaning.LastUpdatedBy = accountId;
+            cardMeaning.LastUpdatedTime = DateTime.Now;
             var updatedCardMeaning = await _cardMeaningRepository.UpdateCardMeaningAsync(id, cardMeaning);
             return _mapper.Map<CardMeaningResponseDTO>(updatedCardMeaning);
         }
 
-        public async Task<bool> DeleteCardMeaningAsync(string id)
+        public async Task<bool> DeleteCardMeaningAsync(string id, ClaimsPrincipal claim)
         {
-            return await _cardMeaningRepository.DeleteCardMeaningAsync(id);
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _accountReposiotory.GetCustomerDetailsInfo(accountId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
+            var cardMeaningRequest = await _cardMeaningRepository.GetCardMeaningByIdAsync(id);
+            if (cardMeaningRequest is null)
+            {
+                throw new BadRequestException("Card meaning not found");
+            }
+            var cardMeaning = _mapper.Map<CardMeaning>(cardMeaningRequest);
+            cardMeaning.DeletedBy = accountId;
+            cardMeaning.DeletedTime = DateTime.Now;
+            await _cardMeaningRepository.UpdateCardMeaningAsync(id, cardMeaning);
+            return true;
         }
 
         public async Task<IEnumerable<CardMeaningResponseDTO>> GetRandomCardMeaningsAsync()

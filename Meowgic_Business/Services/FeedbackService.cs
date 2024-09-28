@@ -57,6 +57,18 @@ namespace Meowgic.Business.Services
             }
         }
 
+        public async Task<List<Feedback>> GetAllFeedbacksByServiceIdAsync(string serviceId)
+        {
+            try
+            {
+                return await _feedbackRepository.GetAllByServiceId(serviceId);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving feedbacks.", ex);
+            }
+        }
+
         public async Task<Feedback> CreateFeedbackAsync(FeedbackRequestDTO feedbackRequest)
         {
             try

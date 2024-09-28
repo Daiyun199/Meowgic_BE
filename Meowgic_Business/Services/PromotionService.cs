@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using Meowgic.Data.Models.Request.Promotion;
 using Meowgic.Shares.Enum;
 using Meowgic.Data.Models.Response.Promotion;
+using System.Security.Claims;
+using Meowgic.Data.Repositories;
 
 namespace Meowgic.Business.Services
 {
@@ -26,15 +28,30 @@ namespace Meowgic.Business.Services
             return (await _unitOfWork.GetPromotionRepository.GetPagedPromotion(request)).Adapt<PagedResultResponse<ListPromotionResponse>>();
         }
 
-        public async Task<CreatePromotion> CreatePromotion(CreatePromotion request)
+        public async Task<CreatePromotion> CreatePromotion(CreatePromotion request, ClaimsPrincipal claim)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
+
+            var existingPromtion = _unitOfWork.GetPromotionRepository.FindAsync(cm => cm.Description == request.Description);
+            if (existingPromtion is not null)
+            {
+                throw new BadRequestException("This promotion has aldready exist!!");
+            }
+
             var promotion = new Promotion();
             promotion.Description = request.Description;
             promotion.DiscountPercent = request.DiscountPercent;
             promotion.MaxDiscount = request.MaxDiscount;
             promotion.ExpireTime = request.ExpireTime;
             promotion.Status = PromotionStatus.Active.ToString();
-            promotion.CreatedBy = request.UserId;
+            promotion.CreatedBy = userId;
             promotion.CreatedTime = DateTime.Now;
 
             await _unitOfWork.GetPromotionRepository.AddAsync(promotion);
@@ -43,9 +60,17 @@ namespace Meowgic.Business.Services
             return request;
         }
 
-        public async Task<CreatePromotion> UpdatePromotion(string id, CreatePromotion request)
+        public async Task<CreatePromotion> UpdatePromotion(string id, CreatePromotion request, ClaimsPrincipal claim)
         {
             var promotion = await _unitOfWork.GetPromotionRepository.FindOneAsync(s => s.Id == id);
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
 
             if (promotion is not null)
             {
@@ -53,7 +78,7 @@ namespace Meowgic.Business.Services
                 promotion.DiscountPercent = request.DiscountPercent;
                 promotion.MaxDiscount = request.MaxDiscount;
                 promotion.ExpireTime = request.ExpireTime;
-                promotion.LastUpdatedBy = request.UserId;
+                promotion.LastUpdatedBy = userId;
                 promotion.LastUpdatedTime = DateTime.Now;
 
                 await _unitOfWork.GetPromotionRepository.UpdateAsync(promotion);
@@ -66,12 +91,20 @@ namespace Meowgic.Business.Services
             }
         }
 
-        public async Task<bool> DeletePromotion(string id, string? userId)
+        public async Task<bool> DeletePromotion(string id, ClaimsPrincipal? claim)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var promotion = await _unitOfWork.GetPromotionRepository.GetByIdAsync(id);
             if (promotion == null)
             {
-                return false;
+                throw new BadRequestException("Not found!!");
             }
             promotion.Status = PromotionStatus.Expired.ToString();
             if (userId != null)

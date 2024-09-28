@@ -20,15 +20,16 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "Reader")]
         public async Task<IActionResult> CreateService([FromBody] ServiceRequest request)
         {
           
-            var product = await _serviceService.CreateTarotServiceAsync(request);
+            var product = await _serviceService.CreateTarotServiceAsync(request, HttpContext.User);
             return Ok(product);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetServicetById(string id)
+        public async Task<IActionResult> GetServicetById([FromRoute] string id)
         {
             var product = await _serviceService.GetTarotServiceByIdAsync(id);
             if (product == null) return NotFound();
@@ -43,17 +44,19 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateService(string id, [FromBody] ServiceRequest request)
+        [Authorize(Policy = "Reader")]
+        public async Task<IActionResult> UpdateService([FromRoute]string id, [FromBody] ServiceRequest request)
         {
-            var updatedProduct = await _serviceService.UpdateTarotServiceAsync(id, request);
+            var updatedProduct = await _serviceService.UpdateTarotServiceAsync(id, request, HttpContext.User);
             if (updatedProduct == null) return NotFound();
             return Ok(updatedProduct);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteServicet(string id)
+        [Authorize(Policy = "Reader")]
+        public async Task<IActionResult> DeleteServicet([FromRoute]string id)
         {
-            var result = await _serviceService.DeleteTarotServiceAsync(id);
+            var result = await _serviceService.DeleteTarotServiceAsync(id, HttpContext.User);
             if (!result) return NotFound();
             return NoContent();
         }

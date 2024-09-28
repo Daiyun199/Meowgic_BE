@@ -42,11 +42,11 @@ namespace Meowgic.Business.Services
 
         public async Task UpdateCustomerInfo(string id, UpdateAccount request)
         {
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(id);
 
             if (account is null)
             {
-                throw new UnauthorizedException("Account not found");
+                throw new BadRequestException("Account not found");
             }
 
             if (request.Name != null)
@@ -80,10 +80,11 @@ namespace Meowgic.Business.Services
         }
         public async Task<bool> DeleteAccountAsync(string id)
         {
-            var account = await _unitOfWork.GetAccountRepository.GetByIdAsync(id);
-            if (account == null)
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(id);
+
+            if (account is null)
             {
-                return false;
+                throw new BadRequestException("Account not found");
             }
             account.Status = UserStatus.Unactive.ToString();
             account.DeletedTime = DateTime.Now;
@@ -93,9 +94,11 @@ namespace Meowgic.Business.Services
             return true;
         }
 
-        public async Task<Account> GetCustomerInfo(string id)
+        public async Task<Account> GetCustomerInfo(ClaimsPrincipal claim)
         {
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
 
             if (account is null)
             {
@@ -111,8 +114,9 @@ namespace Meowgic.Business.Services
         {
             return (await _unitOfWork.GetAccountRepository.GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
         }
-        public async Task<ServiceResult<string>> ConfirmEmailUser(string userId)
+        public async Task<ServiceResult<string>> ConfirmEmailUser(ClaimsPrincipal claim)
         {
+            var userId = claim.FindFirst("aid")?.Value;
             var userExist = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (userExist != null)
             {

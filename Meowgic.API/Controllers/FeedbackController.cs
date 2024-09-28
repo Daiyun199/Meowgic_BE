@@ -32,7 +32,7 @@ namespace Meowgic.API.Controllers
         /// Lấy feedback theo ID
         /// </summary>
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetFeedbackById(string id)
+        public async Task<IActionResult> GetFeedbackById([FromRoute]string id)
         {
             var feedback = await _feedbackService.GetFeedbackByIdAsync(id);
             if (feedback == null)
@@ -43,9 +43,24 @@ namespace Meowgic.API.Controllers
         }
 
         /// <summary>
+        /// Lấy feedback theo service ID
+        /// </summary>
+        [HttpGet("service/{id}")]
+        public async Task<IActionResult> GetFeedbackByOrderDetailId([FromRoute]string id)
+        {
+            var feedbacks = await _feedbackService.GetAllFeedbacksByServiceIdAsync(id);
+            if (feedbacks == null)
+            {
+                return NotFound(new { message = "Not found any feedbacks for this service" });
+            }
+            return Ok(feedbacks);
+        }
+
+        /// <summary>
         /// Tạo feedback mới
         /// </summary>
         [HttpPost]
+        [Authorize(Policy = "Customer")]
         public async Task<IActionResult> CreateFeedback([FromBody] FeedbackRequestDTO feedbackRequest)
         {
             if (!ModelState.IsValid)
@@ -61,7 +76,8 @@ namespace Meowgic.API.Controllers
         /// Cập nhật feedback theo ID
         /// </summary>
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateFeedback(string id, [FromBody] FeedbackRequestDTO feedbackRequest)
+        [Authorize(Policy = "Cútomer")]
+        public async Task<IActionResult> UpdateFeedback([FromRoute]string id, [FromBody] FeedbackRequestDTO feedbackRequest)
         {
             if (!ModelState.IsValid)
             {
@@ -81,6 +97,7 @@ namespace Meowgic.API.Controllers
         /// Xóa feedback theo ID
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Policy = "Customer")]
         public async Task<IActionResult> DeleteFeedback(string id)
         {
             var result = await _feedbackService.DeleteFeedbackAsync(id);

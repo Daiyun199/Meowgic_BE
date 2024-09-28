@@ -43,7 +43,7 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpGet("who-am-i")]
-        [Authorize(Policy = "Customer")]
+        [Authorize]
         public async Task<ActionResult<AccountResponse>> WhoAmI()
         {
             return await _serviceFactory.GetAuthService.GetAuthAccountInfo(HttpContext.User);

@@ -10,7 +10,7 @@ namespace Meowgic.Business.Interface
 {
     public interface IOrderDetailService
     {
-        Task AddToCart(string userId, string serviceId);
+        Task AddToCart(ClaimsPrincipal claim, string serviceId);
 
         Task<List<OrderDetailResponse>> GetList();
         Task RemoveFromCart(string userId, string serviceId);

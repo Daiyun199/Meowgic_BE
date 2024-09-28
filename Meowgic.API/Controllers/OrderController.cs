@@ -4,6 +4,7 @@ using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
 using Meowgic.Data.Models.Response.OrderDetail;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,45 +32,53 @@ namespace Meowgic.API.Controllers
             return await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(id);
         }
         [HttpGet("get-cart")]
-        public async Task<ActionResult<Order>> GetCartInfo([FromForm] string userId)
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<Order>> GetCartInfo()
         {
-            return await _serviceFactory.GetOrderService.GetCartInfo(userId);
+            return await _serviceFactory.GetOrderService.GetCartInfo(HttpContext.User);
         }
         [HttpPost("add-to-cart")]
-        public async Task<ActionResult> AddtoCart([FromBody] string serviceId, string userId)
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult> AddtoCart([FromBody] string serviceId)
         {
 
-            await _serviceFactory.GetOrderDetailService.AddToCart(userId, serviceId);
+            await _serviceFactory.GetOrderDetailService.AddToCart(HttpContext.User, serviceId);
             return Ok();
         }
         [HttpPost("{orderId}")]
-        public async Task<IActionResult> CreateOrder([FromRoute]string orderId, [FromBody] List<string> shirts, [FromForm] string userId)
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> CreateOrder([FromRoute]string orderId, [FromBody] List<string> shirts)
         {
-            await _serviceFactory.GetOrderService.ConfirmOrder(userId, orderId, shirts);
+            await _serviceFactory.GetOrderService.ConfirmOrder(HttpContext.User, orderId, shirts);
             return Ok();
         }
         [HttpPatch("{orderId}")]
-        public async Task<IActionResult> CancelOrder([FromRoute]string orderId, [FromForm] string userId)
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> CancelOrder([FromRoute]string orderId)
         {
-            await _serviceFactory.GetOrderService.CancelOrder(userId, orderId);
+            await _serviceFactory.GetOrderService.CancelOrder(HttpContext.User, orderId);
             return Ok();
         }
         [HttpPut("{orderId}")]
-        public async Task<IActionResult> UpdateOrderDetail([FromRoute]string orderId, [FromForm] string userId, string serviceId)
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> UpdateOrderDetail([FromRoute]string orderId, [FromForm] string serviceId)
         {
-            await _serviceFactory.GetOrderService.UpdateOrderDetail(userId, orderId, serviceId);
+            await _serviceFactory.GetOrderService.UpdateOrderDetail(HttpContext.User, orderId, serviceId);
             return Ok();
         }
         [HttpDelete("{orderId}/services/{shirtId}")]
-        public async Task<IActionResult> DeleteShirtFromCart([FromRoute]string orderId, string shirtId, [FromForm] string userId)
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> DeleteShirtFromCart([FromRoute]string orderId, string shirtId)
         {
-            await _serviceFactory.GetOrderService.DeleteServiceFromCart(userId, orderId, shirtId);
+            await _serviceFactory.GetOrderService.DeleteServiceFromCart(HttpContext.User, orderId, shirtId);
             return Ok();
         }
         [HttpDelete("{orderId}")]
-        public async Task<IActionResult> DeleteOrder([FromRoute]string orderId, [FromForm] string userId)
+        [Authorize(Policy = "Staff")]
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> DeleteOrder([FromRoute]string orderId)
         {
-            await _serviceFactory.GetOrderService.DeleteOrder(userId, orderId);
+            await _serviceFactory.GetOrderService.DeleteOrder(HttpContext.User, orderId);
             return NoContent();
         }
     }

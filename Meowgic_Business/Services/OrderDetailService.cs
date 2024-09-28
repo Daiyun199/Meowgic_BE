@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using System.Drawing;
 using Mapster;
 using Azure.Core;
+using Meowgic.Data.Repositories;
 
 namespace Meowgic.Business.Services
 {
@@ -21,8 +22,16 @@ namespace Meowgic.Business.Services
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task AddToCart(string userId, string serviceId)
-        {    
+        public async Task AddToCart(ClaimsPrincipal claim, string serviceId)
+        {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.AccountId == userId && o.Status == OrderStatus.Incart.ToString());
 
             if (order is null)

@@ -31,10 +31,11 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpGet]
-        [Route("basic-info/{id}")]
-        public async Task<ActionResult<Account>> GetCustomerBasicInfo([FromRoute] string id)
+        [Route("basic-info")]
+        [Authorize]
+        public async Task<ActionResult<Account>> GetCustomerBasicInfo()
         {
-            return await _serviceFactory.GetAccountService.GetCustomerInfo(id);
+            return await _serviceFactory.GetAccountService.GetCustomerInfo(HttpContext.User);
         }
 
         [HttpGet]
@@ -44,11 +45,12 @@ namespace Meowgic.API.Controllers
         }
         [HttpGet]
         [Route("emailConfirm")]
-        public async Task<IActionResult> ConfirmEmail([FromQuery] string id)
+        [Authorize(Policy = "Customer")]
+        public async Task<IActionResult> ConfirmEmail()
         {
             try
             {
-                await _serviceFactory.GetAccountService.ConfirmEmailUser(id);
+                await _serviceFactory.GetAccountService.ConfirmEmailUser(HttpContext.User);
                 return Ok($"Success: Confirm Successfully");
             }
             catch (UnauthorizedAccessException ex)
