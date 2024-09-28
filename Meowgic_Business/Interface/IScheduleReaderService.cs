@@ -1,0 +1,19 @@
+﻿using Meowgic.Data.Entities;
+using Meowgic.Data.Models.Request.ScheduleReader;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Meowgic.Business.Interface
+{
+    public interface IScheduleReaderService
+    {
+        Task<IEnumerable<ScheduleReader>> GetAllSchedulesAsync();
+        Task<ScheduleReader?> GetScheduleByIdAsync(string id);
+        Task<ScheduleReader> CreateScheduleAsync(ScheduleReaderRequestDTO scheduleRequest);
+        Task<ScheduleReader> UpdateScheduleAsync(string id, ScheduleReaderRequestDTO scheduleRequest);
+        Task<bool> DeleteScheduleAsync(string id);
+    }
+}
