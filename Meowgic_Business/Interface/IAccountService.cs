@@ -14,10 +14,10 @@ namespace Meowgic.Business.Interface
 {
     public interface IAccountService
     {
-        Task UpdateCustomerInfo(ClaimsPrincipal claim, UpdateAccount request);
-        Task<bool> DeleteAccountAsync(ClaimsPrincipal claim);
+        Task UpdateCustomerInfo(string id, UpdateAccount request);
+        Task<bool> DeleteAccountAsync(string id);
         Task<Account> GetCustomerInfo(ClaimsPrincipal claim);
         Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
-        Task<ServiceResult<string>> ConfirmEmailUser(string userId);
+        Task<ServiceResult<string>> ConfirmEmailUser(ClaimsPrincipal claim);
     }
 }

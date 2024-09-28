@@ -40,11 +40,9 @@ namespace Meowgic.Business.Services
             return hashedPassword;
         }
 
-        public async Task UpdateCustomerInfo(ClaimsPrincipal claim, UpdateAccount request)
+        public async Task UpdateCustomerInfo(string id, UpdateAccount request)
         {
-            var accountId = claim.FindFirst("aid")?.Value;
-
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(id);
 
             if (account is null)
             {
@@ -80,11 +78,9 @@ namespace Meowgic.Business.Services
             await _unitOfWork.GetAccountRepository.UpdateAsync(account);
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task<bool> DeleteAccountAsync(ClaimsPrincipal claim)
+        public async Task<bool> DeleteAccountAsync(string id)
         {
-            var accountId = claim.FindFirst("aid")?.Value;
-
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(id);
 
             if (account is null)
             {
@@ -118,8 +114,9 @@ namespace Meowgic.Business.Services
         {
             return (await _unitOfWork.GetAccountRepository.GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
         }
-        public async Task<ServiceResult<string>> ConfirmEmailUser(string userId)
+        public async Task<ServiceResult<string>> ConfirmEmailUser(ClaimsPrincipal claim)
         {
+            var userId = claim.FindFirst("aid")?.Value;
             var userExist = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (userExist != null)
             {

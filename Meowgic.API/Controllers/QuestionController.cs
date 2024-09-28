@@ -4,6 +4,7 @@ using Meowgic.Data.Models.Request.Category;
 using Meowgic.Data.Models.Request.Question;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Question;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,21 +22,24 @@ namespace Meowgic.API.Controllers
             return await _serviceFactory.GetQuestionService.GetPagedQuestion(query);
         }
         [HttpPost("create")]
+        [Authorize(Policy = "Staff")]
         public async Task<ActionResult<Question>> CreateQuestion([FromBody] QuestionRequest request)
         {
-            await _serviceFactory.GetQuestionService.CreateQuestion(request);
+            await _serviceFactory.GetQuestionService.CreateQuestion(request, HttpContext.User);
             return Ok();
         }
         [HttpPut("update/{id}")]
+        [Authorize(Policy = "Staff")]
         public async Task<ActionResult> UpdateQuestion([FromRoute] string id, [FromBody] QuestionRequest request)
         {
-            await _serviceFactory.GetQuestionService.UpdateQuestion(id, request);
+            await _serviceFactory.GetQuestionService.UpdateQuestion(id, request, HttpContext.User);
             return Ok();
         }
         [HttpDelete("delete/{id}")]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> DeleteQuestion([FromRoute] string id)
         {
-            var result = await _serviceFactory.GetQuestionService.DeleteQuestion(id);
+            var result = await _serviceFactory.GetQuestionService.DeleteQuestion(id, HttpContext.User);
             if (!result)
             {
                 return NotFound();

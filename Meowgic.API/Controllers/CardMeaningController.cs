@@ -4,6 +4,7 @@ using Meowgic.Data.Models.Request.Card;
 using Meowgic.Data.Models.Request.CardMeaning;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.CardMeaning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,7 +23,7 @@ namespace Meowgic.API.Controllers
 
         // GET: api/CardMeaning/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCardMeaningById(string id)
+        public async Task<IActionResult> GetCardMeaningById([FromRoute] string id)
         {
             var cardMeaning = await _cardMeaningService.GetCardMeaningByIdAsync(id);
             if (cardMeaning == null)
@@ -42,6 +43,7 @@ namespace Meowgic.API.Controllers
 
         // POST: api/CardMeaning
         [HttpPost]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateCardMeaning([FromBody] CardMeaningRequestDTO cardMeaningRequest)
         {
             if (!ModelState.IsValid)
@@ -49,20 +51,21 @@ namespace Meowgic.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var createdCardMeaning = await _cardMeaningService.CreateCardMeaningAsync(cardMeaningRequest);
+            var createdCardMeaning = await _cardMeaningService.CreateCardMeaningAsync(cardMeaningRequest, HttpContext.User);
             return CreatedAtAction(nameof(GetCardMeaningById), new { id = createdCardMeaning.Id }, createdCardMeaning);
         }
 
         // PUT: api/CardMeaning/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCardMeaning(string id, [FromBody] CardMeaningRequestDTO cardMeaningRequest)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> UpdateCardMeaning([FromRoute]string id, [FromBody] CardMeaningRequestDTO cardMeaningRequest)
         {
             if (!ModelState.IsValid)
         {
                 return BadRequest(ModelState);
         }
 
-            var updatedCardMeaning = await _cardMeaningService.UpdateCardMeaningAsync(id, cardMeaningRequest);
+            var updatedCardMeaning = await _cardMeaningService.UpdateCardMeaningAsync(id, cardMeaningRequest, HttpContext.User);
             if (updatedCardMeaning == null)
         {
                 return NotFound();
@@ -72,9 +75,10 @@ namespace Meowgic.API.Controllers
 
         // DELETE: api/CardMeaning/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCardMeaning(string id)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> DeleteCardMeaning([FromRoute] string id)
         {
-            var result = await _cardMeaningService.DeleteCardMeaningAsync(id);
+            var result = await _cardMeaningService.DeleteCardMeaningAsync(id, HttpContext.User);
             if (!result)
             {
                 return NotFound();

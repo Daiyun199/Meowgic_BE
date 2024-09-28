@@ -45,11 +45,6 @@ namespace Meowgic.Business.Services
             {
                 throw new BadRequestException("Account not found");
             }
-            var existingCategory = _categoryRepository.FindAsync(cm => cm.Name == categoryRequest.Name);
-            if (existingCategory is not null)
-            {
-                throw new BadRequestException("This category has aldready exist!!");
-            }
             // Chuyển đổi từ CategoryRequestDTO sang Category
             var category = _mapper.Map<Category>(categoryRequest);
             category.CreatedBy = accountId;

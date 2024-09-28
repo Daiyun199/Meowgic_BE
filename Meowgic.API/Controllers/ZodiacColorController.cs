@@ -1,5 +1,6 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Models.Request.ZodiacColor;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Meowgic.API.Controllers
@@ -25,7 +26,7 @@ namespace Meowgic.API.Controllers
 
         // GET: api/ZodiacColor/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetZodiacColorById(string id)
+        public async Task<IActionResult> GetZodiacColorById([FromRoute]string id)
         {
             var zodiacColor = await _zodiacColorService.GetZodiacColorByIdAsync(id);
             if (zodiacColor == null)
@@ -35,7 +36,7 @@ namespace Meowgic.API.Controllers
 
         // GET: api/ZodiacColor/zodiac/{zodiacId}
         [HttpGet("zodiac/{zodiacId}")]
-        public async Task<IActionResult> GetZodiacColorByZodiacId(string zodiacId)
+        public async Task<IActionResult> GetZodiacColorByZodiacId([FromRoute]string zodiacId)
         {
             var zodiacColor = await _zodiacColorService.GetZodiacColorByZodiacIdAsync(zodiacId);
             if (zodiacColor == null)
@@ -45,23 +46,25 @@ namespace Meowgic.API.Controllers
 
         // POST: api/ZodiacColor
         [HttpPost]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateZodiacColor([FromBody] ZodiacColorRequestDTO zodiacColorDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdZodiacColor = await _zodiacColorService.CreateZodiacColorAsync(zodiacColorDto);
+            var createdZodiacColor = await _zodiacColorService.CreateZodiacColorAsync(zodiacColorDto, HttpContext.User);
             return CreatedAtAction(nameof(GetZodiacColorById), new { id = createdZodiacColor.Id }, createdZodiacColor);
         }
 
         // PUT: api/ZodiacColor/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateZodiacColor(string id, [FromBody] ZodiacColorRequestDTO zodiacColorDto)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> UpdateZodiacColor([FromRoute] string id, [FromBody] ZodiacColorRequestDTO zodiacColorDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedZodiacColor = await _zodiacColorService.UpdateZodiacColorAsync(id, zodiacColorDto);
+            var updatedZodiacColor = await _zodiacColorService.UpdateZodiacColorAsync(id, zodiacColorDto, HttpContext.User);
             if (updatedZodiacColor == null)
                 return NotFound();
 
@@ -70,9 +73,10 @@ namespace Meowgic.API.Controllers
 
         // DELETE: api/ZodiacColor/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteZodiacColor(string id)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> DeleteZodiacColor([FromRoute]string id)
         {
-            var success = await _zodiacColorService.DeleteZodiacColorAsync(id);
+            var success = await _zodiacColorService.DeleteZodiacColorAsync(id, HttpContext.User);
             if (!success)
                 return NotFound();
 

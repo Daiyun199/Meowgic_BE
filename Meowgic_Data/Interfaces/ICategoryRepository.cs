@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Meowgic.Data.Interfaces
 {
-    public interface ICategoryRepository : IGenericRepository<Category>
+    public interface ICategoryRepository
     {
         //Task<IEnumerable<Category>> GetAllCategoriesAsync();
         //Task<Category?> GetCategoryByIdAsync(string id);

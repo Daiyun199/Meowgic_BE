@@ -1,5 +1,6 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Models.Request.Zodiac;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Meowgic.API.Controllers
@@ -23,7 +24,7 @@ namespace Meowgic.API.Controllers
 
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetZodiacById(string id)
+        public async Task<IActionResult> GetZodiacById([FromRoute]string id)
         {
             var zodiac = await _zodiacService.GetZodiacByIdAsync(id);
             if (zodiac == null)
@@ -32,23 +33,25 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateZodiac([FromBody] ZodiacRequestDTO zodiacDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdZodiac = await _zodiacService.CreateZodiacAsync(zodiacDto);
+            var createdZodiac = await _zodiacService.CreateZodiacAsync(zodiacDto, HttpContext.User);
             return CreatedAtAction(nameof(GetZodiacById), new { id = createdZodiac.Id }, createdZodiac);
         }
 
      
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateZodiac(string id, [FromBody] ZodiacRequestDTO zodiacDto)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> UpdateZodiac([FromRoute]string id, [FromBody] ZodiacRequestDTO zodiacDto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedZodiac = await _zodiacService.UpdateZodiacAsync(id, zodiacDto);
+            var updatedZodiac = await _zodiacService.UpdateZodiacAsync(id, zodiacDto, HttpContext.User);
             if (updatedZodiac == null)
                 return NotFound();
 
@@ -57,9 +60,10 @@ namespace Meowgic.API.Controllers
 
       
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteZodiac(string id)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> DeleteZodiac([FromRoute] string id)
         {
-            var success = await _zodiacService.DeleteZodiacAsync(id);
+            var success = await _zodiacService.DeleteZodiacAsync(id, HttpContext.User);
             if (!success)
                 return NotFound();
 

@@ -31,7 +31,7 @@ namespace Meowgic.API.Controllers
 
         // GET: api/Category/{id}
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCategoryById(string id)
+        public async Task<IActionResult> GetCategoryById([FromRoute] string id)
         {
             var category = await _categoryService.GetCategoryByIdAsync(id);
             if (category == null)
@@ -42,23 +42,25 @@ namespace Meowgic.API.Controllers
 
         // POST: api/Category
         [HttpPost]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateCategory([FromBody] CategoryRequestDTO category)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var createdCategory = await _categoryService.CreateCategoryAsync(category);
+            var createdCategory = await _categoryService.CreateCategoryAsync(category, HttpContext.User);
             return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
         }
 
         // PUT: api/Category/{id}
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(string id, [FromBody] CategoryRequestDTO category)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> UpdateCategory([FromRoute]string id, [FromBody] CategoryRequestDTO category)
             {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, category);
+            var updatedCategory = await _categoryService.UpdateCategoryAsync(id, category, HttpContext.User);
             if (updatedCategory == null)
                 return NotFound();
 
@@ -67,9 +69,10 @@ namespace Meowgic.API.Controllers
 
         // DELETE: api/Category/{id}
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCategory(string id)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> DeleteCategory([FromRoute] string id)
         {
-            var success = await _categoryService.DeleteCategoryAsync(id);
+            var success = await _categoryService.DeleteCategoryAsync(id, HttpContext.User);
             if (!success)
                 return NotFound();
 

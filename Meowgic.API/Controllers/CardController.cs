@@ -29,7 +29,7 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetCardById(string id)
+        public async Task<IActionResult> GetCardById([FromRoute] string id)
         {
             var card = await _cardService.GetCardByIdAsync(id);
             if (card == null)
@@ -40,6 +40,7 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Policy = "Staff")]
         public async Task<IActionResult> CreateCard([FromBody] CardRequest cardRequest)
         {
             if (!ModelState.IsValid)
@@ -47,19 +48,20 @@ namespace Meowgic.API.Controllers
                 return BadRequest(ModelState);
             }
 
-            var createdCard = await _cardService.CreateCardAsync(cardRequest);
+            var createdCard = await _cardService.CreateCardAsync(cardRequest, HttpContext.User);
             return CreatedAtAction(nameof(GetCardById), new { id = createdCard.Id }, createdCard);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCard(string id, [FromBody] CardRequest cardRequest)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> UpdateCard([FromRoute]string id, [FromBody] CardRequest cardRequest)
         {
             if (!ModelState.IsValid)
         {
                 return BadRequest(ModelState);
             }
 
-            var updatedCard = await _cardService.UpdateCardAsync(id, cardRequest);
+            var updatedCard = await _cardService.UpdateCardAsync(id, cardRequest, HttpContext.User);
             if (updatedCard == null)
             {
                 return NotFound();
@@ -69,9 +71,10 @@ namespace Meowgic.API.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCard(string id)
+        [Authorize(Policy = "Staff")]
+        public async Task<IActionResult> DeleteCard([FromRoute] string id)
         {
-            var success = await _cardService.DeleteCardAsync(id);
+            var success = await _cardService.DeleteCardAsync(id, HttpContext.User);
             if (!success)
         {
                 return NotFound();
