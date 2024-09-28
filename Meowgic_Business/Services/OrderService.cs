@@ -5,6 +5,7 @@ using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
+using Meowgic.Data.Repositories;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
 using System;
@@ -36,8 +37,16 @@ namespace Meowgic.Business.Services
 
             return order;
         }
-        public async Task<Order> GetCartInfo(string userId)
+        public async Task<Order> GetCartInfo(ClaimsPrincipal claim)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.GetCustomerCartInfo(userId);
             if (order is null)
             {
@@ -45,8 +54,16 @@ namespace Meowgic.Business.Services
             }
             return order;
         }
-        public async Task ConfirmOrder(string userId, string orderId, List<string> serviceIds)
+        public async Task ConfirmOrder(ClaimsPrincipal claim, string orderId, List<string> serviceIds)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
@@ -121,10 +138,17 @@ namespace Meowgic.Business.Services
 
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task CancelOrder(string userId, string orderId)
+        public async Task CancelOrder(ClaimsPrincipal claim, string orderId)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
@@ -145,8 +169,16 @@ namespace Meowgic.Business.Services
             var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task UpdateOrderDetail(string userId, string orderId, string serviceId)
+        public async Task UpdateOrderDetail(ClaimsPrincipal claim, string orderId, string serviceId)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
@@ -166,8 +198,16 @@ namespace Meowgic.Business.Services
 
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task DeleteServiceFromCart(string userId, string orderId, string serviceId)
+        public async Task DeleteServiceFromCart(ClaimsPrincipal claim, string orderId, string serviceId)
         {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
@@ -188,10 +228,17 @@ namespace Meowgic.Business.Services
             await _unitOfWork.GetOrderDetailRepository.DeleteAsync(orderDetail);
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task DeleteOrder(string userId, string orderId)
-        {    
+        public async Task DeleteOrder(ClaimsPrincipal claim, string orderId)
+        {
+            var userId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");

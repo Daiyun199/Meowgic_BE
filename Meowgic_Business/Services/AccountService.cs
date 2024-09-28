@@ -39,13 +39,15 @@ namespace Meowgic.Business.Services
             return hashedPassword;
         }
 
-        public async Task UpdateCustomerInfo(string id, UpdateAccount request)
+        public async Task UpdateCustomerInfo(ClaimsPrincipal claim, UpdateAccount request)
         {
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
 
             if (account is null)
             {
-                throw new UnauthorizedException("Account not found");
+                throw new BadRequestException("Account not found");
             }
 
             if (request.Name != null)
@@ -77,12 +79,15 @@ namespace Meowgic.Business.Services
             await _unitOfWork.GetAccountRepository.UpdateAsync(account);
             await _unitOfWork.SaveChangesAsync();
         }
-        public async Task<bool> DeleteAccountAsync(string id)
+        public async Task<bool> DeleteAccountAsync(ClaimsPrincipal claim)
         {
-            var account = await _unitOfWork.GetAccountRepository.GetByIdAsync(id);
-            if (account == null)
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
+
+            if (account is null)
             {
-                return false;
+                throw new BadRequestException("Account not found");
             }
             account.Status = UserStatus.Unactive.ToString();
             account.DeletedTime = DateTime.Now;
@@ -92,9 +97,11 @@ namespace Meowgic.Business.Services
             return true;
         }
 
-        public async Task<Account> GetCustomerInfo(string id)
+        public async Task<Account> GetCustomerInfo(ClaimsPrincipal claim)
         {
-            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
+            var accountId = claim.FindFirst("aid")?.Value;
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
 
             if (account is null)
             {
