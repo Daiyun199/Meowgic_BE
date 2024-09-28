@@ -2,6 +2,7 @@
 using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
+using Meowgic.Data.Models;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
@@ -116,6 +117,24 @@ namespace Meowgic.Business.Services
         public async Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request)
         {
             return (await _unitOfWork.GetAccountRepository.GetPagedAccount(request)).Adapt<PagedResultResponse<AccountResponse>>();
+        }
+        public async Task<ServiceResult<string>> ConfirmEmailUser(string userId)
+        {
+            var userExist = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == userId);
+            if (userExist != null)
+            {
+                userExist.EmailConfirmed = true;
+                userExist.isConfirmed = true;
+                await _unitOfWork.GetAccountRepository.UpdateAsync(userExist);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            var result = new ServiceResult<string>();
+            result.Status = 1;
+            result.IsSuccess = true;
+            result.ErrorMessage = "Confirm Email Successfully";
+
+            return result;
         }
     }
 }

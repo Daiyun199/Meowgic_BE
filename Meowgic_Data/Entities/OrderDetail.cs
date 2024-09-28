@@ -17,13 +17,11 @@ namespace Meowgic.Data.Entities
         [ForeignKey("Service")]
         public string ServiceId { get; set; }
 
-        public double? Rate { get; set; }
-
-        public string? Feedback { get; set; }
-
         public virtual Order Order { get; set; } = null!;
 
         public virtual TarotService Service { get; set; } = null!;
+        public virtual Feedback? Feedback { get; set; }
+
     }
 
 }

@@ -41,6 +41,7 @@ namespace Meowgic.Data.Data
         public virtual DbSet<Zodiac> Zodiac { get; set; }
         public virtual DbSet<ZodiacColor> ZodiacColor { get; set; }
         public virtual DbSet<ScheduleReader> ScheduleReaders { get; set; }
+        public virtual DbSet<Feedback> Feedbacks { get; set; }
 
         public DatabaseFacade DatabaseFacade => throw new NotImplementedException();
 

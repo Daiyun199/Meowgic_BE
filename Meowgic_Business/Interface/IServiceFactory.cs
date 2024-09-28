@@ -20,6 +20,7 @@ namespace Meowgic.Business.Interface
         //IServiceService GetServiceService { get; }
         //IFirebaseStorageService GetFirebaseStorageService();
         ITokenService GetTokenService { get; }
+  
 
     }
 }

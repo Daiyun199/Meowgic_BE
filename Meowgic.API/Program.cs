@@ -12,6 +12,7 @@ using Meowgic.API.Middlewares;
 using Meowgic.Business.Mapper;
 using Meowgic.Business.Services;
 using Meowgic.Data.Models.Response.Account;
+using Meowgic.Data.Models;
 
             var builder = WebApplication.CreateBuilder(args);
          
@@ -27,9 +28,10 @@ builder.Services.AddApiDependencies(configuration)
                             .AddBusinessLogicDependencies()
                             .AddDataAccessDependencies();
 
-         
-            //Add serilog
-            builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
+    var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+    builder.Services.AddSingleton(emailConfig);     
+//Add serilog
+builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
             //builder.Services.AddDbContext<AppDbContext>(options =>
             //    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));

@@ -26,6 +26,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Meowgic_Business\Meowgic.Business.csproj" />
+	
   </ItemGroup>
+	<ItemGroup>
+		<None Update="EmailTemplate\EmailConfirm.html">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</None>
+	</ItemGroup>
 
 </Project>

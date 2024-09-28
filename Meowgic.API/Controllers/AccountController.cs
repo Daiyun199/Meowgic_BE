@@ -42,5 +42,23 @@ namespace Meowgic.API.Controllers
         {
             return await _serviceFactory.GetAccountService.GetPagedAccounts(query);
         }
+        [HttpGet]
+        [Route("emailConfirm")]
+        public async Task<IActionResult> ConfirmEmail([FromQuery] string id)
+        {
+            try
+            {
+                await _serviceFactory.GetAccountService.ConfirmEmailUser(id);
+                return Ok($"Success: Confirm Successfully");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
     }
 }
