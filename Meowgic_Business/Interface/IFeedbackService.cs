@@ -12,6 +12,7 @@ namespace Meowgic.Business.Interface
     {
         Task<IEnumerable<Feedback>> GetAllFeedbacksAsync();
         Task<Feedback?> GetFeedbackByIdAsync(string id);
+        Task<List<Feedback>> GetAllFeedbacksByServiceIdAsync(string serviceId);
         Task<Feedback> CreateFeedbackAsync(FeedbackRequestDTO feedbackRequest);
         Task<Feedback> UpdateFeedbackAsync(string id, FeedbackRequestDTO feedbackRequest);
         Task<bool> DeleteFeedbackAsync(string id);
