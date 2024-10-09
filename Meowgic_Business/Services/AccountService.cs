@@ -131,6 +131,25 @@ namespace Meowgic.Business.Services
 
             return result;
         }
+        public async Task<ServiceResult<string>> ConfirmEmailUserProMax(string id)
+        {
+         
+            var userExist = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == id);
+            if (userExist != null)
+            {
+                userExist.EmailConfirmed = true;
+                userExist.isConfirmed = true;
+                await _unitOfWork.GetAccountRepository.UpdateAsync(userExist);
+                await _unitOfWork.SaveChangesAsync();
+            }
+
+            var result = new ServiceResult<string>();
+            result.Status = 1;
+            result.IsSuccess = true;
+            result.ErrorMessage = "Confirm Email Successfully";
+
+            return result;
+        }
         public async Task<ServiceResult<string>> ResetPasswordAsync(ResetPassword resetPasswordDTO)
         {
         

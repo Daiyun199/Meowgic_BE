@@ -45,12 +45,12 @@ namespace Meowgic.API.Controllers
         }
         [HttpGet]
         [Route("emailConfirm")]
-        [Authorize(Policy = "Customer")]
-        public async Task<IActionResult> ConfirmEmail()
+        //[Authorize(Policy = "Customer")]
+        public async Task<IActionResult> ConfirmEmail(string id)
         {
             try
             {
-                await _serviceFactory.GetAccountService.ConfirmEmailUser(HttpContext.User);
+                await _serviceFactory.GetAccountService.ConfirmEmailUserProMax(id);
                 return Ok($"Success: Confirm Successfully");
             }
             catch (UnauthorizedAccessException ex)

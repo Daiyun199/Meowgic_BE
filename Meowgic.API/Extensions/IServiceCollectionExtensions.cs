@@ -11,6 +11,7 @@ using Meowgic.Data.Data;
 using Meowgic.Shares;
 using System.Security.Claims;
 using Meowgic.Shares.Enum;
+using Meowgic.Business.Services;
 
 namespace Meowgic.API.Extensions
 {
@@ -122,6 +123,11 @@ namespace Meowgic.API.Extensions
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             });
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                 { 
+          options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                });
             return services;
         }
 

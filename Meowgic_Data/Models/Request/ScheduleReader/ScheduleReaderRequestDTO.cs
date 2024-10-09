@@ -10,15 +10,14 @@ namespace Meowgic.Data.Models.Request.ScheduleReader
     public class ScheduleReaderRequestDTO
     {
         [Required]
-        public DateTime DayOfWeek { get; set; }
+        public string DayOfWeek { get; set; } // Giữ lại dưới dạng chuỗi
 
         [Required]
-        public TimeOnly StartTime { get; set; }
+        public string StartTime { get; set; } // Giữ lại dưới dạng chuỗi
 
         [Required]
-        public TimeOnly EndTime { get; set; }
+        public string EndTime { get; set; } // Giữ lại dưới dạng chuỗi
 
-        [Required]
         public bool IsBooked { get; set; }
 
         //[Required]

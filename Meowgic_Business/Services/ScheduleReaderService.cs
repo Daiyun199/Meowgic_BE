@@ -57,12 +57,14 @@ namespace Meowgic.Business.Services
             }
         }
 
-        public async Task<ScheduleReader> CreateScheduleAsync(ScheduleReaderRequestDTO scheduleRequest)
+        public async Task<ScheduleReader> CreateScheduleAsync(ScheduleRequestDTO2 scheduleRequest)
         {
             try
             {
+            
+
                 // Lấy AccountId từ HttpContext
-                var accountId = _httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                var accountId = _httpContextAccessor.HttpContext?.User?.FindFirst("aid")?.Value;
                 if (accountId == null)
                 {
                     throw new UnauthorizedException("User is not authenticated.");
@@ -70,7 +72,7 @@ namespace Meowgic.Business.Services
 
                 var schedule = _mapper.Map<ScheduleReader>(scheduleRequest);
                 schedule.AccountId = accountId;
-
+                
                 await _scheduleReaderRepository.AddAsync(schedule);
              
 
@@ -86,7 +88,7 @@ namespace Meowgic.Business.Services
             }
         }
 
-        public async Task<ScheduleReader> UpdateScheduleAsync(string id, ScheduleReaderRequestDTO scheduleRequest)
+        public async Task<ScheduleReader> UpdateScheduleAsync(string id, ScheduleRequestDTO2 scheduleRequest)
         {
             try
             {

@@ -9,7 +9,7 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "Reader")] // Yêu cầu người dùng phải được xác thực và có role "Reader"
+    [Authorize(Roles = "Reader")] // Yêu cầu người dùng phải được xác thực và có role "Reader
     public class ScheduleReaderController : ControllerBase
     {
         private readonly IScheduleReaderService _scheduleReaderService;
@@ -71,8 +71,20 @@ namespace Meowgic.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+                // Chuyển đổi chuỗi thành DateTime
+                DateTime dayOfWeek = DateTime.Parse(scheduleRequest.DayOfWeek);
 
-                var createdSchedule = await _scheduleReaderService.CreateScheduleAsync(scheduleRequest);
+                // Chuyển đổi chuỗi thành TimeOnly
+                TimeOnly startTime = TimeOnly.Parse(scheduleRequest.StartTime);
+                TimeOnly endTime = TimeOnly.Parse(scheduleRequest.EndTime);
+                var scheduleRequest2 = new ScheduleRequestDTO2
+                {
+                    DayOfWeek = dayOfWeek,
+                    EndTime = endTime,
+                    IsBooked = scheduleRequest.IsBooked,
+                    StartTime = startTime,
+                };
+                var createdSchedule = await _scheduleReaderService.CreateScheduleAsync(scheduleRequest2);
                 return CreatedAtAction(nameof(GetScheduleById), new { id = createdSchedule.Id }, createdSchedule);
             }
             catch (UnauthorizedException ex)
@@ -97,8 +109,21 @@ namespace Meowgic.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+                DateTime dayOfWeek = DateTime.Parse(scheduleRequest.DayOfWeek);
 
-                var updatedSchedule = await _scheduleReaderService.UpdateScheduleAsync(id, scheduleRequest);
+                // Chuyển đổi chuỗi thành TimeOnly
+                TimeOnly startTime = TimeOnly.Parse(scheduleRequest.StartTime);
+                TimeOnly endTime = TimeOnly.Parse(scheduleRequest.EndTime);
+                var scheduleRequest2 = new ScheduleRequestDTO2
+                {
+                    DayOfWeek = dayOfWeek,
+                    EndTime = endTime,
+                    IsBooked = scheduleRequest.IsBooked,
+                    StartTime = startTime,
+                };
+
+
+                var updatedSchedule = await _scheduleReaderService.UpdateScheduleAsync(id, scheduleRequest2);
                 return Ok(updatedSchedule);
             }
             catch (NotFoundException ex)
@@ -131,5 +156,6 @@ namespace Meowgic.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+    
     }
 }

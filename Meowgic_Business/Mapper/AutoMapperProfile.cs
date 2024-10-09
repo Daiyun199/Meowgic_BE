@@ -26,7 +26,7 @@ namespace Meowgic.Business.Mapper
            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
             CreateMap<TarotService, ServiceRequest>().ReverseMap();
             // Mapping từ Request DTO sang Entity
-            CreateMap<ScheduleReaderRequestDTO, ScheduleReader>();
+            CreateMap<ScheduleRequestDTO2, ScheduleReader>();
 
             // Mapping từ Entity sang Response DTO
             CreateMap<ScheduleReader, ScheduleReaderResponseDTO>();
