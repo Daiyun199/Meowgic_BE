@@ -31,7 +31,7 @@ namespace Meowgic.API.Extensions
         {
             string connectionString = configuration.GetConnectionString("Default")!;
             services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString, b => b.EnableRetryOnFailure()));
             return services;
         }
 
