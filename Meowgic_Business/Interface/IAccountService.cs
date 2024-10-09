@@ -19,5 +19,6 @@ namespace Meowgic.Business.Interface
         Task<Account> GetCustomerInfo(ClaimsPrincipal claim);
         Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
         Task<ServiceResult<string>> ConfirmEmailUser(ClaimsPrincipal claim);
+        Task<ServiceResult<string>> ResetPasswordAsync(ResetPassword resetPasswordDTO);
     }
 }

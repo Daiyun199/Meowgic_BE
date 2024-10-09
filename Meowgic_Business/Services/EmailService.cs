@@ -79,7 +79,7 @@ namespace Meowgic.Business.Services
             var token = userExist.VerificationToken;
 
             var link = $"https://localhost:7043/api/Account/emailConfirm?id={userExist.Id}";
-            htmlContent = htmlContent.Replace("{{UserName}}", userExist.UserName).Replace("{{Link}}", link);
+            htmlContent = htmlContent.Replace("{{UserName}}", userExist.Name).Replace("{{Link}}", link);
 
             var message = new Message(new string[] { userExist.Email }, "[Confirm Email] Please verify your account in Meowgic", htmlContent, true);
             SendEmail(message);
@@ -92,7 +92,51 @@ namespace Meowgic.Business.Services
 
             return result;
         }
+        public async Task<ServiceResult<string>> SendResetPasswordAsync(string email)
+        {
+            var baseDirectory = AppContext.BaseDirectory;
+            var templatePath = Path.Combine(baseDirectory, "EmailTemplate", "ResetPassword.html");
+            var htmlContent = GetEmailTemplate(templatePath);
 
+            //var userExist = await _userRepository.GetUserByEmail(email);
+            var userExist = await _unitOfWork.GetAccountRepository.FindOneAsync(x => x.Email == email);
+            if (userExist == null)
+            {
+                throw new Exception("User does not exist");
+            }
+
+            var token = userExist.VerificationToken;
+            var otp = GenerateRandomOTP(6);
+            userExist.otpResetPassword = otp;
+           
+            htmlContent = htmlContent.Replace("{{UserName}}", userExist.Name).Replace("{{OTP}}", otp);
+
+            var message = new Message(new string[] { userExist.Email }, "Reset Password for Meowgic", htmlContent, true);
+            SendEmail(message);
+            await _unitOfWork.GetAccountRepository.UpdateAsync(userExist);
+            await _unitOfWork.SaveChangesAsync();
+            var result = new ServiceResult<string>();
+            result.Status = 1;
+            result.IsSuccess = true;
+            result.Data = null;
+            result.ErrorMessage = "Confirm Email Successfully";
+
+            return result;
+
+        }
+        public static string GenerateRandomOTP(int length)
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()";
+            Random random = new Random();
+            StringBuilder otpBuilder = new StringBuilder();
+
+            for (int i = 0; i < length; i++)
+            {
+                otpBuilder.Append(chars[random.Next(chars.Length)]);
+            }
+
+            return otpBuilder.ToString();
+        }
         public string GetEmailTemplate(string templatePath)
         {
             if (File.Exists(templatePath))

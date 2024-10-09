@@ -43,6 +43,7 @@ namespace Meowgic.Data.Entities
         public string? Specialization {  get; set; }
         public int? countTarot { get; set; } 
         public bool IsDeleted { get; set; } = false;
+        public string? otpResetPassword { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [DefaultValue("GETDATE()")]
         public DateTime? CreatedTime { get; set; } = DateTime.Now;

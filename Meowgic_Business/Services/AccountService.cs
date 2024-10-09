@@ -133,5 +133,58 @@ namespace Meowgic.Business.Services
 
             return result;
         }
+        public async Task<ServiceResult<string>> ResetPasswordAsync(ResetPassword resetPasswordDTO)
+        {
+        
+
+            if (resetPasswordDTO.newPassword !=resetPasswordDTO.confirmPassword)
+            {
+                throw new BadRequestException("Passwords do not match");
+            }
+
+            // Tìm tài khoản theo email
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email ==resetPasswordDTO.email);
+
+            if (account is null)
+            {
+                throw new BadRequestException("Account not found");
+            }
+
+            // Xác thực mã OTP (giả định bạn có một phương thức để thực hiện việc này)
+            bool isOtpValid = await ValidateOtpAsync(resetPasswordDTO.email, resetPasswordDTO.otpResetPassword); // Bạn cần triển khai phương thức ValidateOtpAsync
+            if (!isOtpValid)
+            {
+                throw new BadRequestException("Invalid OTP");
+            }
+
+            // Cập nhật mật khẩu
+            account.Password = HashPassword(resetPasswordDTO.newPassword); // Sử dụng phương thức HashPassword đã có
+            await _unitOfWork.GetAccountRepository.UpdateAsync(account);
+            await _unitOfWork.SaveChangesAsync();
+
+            var result = new ServiceResult<string>
+            {
+                Status = 1,
+                IsSuccess = true,
+                ErrorMessage = "Password reset successfully"
+            };
+            return result;
+        }
+
+        // Giả định bạn có phương thức để xác thực mã OTP
+        private async Task<bool> ValidateOtpAsync(string email, string otp)
+        {
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a =>a.Email ==email);
+            if (account.otpResetPassword != otp)
+            {
+                return false;
+            }
+            // Thực hiện kiểm tra mã OTP. 
+            // Bạn có thể thêm logic xác thực mã OTP ở đây.
+            // Trả về true nếu hợp lệ, false nếu không hợp lệ.
+            return true; // Thay đổi theo logic xác thực của bạn
+        }
+
     }
+
 }
