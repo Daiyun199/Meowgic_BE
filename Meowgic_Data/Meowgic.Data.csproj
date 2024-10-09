@@ -27,11 +27,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="EmailTemplate\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="EmailTemplate\EmailConfirm.html">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="EmailTemplate\ResetPassword.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

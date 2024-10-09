@@ -17,10 +17,11 @@ namespace Meowgic.API.Controllers
     public class AccountController : ControllerBase
     {
         private readonly IServiceFactory _serviceFactory;
-
-        public AccountController(IServiceFactory serviceFactory)
+        private readonly IEmailService _emailService;
+        public AccountController(IServiceFactory serviceFactory, IEmailService emailService)
         {
             _serviceFactory = serviceFactory;
+            _emailService = emailService;
         }
 
         [HttpPut("update/{id}")]
@@ -62,5 +63,42 @@ namespace Meowgic.API.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
+        [HttpPost]
+        [Route("sendOTPResetPassword")]
+        public async Task<IActionResult> SendResetPassword([FromBody] string email)
+        {
+            try
+            {
+                await _emailService.SendResetPasswordAsync(email);
+                return Ok($"Success: Confirm Successfully");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+        [HttpPost]
+        [Route("resetPassword")]
+        public async Task<IActionResult> ResetPassword([FromBody] ResetPassword resetPassword)
+        {
+            try
+            {
+                await _serviceFactory.GetAccountService.ResetPasswordAsync(resetPassword);
+                return Ok($"Success: Reset Password Successfully");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Error: {ex.Message}");
+            }
+        }
+
     }
 }

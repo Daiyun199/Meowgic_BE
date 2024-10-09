@@ -37,8 +37,13 @@ namespace Meowgic.Data.Entities
         public bool Premium { get; set; }
 
         public string? ImgUrl { get; set; }
+        public string? Description { get; set; }
+        public string? bankAccount { get; set; }
+        public double? yearsOfExperience { get; set; }
+        public string? Specialization {  get; set; }
         public int? countTarot { get; set; } 
         public bool IsDeleted { get; set; } = false;
+        public string? otpResetPassword { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [DefaultValue("GETDATE()")]
         public DateTime? CreatedTime { get; set; } = DateTime.Now;

@@ -13,5 +13,6 @@ namespace Meowgic.Business.Interface
         string GetEmailTemplate(string template);
         Task<ServiceResult<string>> SendConfirmEmailAsync(string email);
         Task<ServiceResult<string>> SendPasswordEmailAsync(string email, string password);
+        Task<ServiceResult<string>> SendResetPasswordAsync(string email);
     }
 }
