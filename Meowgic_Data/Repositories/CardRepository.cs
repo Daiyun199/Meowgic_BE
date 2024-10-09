@@ -81,6 +81,7 @@ namespace Meowgic.Data.Repositories
         {
             return await _context.Cards
                                  .AsNoTracking()
+                                 .Include(c => c.CardMeanings)
                                  .ToListAsync();
         }
 

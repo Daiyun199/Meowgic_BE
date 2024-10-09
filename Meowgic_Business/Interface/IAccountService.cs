@@ -16,7 +16,7 @@ namespace Meowgic.Business.Interface
     {
         Task UpdateCustomerInfo(string id, UpdateAccount request);
         Task<bool> DeleteAccountAsync(string id);
-        Task<Account> GetCustomerInfo(ClaimsPrincipal claim);
+        Task<Account> GetCustomerInfo(string id);
         Task<PagedResultResponse<AccountResponse>> GetPagedAccounts(QueryPagedAccount request);
         Task<ServiceResult<string>> ConfirmEmailUser(ClaimsPrincipal claim);
     }

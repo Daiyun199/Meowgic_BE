@@ -76,7 +76,7 @@ namespace Meowgic.API.Controllers
         /// Cập nhật feedback theo ID
         /// </summary>
         [HttpPut("{id}")]
-        [Authorize(Policy = "Cútomer")]
+        [Authorize(Policy = "Customer")]
         public async Task<IActionResult> UpdateFeedback([FromRoute]string id, [FromBody] FeedbackRequestDTO feedbackRequest)
         {
             if (!ModelState.IsValid)

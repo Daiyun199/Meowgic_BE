@@ -94,10 +94,8 @@ namespace Meowgic.Business.Services
             return true;
         }
 
-        public async Task<Account> GetCustomerInfo(ClaimsPrincipal claim)
+        public async Task<Account> GetCustomerInfo(string accountId)
         {
-            var accountId = claim.FindFirst("aid")?.Value;
-
             var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
 
             if (account is null)

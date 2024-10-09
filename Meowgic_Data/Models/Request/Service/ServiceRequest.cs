@@ -21,7 +21,7 @@ namespace Meowgic.Data.Models.Request.Service
         [Required]
         public double Price { get; set; }
 
-        //[Required]
-        //public string PromotionId { get; set; }
+        [Required]
+        public required string PromotionId { get; set; }
     }
 }
