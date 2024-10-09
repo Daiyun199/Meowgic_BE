@@ -46,6 +46,29 @@ namespace Meowgic.Business.Services
             throw new UnauthorizedException("Wrong email or password");
 
         }
+        public async Task<GetAuthTokens> LoginWithoutPassword(string email)
+        {
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == email);
+
+            if (account is not null)
+            {
+                string accessToken = _serviceFactory.GetTokenService.GenerateAccessToken(account.Id, Roles.Customer, account.Name);
+                string refreshToken = _serviceFactory.GetTokenService.GenerateRefreshToken();
+
+                return new GetAuthTokens
+                {
+                    Id = account.Id,
+                    Name = account.Name,
+                    Role = account.Role,
+                    Status = account.Status,
+                    AccessToken = accessToken,
+                    RefreshToken = refreshToken
+                };
+            }
+
+            throw new UnauthorizedException("Wrong email or password");
+
+        }
 
         public async Task<Register> Register(Register registerDto)
         {

@@ -42,6 +42,17 @@ namespace Meowgic.API.Controllers
             return Created(nameof(Login), user) ;
         }
 
+        [HttpPost("loginWithouPassword")]
+        public async Task<ActionResult<GetAuthTokens>> LoginWithoutPassword(string email)
+        {
+            var user = await _serviceFactory.GetAuthService.LoginWithoutPassword(email);
+            if (user.Status == UserStatus.Unactive.ToString())
+            {
+                return BadRequest("Your Account have been banned!!!");
+            }
+            return Created(nameof(LoginWithoutPassword), user);
+        }
+
         [HttpGet("who-am-i")]
         [Authorize]
         public async Task<ActionResult<AccountResponse>> WhoAmI()
