@@ -10,16 +10,10 @@ namespace Meowgic.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles = "Reader")] // Yêu cầu người dùng phải được xác thực và có role "Reader
-    public class ScheduleReaderController : ControllerBase
+    public class ScheduleReaderController(IScheduleReaderService scheduleReaderService, IMapper mapper) : ControllerBase
     {
-        private readonly IScheduleReaderService _scheduleReaderService;
-        private readonly IMapper _mapper;
-
-        public ScheduleReaderController(IScheduleReaderService scheduleReaderService, IMapper mapper)
-        {
-            _scheduleReaderService = scheduleReaderService;
-            _mapper = mapper;
-        }
+        private readonly IScheduleReaderService _scheduleReaderService = scheduleReaderService;
+        private readonly IMapper _mapper = mapper;
 
         /// <summary>
         /// Lấy tất cả các lịch của Reader

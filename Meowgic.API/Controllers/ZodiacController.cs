@@ -7,14 +7,10 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ZodiacController : Controller
+    public class ZodiacController(IZodiacService zodiacService) : Controller
     {
-        private IZodiacService _zodiacService;
-        
-        public ZodiacController(IZodiacService zodiacService)
-        {
-            _zodiacService = zodiacService;
-        }
+        private IZodiacService _zodiacService = zodiacService;
+
         [HttpGet]
         public async Task<IActionResult> GetAllZodiacs()
         {
@@ -67,7 +63,7 @@ namespace Meowgic.API.Controllers
             if (!success)
                 return NotFound();
 
-            return NoContent();
+            return Ok();
         }
     }
 }

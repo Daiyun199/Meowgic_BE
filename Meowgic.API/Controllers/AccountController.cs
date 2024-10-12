@@ -14,21 +14,16 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AccountController : ControllerBase
+    public class AccountController(IServiceFactory serviceFactory, IEmailService emailService) : ControllerBase
     {
-        private readonly IServiceFactory _serviceFactory;
-        private readonly IEmailService _emailService;
-        public AccountController(IServiceFactory serviceFactory, IEmailService emailService)
-        {
-            _serviceFactory = serviceFactory;
-            _emailService = emailService;
-        }
+        private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly IEmailService _emailService = emailService;
 
         [HttpPut("update/{id}")]
         public async Task<ActionResult> UpdateCustomerAccountInfo([FromRoute] string id, [FromBody] UpdateAccount request)
         {
             await _serviceFactory.GetAccountService.UpdateCustomerInfo(id, request);
-            return Ok();
+            return Ok(request);
         }
 
         [HttpGet]

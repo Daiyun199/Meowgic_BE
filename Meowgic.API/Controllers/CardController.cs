@@ -12,15 +12,11 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CardController : Controller
+    public class CardController(ICardService cardService) : Controller
     {
-        private readonly ICardService _cardService;
+        private readonly ICardService _cardService = cardService;
 
-        public CardController(ICardService cardService)
-        {
-            _cardService = cardService;
-        }
-        [Authorize]
+        //[Authorize]
         [HttpGet]
         public async Task<IActionResult> GetAllCards()
         {
