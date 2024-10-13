@@ -13,7 +13,7 @@ namespace Meowgic.Data.Entities
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
         [Required]
-        public DateTime DayOfWeek { get; set; }
+        public DateOnly DayOfWeek { get; set; }
         [Required]
         public TimeOnly StartTime { get; set; }
         [Required]

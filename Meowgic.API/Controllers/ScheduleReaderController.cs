@@ -72,9 +72,10 @@ namespace Meowgic.API.Controllers
                     return BadRequest(ModelState);
                 }
                 // Chuyển đổi chuỗi thành DateTime
-                DateTime dayOfWeek = DateTime.Parse(scheduleRequest.DayOfWeek);
+                DateTime dateTime = DateTime.Parse(scheduleRequest.DayOfWeek);
+                DateOnly dayOfWeek = DateOnly.FromDateTime(dateTime); 
 
-                // Chuyển đổi chuỗi thành TimeOnly
+                        // Chuyển đổi chuỗi thành TimeOnly
                 TimeOnly startTime = TimeOnly.Parse(scheduleRequest.StartTime);
                 TimeOnly endTime = TimeOnly.Parse(scheduleRequest.EndTime);
                 var scheduleRequest2 = new ScheduleRequestDTO2
@@ -109,9 +110,10 @@ namespace Meowgic.API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
-                DateTime dayOfWeek = DateTime.Parse(scheduleRequest.DayOfWeek);
+                DateTime dateTime = DateTime.Parse(scheduleRequest.DayOfWeek);
+                DateOnly dayOfWeek = DateOnly.FromDateTime(dateTime); 
 
-                // Chuyển đổi chuỗi thành TimeOnly
+                        // Chuyển đổi chuỗi thành TimeOnly
                 TimeOnly startTime = TimeOnly.Parse(scheduleRequest.StartTime);
                 TimeOnly endTime = TimeOnly.Parse(scheduleRequest.EndTime);
                 var scheduleRequest2 = new ScheduleRequestDTO2

@@ -3,6 +3,7 @@ using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.ScheduleReader;
+using Meowgic.Data.Repositories;
 using Meowgic.Shares.Exceptions;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -54,6 +55,21 @@ namespace Meowgic.Business.Services
             catch (Exception ex)
             {
                 throw new Exception($"An error occurred while retrieving the schedule with ID {id}.", ex);
+            }
+        }
+        public async Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAsync(DateOnly startDate, DateOnly endDate)
+        {
+            try
+            {
+                var accountId = _httpContextAccessor.HttpContext?.User?.FindFirst("aid")?.Value;
+                if (accountId == null)
+                {
+                    throw new UnauthorizedException("User is not authenticated.");
+                }
+                return await _scheduleReaderRepository.GetSchedulesByDateRangeAndAccountIdAsync(startDate, endDate, accountId);
+            }catch(Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving schedules.", ex);
             }
         }
 

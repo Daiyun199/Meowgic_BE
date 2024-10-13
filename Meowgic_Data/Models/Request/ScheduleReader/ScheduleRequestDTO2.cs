@@ -10,7 +10,7 @@ namespace Meowgic.Data.Models.Request.ScheduleReader
     public class ScheduleRequestDTO2
     {
         [Required]
-        public DateTime DayOfWeek { get; set; }
+        public DateOnly DayOfWeek { get; set; }
 
         [Required]
         public TimeOnly StartTime { get; set; }

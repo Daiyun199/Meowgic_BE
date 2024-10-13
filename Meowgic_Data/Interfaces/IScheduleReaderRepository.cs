@@ -9,6 +9,7 @@ namespace Meowgic.Data.Interfaces
 {
     public interface IScheduleReaderRepository
     {
+        Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAsync(DateOnly startDate, DateOnly endDate, string accountId);
         Task<IEnumerable<ScheduleReader>> GetAllAsync();
         Task<ScheduleReader?> GetByIdAsync(string id);
         Task<ScheduleReader> AddAsync(ScheduleReader schedule);
