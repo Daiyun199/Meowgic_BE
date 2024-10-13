@@ -12,14 +12,9 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CardMeaningController : Controller
+    public class CardMeaningController(ICardMeaningService cardMeaningService) : Controller
     {
-        private readonly ICardMeaningService _cardMeaningService;
-
-        public CardMeaningController(ICardMeaningService cardMeaningService)
-        {
-            _cardMeaningService = cardMeaningService;
-        }
+        private readonly ICardMeaningService _cardMeaningService = cardMeaningService;
 
         // GET: api/CardMeaning/{id}
         [HttpGet("{id}")]
@@ -83,7 +78,7 @@ namespace Meowgic.API.Controllers
             {
                 return NotFound();
             }
-            return NoContent();
+            return Ok();
         }
         [HttpGet("random")]
         public async Task<IActionResult> GetRandomCardMeanings()

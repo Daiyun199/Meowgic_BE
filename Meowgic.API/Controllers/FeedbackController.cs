@@ -9,14 +9,9 @@ namespace Meowgic.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     // Yêu cầu người dùng phải được xác thực và có role "Reader"
-    public class FeedbackController : ControllerBase
+    public class FeedbackController(IFeedbackService feedbackService) : ControllerBase
     {
-        private readonly IFeedbackService _feedbackService;
-
-        public FeedbackController(IFeedbackService feedbackService)
-        {
-            _feedbackService = feedbackService;
-        }
+        private readonly IFeedbackService _feedbackService = feedbackService;
 
         /// <summary>
         /// Lấy tất cả feedbacks
@@ -105,7 +100,7 @@ namespace Meowgic.API.Controllers
             {
                 return NotFound(new { message = "Feedback not found." });
             }
-            return NoContent();
+            return Ok();
         }
     }
 }

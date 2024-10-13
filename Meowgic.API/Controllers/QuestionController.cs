@@ -26,14 +26,14 @@ namespace Meowgic.API.Controllers
         public async Task<ActionResult<Question>> CreateQuestion([FromBody] QuestionRequest request)
         {
             await _serviceFactory.GetQuestionService.CreateQuestion(request, HttpContext.User);
-            return Ok();
+            return Ok(request);
         }
         [HttpPut("update/{id}")]
         [Authorize(Policy = "Staff")]
         public async Task<ActionResult> UpdateQuestion([FromRoute] string id, [FromBody] QuestionRequest request)
         {
             await _serviceFactory.GetQuestionService.UpdateQuestion(id, request, HttpContext.User);
-            return Ok();
+            return Ok(request);
         }
         [HttpDelete("delete/{id}")]
         [Authorize(Policy = "Staff")]
@@ -51,7 +51,7 @@ namespace Meowgic.API.Controllers
         [Route("getall")]
         public async Task<ActionResult<List<QuestionResponse>>> GetAllQuestion()
         {
-            return await _serviceFactory.GetQuestionService.GetAll();
+            return Ok(await _serviceFactory.GetQuestionService.GetAll());
         }
     }
 }

@@ -28,7 +28,7 @@ namespace Meowgic.API.Controllers
         {
             await _serviceFactory.GetAuthService.Register(request);
             await _emailService.SendConfirmEmailAsync(request.Email);
-            return Ok();
+            return Ok(request);
         }
 
         [HttpPost("login")]

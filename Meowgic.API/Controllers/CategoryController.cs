@@ -12,14 +12,9 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CategoryController : Controller
+    public class CategoryController(ICategoryService categoryService) : Controller
     {
-        private readonly ICategoryService _categoryService;
-
-        public CategoryController(ICategoryService categoryService)
-        {
-            _categoryService = categoryService;
-        }
+        private readonly ICategoryService _categoryService = categoryService;
 
         // GET: api/Category
         [HttpGet]
@@ -76,7 +71,7 @@ namespace Meowgic.API.Controllers
             if (!success)
                 return NotFound();
 
-            return NoContent();
+            return Ok();
         }
 
     }

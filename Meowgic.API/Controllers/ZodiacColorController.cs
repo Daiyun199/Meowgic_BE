@@ -7,14 +7,9 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ZodiacColorController : ControllerBase
+    public class ZodiacColorController(IZodiacColorService zodiacColorService) : ControllerBase
     {
-        private readonly IZodiacColorService _zodiacColorService;
-
-        public ZodiacColorController(IZodiacColorService zodiacColorService)
-        {
-            _zodiacColorService = zodiacColorService;
-        }
+        private readonly IZodiacColorService _zodiacColorService = zodiacColorService;
 
         // GET: api/ZodiacColor
         [HttpGet]
@@ -80,7 +75,7 @@ namespace Meowgic.API.Controllers
             if (!success)
                 return NotFound();
 
-            return NoContent();
+            return Ok();
         }
     }
 }

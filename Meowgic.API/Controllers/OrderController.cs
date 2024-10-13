@@ -47,9 +47,9 @@ namespace Meowgic.API.Controllers
         }
         [HttpPost("{orderId}")]
         [Authorize(Policy = "Customer")]
-        public async Task<IActionResult> CreateOrder([FromRoute]string orderId, [FromBody] List<string> shirts)
+        public async Task<IActionResult> CreateOrder([FromRoute]string orderId, [FromBody] List<string> serviceIds)
         {
-            await _serviceFactory.GetOrderService.ConfirmOrder(HttpContext.User, orderId, shirts);
+            await _serviceFactory.GetOrderService.ConfirmOrder(HttpContext.User, orderId, serviceIds);
             return Ok();
         }
         [HttpPatch("{orderId}")]
@@ -57,21 +57,21 @@ namespace Meowgic.API.Controllers
         public async Task<IActionResult> CancelOrder([FromRoute]string orderId)
         {
             await _serviceFactory.GetOrderService.CancelOrder(HttpContext.User, orderId);
-            return Ok();
+            return Ok(await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(orderId));
         }
         [HttpPut("{orderId}")]
         [Authorize(Policy = "Customer")]
         public async Task<IActionResult> UpdateOrderDetail([FromRoute]string orderId, [FromForm] string serviceId)
         {
             await _serviceFactory.GetOrderService.UpdateOrderDetail(HttpContext.User, orderId, serviceId);
-            return Ok();
+            return Ok(await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(orderId));
         }
         [HttpDelete("{orderId}/services/{shirtId}")]
         [Authorize(Policy = "Customer")]
         public async Task<IActionResult> DeleteShirtFromCart([FromRoute]string orderId, string shirtId)
         {
             await _serviceFactory.GetOrderService.DeleteServiceFromCart(HttpContext.User, orderId, shirtId);
-            return Ok();
+            return Ok(await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(orderId));
         }
         [HttpDelete("{orderId}")]
         [Authorize(Policy = "Staff")]

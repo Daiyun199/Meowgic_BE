@@ -8,16 +8,9 @@ namespace Meowgic.API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class TarotServiceController : Controller
+    public class TarotServiceController(IServiceService serviceService) : Controller
     {
-        private readonly IServiceService _serviceService;
-      
-
-        public TarotServiceController(IServiceService serviceService)
-        {
-            _serviceService = serviceService;
-           
-        }
+        private readonly IServiceService _serviceService = serviceService;
 
         [HttpPost]
         [Authorize(Policy = "Reader")]
@@ -58,7 +51,7 @@ namespace Meowgic.API.Controllers
         {
             var result = await _serviceService.DeleteTarotServiceAsync(id, HttpContext.User);
             if (!result) return NotFound();
-            return NoContent();
+            return Ok();
         }
     }
 }
