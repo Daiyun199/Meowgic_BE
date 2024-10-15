@@ -167,8 +167,12 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException("Account not found");
             }
 
-            // Xác thực mã OTP (giả định bạn có một phương thức để thực hiện việc này)
-            bool isOtpValid = await ValidateOtpAsync(resetPasswordDTO.email, resetPasswordDTO.otpResetPassword); // Bạn cần triển khai phương thức ValidateOtpAsync
+            if (VerifyPassword(resetPasswordDTO.newPassword, account.Password))
+            {
+                throw new BadRequestException("New password cannot be the same as the old password");
+            }
+                // Xác thực mã OTP (giả định bạn có một phương thức để thực hiện việc này)
+                bool isOtpValid = await ValidateOtpAsync(resetPasswordDTO.email, resetPasswordDTO.otpResetPassword); // Bạn cần triển khai phương thức ValidateOtpAsync
             if (!isOtpValid)
             {
                 throw new BadRequestException("Invalid OTP");
@@ -201,7 +205,17 @@ namespace Meowgic.Business.Services
             // Trả về true nếu hợp lệ, false nếu không hợp lệ.
             return true; // Thay đổi theo logic xác thực của bạn
         }
+        private bool VerifyPassword(string newPassword, string oldPasswordHash)
+        {
+            // Implement your password verification logic here
+            return HashPassword(newPassword) == oldPasswordHash;
+        }
+
+            //private async Task<String> getPasswordOfAccount(string email)
+            //{
+            //    var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a=> a.Email == email);
+            //    return account.Password;
+            //}
+        }
 
     }
-
-}

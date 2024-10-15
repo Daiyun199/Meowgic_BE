@@ -152,6 +152,23 @@ namespace Meowgic.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+         [HttpGet("byDateRangeAndAccount")]
+        public async Task<IActionResult> GetSchedulesByDateRangeAndAccountId([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var schedules = await _scheduleReaderService.GetSchedulesByDateRangeAndAccountIdAsync(DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate));
+                return Ok(schedules);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     
     }
 }
