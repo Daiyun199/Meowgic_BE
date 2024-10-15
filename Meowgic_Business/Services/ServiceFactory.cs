@@ -23,6 +23,7 @@ namespace Meowgic.Business.Services
         private readonly Lazy<IPromotionService> _promotionService;
         private readonly Lazy<IQuestionService> _questionService;
         private readonly Lazy<IServiceService> _serviceService;
+        private readonly Lazy<IPayOSService> _payOSService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
 
@@ -41,6 +42,7 @@ namespace Meowgic.Business.Services
             _orderService = new Lazy<IOrderService>(() => new OrderService(unitOfWork));
             _promotionService = new Lazy<IPromotionService>(() => new PromotionService(unitOfWork));
             _questionService = new Lazy<IQuestionService>(() => new QuestionService(unitOfWork));
+            _payOSService = new Lazy<IPayOSService>(() => new PayOSService(configuration, unitOfWork));
             //_serviceService = new Lazy<IServiceService>(() => new ServiceService(unitOfWork));
         }
 
@@ -58,5 +60,6 @@ namespace Meowgic.Business.Services
         public IPromotionService GetPromotionService => _promotionService.Value;
         public IQuestionService GetQuestionService => _questionService.Value;
         //public IServiceService GetServiceService => _serviceService.Value;
+        public IPayOSService GetPayOSService => _payOSService.Value;
     }
 }

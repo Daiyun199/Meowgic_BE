@@ -14,5 +14,6 @@ namespace Meowgic.Data.Interfaces
         Task<PagedResultResponse<Order>> GetPagedOrders(QueryPageOrder request);
         Task<Order?> GetOrderDetailsInfoById(string orderId);
         Task<Order?> GetCustomerCartInfo(string accountId);
+        Task<int> FindEmptyPositionWithBinarySearch(List<Order> list, int low, int high, string entityName, string entityIndex);
     }
 }

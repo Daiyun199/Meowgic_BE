@@ -253,14 +253,8 @@ namespace Meowgic.Business.Services
             }
 
             var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
-            if (orderDetails is not [])
-            {
-                foreach (var item in orderDetails)
-                {
-                    await _unitOfWork.GetOrderDetailRepository.DeleteAsync(item);
-                }
-            }
-            await _unitOfWork.GetOrderRepository.DeleteAsync(order);
+            order.Status = OrderStatus.Cancel.ToString();
+            await _unitOfWork.GetOrderRepository.UpdateAsync(order);
 
             await _unitOfWork.SaveChangesAsync();
         }

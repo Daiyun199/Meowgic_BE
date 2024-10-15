@@ -34,9 +34,6 @@ namespace Meowgic.Business.Services
 
                 return new GetAuthTokens
                 {
-                    Id = account.Id,
-                    Name = account.Name,
-                    Role = account.Role,
                     Status = account.Status,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
@@ -57,9 +54,6 @@ namespace Meowgic.Business.Services
 
                 return new GetAuthTokens
                 {
-                    Id = account.Id,
-                    Name = account.Name,
-                    Role = account.Role,
                     Status = account.Status,
                     AccessToken = accessToken,
                     RefreshToken = refreshToken

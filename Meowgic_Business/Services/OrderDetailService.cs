@@ -36,8 +36,15 @@ namespace Meowgic.Business.Services
 
             if (order is null)
             {
+                var orders = await _unitOfWork.GetOrderRepository.GetAllAsync();
+                var id = orders.Count + 1;
+                if (_unitOfWork.GetOrderRepository.GetByIdAsync($"OD{id.ToString("D4")}") is not null)
+                {
+                    id = await _unitOfWork.GetOrderRepository.FindEmptyPositionWithBinarySearch(orders, 1, id, "OD", "Id");
+                }
                 order = new Order
                 {
+                    Id = "OD" + id.ToString("D4"),
                     AccountId = userId,
                     Status = OrderStatus.Incart.ToString(),
                     TotalPrice = 0,
