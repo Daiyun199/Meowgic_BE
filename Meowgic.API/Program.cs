@@ -67,9 +67,9 @@ builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration
             app.UseHttpsRedirection();
 
             app.UseMiddleware<GlobalExceptionMiddleware>();
-
-app.UseAuthentication();
-app.UseRouting();
+    
+            app.UseAuthentication();
+            app.UseRouting();
 
             app.UseAuthorization();
 
