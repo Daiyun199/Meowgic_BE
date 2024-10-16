@@ -9,45 +9,39 @@ namespace Meowgic.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PayOSController(IServiceFactory serviceFactory) : ControllerBase
+    public class PayOSController(IPayOSService payOSService) : ControllerBase
     {
-        private readonly IServiceFactory _serviceFactory = serviceFactory;
+        private readonly IPayOSService _payOSService = payOSService;
 
         [HttpPost("create")]
-        public async Task<CreatePaymentResult> CreatePaymentLink([FromBody]string orderId)
+        public async Task<CreatePaymentResult> CreatePaymentLink(string orderId)
         {
-            return await _serviceFactory.GetPayOSService.CreatePaymentLink(orderId);
+            return await _payOSService.CreatePaymentLink(orderId, HttpContext.User);
         }
         [HttpGet("{orderCode}")]
         public async Task<PaymentLinkInformation> GetPaymentLinkInfomation([FromRoute] int orderCode)
         {
-            return await _serviceFactory.GetPayOSService.GetPaymentLinkInformation(orderCode);
+            return await _payOSService.GetPaymentLinkInformation(orderCode);
         }
         [HttpPut("{orderCode}")]
         public async Task<PaymentLinkInformation> CancelOrder([FromRoute] int orderCode)
         {
-            return await _serviceFactory.GetPayOSService.CancelOrder(orderCode);
+            return await _payOSService.CancelOrder(orderCode);
         }
         [HttpPost("payos_transfer_handler")]
         public async Task<IActionResult> PayOSTransferHandler(WebhookType body)
         {
-            try
-            {
-                var result = await _serviceFactory.GetPayOSService.VerifyPaymentWebhookData(body);
+                var result = await _payOSService.VerifyPaymentWebhookData(body);
 
                 if (result.IsSuccess)
                 {
                     return Ok(new { Message = "Webhook process success", OrderId = "OD" + result.Code });
-                }
-
-                return BadRequest(new { Message = "Webhook process failed.", OrderId = "OD" + result.Code });
-
-            }
-            catch (Exception ex)
+                } else if (result.Code == -1)
             {
-                Console.WriteLine(ex.ToString());
-                return BadRequest(new { ex.Message });
+                return Ok(new { Message = "Webhook process failed.", Error = "WebhookType not valid" });
             }
+
+                return Ok(new { Message = "Webhook process failed.", OrderId = "OD" + result.Code });
 
         }
     }
