@@ -210,12 +210,29 @@ namespace Meowgic.Business.Services
             // Implement your password verification logic here
             return HashPassword(newPassword) == oldPasswordHash;
         }
+        public async Task<string> UpdateProfile(ClaimsPrincipal claims,string imgURl)
+        {
+            var accountId = claims.FindFirst(c => c.Type == "aid")?.Value;
 
-            //private async Task<String> getPasswordOfAccount(string email)
-            //{
-            //    var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a=> a.Email == email);
-            //    return account.Password;
-            //}
+            if (accountId is null)
+            {
+                throw new UnauthorizedException("Unauthorized ");
+            }
+
+            var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Id == accountId);
+
+            if (account is null)
+            {
+                throw new UnauthorizedException("Account not found");
+            }
+            account.ImgUrl = imgURl;
+            await _unitOfWork.GetAccountRepository.UpdateAsync(account);
+            await _unitOfWork.SaveChangesAsync();
+            return account.ImgUrl;
         }
 
+
     }
+
+
+}

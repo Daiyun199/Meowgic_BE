@@ -93,6 +93,13 @@ namespace Meowgic.API.Controllers
                 return BadRequest($"Error: {ex.Message}");
             }
         }
+        [HttpPut("update-profile")]
+        [Authorize]
+        public async Task<string> UpdateProfile([FromBody] string urlLink)
+        {
+            return await _serviceFactory.GetAccountService.UpdateProfile(HttpContext.User,urlLink);
+        }
+
 
     }
 }
