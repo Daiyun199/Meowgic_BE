@@ -72,6 +72,22 @@ namespace Meowgic.Business.Services
                 throw new Exception("An error occurred while retrieving schedules.", ex);
             }
         }
+        public async Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAndIsBookedAsync(DateOnly startDate, DateOnly endDate, bool isBooked)
+        {
+            try
+            {
+                var accountId = _httpContextAccessor.HttpContext?.User?.FindFirst("aid")?.Value;
+                if (accountId == null)
+                {
+                    throw new UnauthorizedException("User is not authenticated.");
+                }
+                return await _scheduleReaderRepository.GetSchedulesByDateRangeAccountIdAndStatusAsync(startDate, endDate, accountId,isBooked);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving schedules.", ex);
+            }
+        }
 
         public async Task<ScheduleReader> CreateScheduleAsync(ScheduleRequestDTO2 scheduleRequest)
         {
@@ -135,12 +151,19 @@ namespace Meowgic.Business.Services
         {
             try
             {
+                var existingSchedule = await _scheduleReaderRepository.GetByIdAsync(id);
+                var accountId = _httpContextAccessor.HttpContext?.User?.FindFirst("aid")?.Value;
+                if (accountId != existingSchedule.AccountId)
+                {
+                    throw new UnauthorizedException("You dont have any permission to delete this schedule");
+                }
                 var result = await _scheduleReaderRepository.DeleteAsync(id);
                 if (!result)
                 {
                     throw new NotFoundException("Schedule not found or could not be deleted.");
                 }
-        
+               
+
                 return result;
             }
             catch (NotFoundException ex)

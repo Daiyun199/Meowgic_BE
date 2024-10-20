@@ -72,5 +72,13 @@ namespace Meowgic.Data.Repositories
                                  .Where(sr => sr.AccountId == accountId && sr.DayOfWeek >= startDate && sr.DayOfWeek <= endDate)
                                  .ToListAsync();
         }
+        public async Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAccountIdAndStatusAsync(DateOnly startDate, DateOnly endDate, string accountId,bool isBooked)
+        {
+            return await _context.ScheduleReaders
+                                 .Include(sr => sr.Account)
+                                 .Where(sr => sr.AccountId == accountId && sr.DayOfWeek >= startDate && sr.DayOfWeek <= endDate && sr.IsBooked == isBooked)
+                                 .ToListAsync();
+        }
+
     }
 }

@@ -11,6 +11,7 @@ namespace Meowgic.Data.Interfaces
     {
         Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAsync(DateOnly startDate, DateOnly endDate, string accountId);
         Task<IEnumerable<ScheduleReader>> GetAllAsync();
+        Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAccountIdAndStatusAsync(DateOnly startDate, DateOnly endDate, string accountId, bool isBooked);
         Task<ScheduleReader?> GetByIdAsync(string id);
         Task<ScheduleReader> AddAsync(ScheduleReader schedule);
         Task<ScheduleReader> UpdateAsync(ScheduleReader schedule);

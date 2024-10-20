@@ -169,6 +169,24 @@ namespace Meowgic.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-    
+        [HttpGet("schedule-not-booked")]
+        public async Task<IActionResult> GetSchedulesByDateRangeAndAccountIdAndIsNotBooked([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            try
+            {
+                var schedules = await _scheduleReaderService.GetSchedulesByDateRangeAndAccountIdAndIsBookedAsync(DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate),false);
+                return Ok(schedules);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+
     }
 }
