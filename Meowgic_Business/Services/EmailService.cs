@@ -78,7 +78,7 @@ namespace Meowgic.Business.Services
 
             var token = userExist.VerificationToken;
 
-            var link = $"https://localhost:7043/api/Account/emailConfirm?id={userExist.Id}";
+            var link = $"https://meowgic.azurewebsites.net/api/Account/emailConfirm?id={userExist.Id}";
             htmlContent = htmlContent.Replace("{{UserName}}", userExist.Name).Replace("{{Link}}", link);
 
             var message = new Message(new string[] { userExist.Email }, "[Confirm Email] Please verify your account in Meowgic", htmlContent, true);
