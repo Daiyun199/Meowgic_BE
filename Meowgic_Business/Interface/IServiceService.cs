@@ -16,5 +16,6 @@ namespace Meowgic.Business.Interface
         Task<IEnumerable<TarotService>> GetAllTarotServicesAsync();
         Task<TarotService?> UpdateTarotServiceAsync(string id, ServiceRequest tarotServiceRequest, ClaimsPrincipal claim);
         Task<bool> DeleteTarotServiceAsync(string id, ClaimsPrincipal claim);
+        Task<List<TarotService>> GetTarotServiceByAccountIdAsync(string id);
     }
 }

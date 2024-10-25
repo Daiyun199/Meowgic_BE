@@ -16,5 +16,6 @@ namespace Meowgic.Data.Interfaces
         Task<ScheduleReader> AddAsync(ScheduleReader schedule);
         Task<ScheduleReader> UpdateAsync(ScheduleReader schedule);
         Task<bool> DeleteAsync(string id);
+
     }
 }

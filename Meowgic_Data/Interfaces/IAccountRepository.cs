@@ -2,6 +2,7 @@
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
+using Meowgic.Shares.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,5 +16,6 @@ namespace Meowgic.Data.Interfaces
         Task<PagedResultResponse<Account>> GetPagedAccount(QueryPagedAccount queryPagedAccount);
         Task<List<Account>> GetAllAcountCustomer();
         Task<Account?> GetCustomerDetailsInfo(string id);
+        Task<List<Account>> GetAccountsByRoleAsync(Roles role);
     }
 }

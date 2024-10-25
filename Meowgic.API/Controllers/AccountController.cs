@@ -37,6 +37,14 @@ namespace Meowgic.API.Controllers
         public async Task<ActionResult<PagedResultResponse<AccountResponse>>> GetPagedAccounts([FromQuery] QueryPagedAccount query)
         {
             return await _serviceFactory.GetAccountService.GetPagedAccounts(query);
+
+        }
+        [HttpGet]
+        [Route("Reader")]
+        public async Task<ActionResult<List<AccountResponse>>> GetReader()
+        {
+            var accounts = await _serviceFactory.GetAccountService.GetAccountsByRole(2);
+            return Ok(accounts); // Hoặc return accounts; nếu bạn không cần đến Status Code
         }
         [HttpGet]
         [Route("emailConfirm")]

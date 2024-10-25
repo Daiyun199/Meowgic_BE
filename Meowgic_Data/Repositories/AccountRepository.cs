@@ -51,7 +51,12 @@ namespace Meowgic.Data.Repositories
                 _ => acc => acc.Id,
             };
         }
-
+        public async Task<List<Account>> GetAccountsByRoleAsync(Roles role)
+        {
+            return await _context.Accounts
+                .Where(a => a.Role == role)
+                .ToListAsync();
+        }
         public async Task<PagedResultResponse<Account>> GetPagedAccount(QueryPagedAccount queryPagedAccount)
         {
             int pageNumber = queryPagedAccount.PageNumber;

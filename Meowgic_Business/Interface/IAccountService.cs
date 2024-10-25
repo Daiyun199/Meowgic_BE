@@ -22,5 +22,6 @@ namespace Meowgic.Business.Interface
         Task<ServiceResult<string>> ResetPasswordAsync(ResetPassword resetPasswordDTO);
         Task<ServiceResult<string>> ConfirmEmailUserProMax(string id);
         Task<string> UpdateProfile(ClaimsPrincipal claims, string imgURl);
+        Task<List<AccountResponse>> GetAccountsByRole(int roleId);
     }
 }
