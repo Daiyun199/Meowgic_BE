@@ -1,4 +1,5 @@
 ﻿using Meowgic.Business.Interface;
+using Meowgic.Business.Services;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
@@ -41,7 +42,7 @@ namespace Meowgic.API.Controllers
         }
         [HttpGet]
         [Route("Reader")]
-        public async Task<ActionResult<List<AccountResponse>>> GetReader()
+        public async Task<ActionResult<List<AccountResponseWithoutPassword>>> GetReader()
         {
             var accounts = await _serviceFactory.GetAccountService.GetAccountsByRole(2);
             return Ok(accounts); // Hoặc return accounts; nếu bạn không cần đến Status Code
@@ -107,7 +108,20 @@ namespace Meowgic.API.Controllers
         {
             return await _serviceFactory.GetAccountService.UpdateProfile(HttpContext.User,urlLink);
         }
-
+        [HttpGet("active")]
+        public async Task<ActionResult<List<AccountResponseWithoutPassword>>> GetAccountByStatus()
+        {
+            try
+            {
+                var accounts = await _serviceFactory.GetAccountService.GetAccountByStatus(UserStatus.Active);
+                return Ok(accounts); // Trả về danh sách tài khoản
+            }
+            catch (Exception ex)
+            {
+                // Xử lý lỗi (có thể log và trả về thông báo phù hợp)
+                return StatusCode(500, "Lỗi khi lấy tài khoản.");
+            }
+        }
 
     }
 }

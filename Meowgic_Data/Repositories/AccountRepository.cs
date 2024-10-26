@@ -75,5 +75,14 @@ namespace Meowgic.Data.Repositories
             //Paging
             return await query.ToPagedResultResponseAsync(pageNumber, pageSize);
         }
+        public async Task<List<Account>> GetAccountsByStatus(UserStatus status)
+        {
+            var activeAccounts = await _context.Accounts
+                .AsNoTracking()
+                .Where(c => c.Status == status.ToString())
+                .ToListAsync();
+
+            return activeAccounts;
+        }
     }
 }

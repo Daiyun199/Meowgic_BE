@@ -17,5 +17,6 @@ namespace Meowgic.Data.Interfaces
         Task<List<Account>> GetAllAcountCustomer();
         Task<Account?> GetCustomerDetailsInfo(string id);
         Task<List<Account>> GetAccountsByRoleAsync(Roles role);
+        Task<List<Account>> GetAccountsByStatus(UserStatus status);
     }
 }

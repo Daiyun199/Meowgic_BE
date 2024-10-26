@@ -224,7 +224,7 @@ namespace Meowgic.Business.Services
             return account.ImgUrl;
         }
 
-        public async Task<List<AccountResponse>> GetAccountsByRole(int roleId)
+        public async Task<List<AccountResponseWithoutPassword>> GetAccountsByRole(int roleId)
         {
             // Kiểm tra xem roleId có hợp lệ không
             if (roleId <= 0)
@@ -243,9 +243,14 @@ namespace Meowgic.Business.Services
                 throw new NotFoundException("No accounts found with the specified role");
             }
 
-            return accounts.Adapt<List<AccountResponse>>(); // Chuyển đổi thành danh sách AccountResponse
+            return accounts.Adapt<List<AccountResponseWithoutPassword>>(); // Chuyển đổi thành danh sách AccountResponse
         }
-
+        public async Task<List<AccountResponseWithoutPassword>> GetAccountByStatus(UserStatus status)
+        {
+            // Gọi hàm từ repository
+            var accounts = await _unitOfWork.GetAccountRepository.GetAccountsByStatus(status);
+            return accounts.Adapt<List<AccountResponseWithoutPassword>>();
+        }
 
     }
 

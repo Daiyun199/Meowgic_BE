@@ -3,6 +3,7 @@ using Meowgic.Data.Models;
 using Meowgic.Data.Models.Request.Account;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Account;
+using Meowgic.Shares.Enum;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,6 +23,7 @@ namespace Meowgic.Business.Interface
         Task<ServiceResult<string>> ResetPasswordAsync(ResetPassword resetPasswordDTO);
         Task<ServiceResult<string>> ConfirmEmailUserProMax(string id);
         Task<string> UpdateProfile(ClaimsPrincipal claims, string imgURl);
-        Task<List<AccountResponse>> GetAccountsByRole(int roleId);
+        Task<List<AccountResponseWithoutPassword>> GetAccountsByRole(int roleId);
+        Task<List<AccountResponseWithoutPassword>> GetAccountByStatus(UserStatus status);
     }
 }
