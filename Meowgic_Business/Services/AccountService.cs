@@ -53,10 +53,7 @@ namespace Meowgic.Business.Services
             {
                 account.Name = request.Name;
             }
-            if (request.Password != null)
-            {
-                account.Password = HashPassword(request.Password);
-            }
+
             if (request.Dob != null)
             {
                 account.Dob = new DateOnly(request.Dob.Value.Year, request.Dob.Value.Month, request.Dob.Value.Day);
@@ -68,10 +65,6 @@ namespace Meowgic.Business.Services
             if (request.Phone != null)
             {
                 account.Phone = request.Phone;
-            }
-            if (string.IsNullOrEmpty(account.Role.ToString()))
-            {
-                account.Role = request.Role;
             }
             account.LastUpdatedTime = DateTime.Now;
 
