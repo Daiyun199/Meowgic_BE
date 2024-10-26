@@ -31,6 +31,13 @@ namespace Meowgic.Data.Repositories
             return await _context.Services
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
+        public async Task<List<TarotService>> GetTarotServicesByAccountIdAsync(string id)
+        {
+            return await _context.Services
+                .Where(t => t.AccountId == id)
+                .ToListAsync();
+        }
+
 
         public async Task<IEnumerable<TarotService>> GetAllTarotServicesAsync()
         {

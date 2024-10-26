@@ -49,6 +49,10 @@ namespace Meowgic.Business.Services
         {
             return await _serviceRepository.GetTarotServiceByIdAsync(id);
         }
+        public async Task<List<TarotService>> GetTarotServiceByAccountIdAsync(string id)
+        {
+            return await _serviceRepository.GetTarotServicesByAccountIdAsync(id);
+        }
 
         public async Task<IEnumerable<TarotService>> GetAllTarotServicesAsync()
         {

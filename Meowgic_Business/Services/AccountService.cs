@@ -231,6 +231,28 @@ namespace Meowgic.Business.Services
             return account.ImgUrl;
         }
 
+        public async Task<List<AccountResponse>> GetAccountsByRole(int roleId)
+        {
+            // Kiểm tra xem roleId có hợp lệ không
+            if (roleId <= 0)
+            {
+                throw new BadRequestException("Invalid role ID");
+            }
+
+            // Chuyển roleId thành enum (nếu cần)
+            var role = (Roles)roleId;
+
+            // Lấy danh sách tài khoản có Role tương ứng
+            var accounts = await _unitOfWork.GetAccountRepository.GetAccountsByRoleAsync(role);
+
+            if (accounts == null || !accounts.Any())
+            {
+                throw new NotFoundException("No accounts found with the specified role");
+            }
+
+            return accounts.Adapt<List<AccountResponse>>(); // Chuyển đổi thành danh sách AccountResponse
+        }
+
 
     }
 

@@ -28,6 +28,14 @@ namespace Meowgic.API.Controllers
             if (product == null) return NotFound();
             return Ok(product);
         }
+
+        [HttpGet("Reader/{id}")]
+        public async Task<IActionResult> GetServiceByReaderId([FromRoute] string id)
+        {
+            var product = await _serviceService.GetTarotServiceByAccountIdAsync(id);
+            if (product == null) return NotFound();
+            return Ok(product);
+        }
         //[Authorize(Roles = "Reader")]
         [HttpGet]
         public async Task<IActionResult> GetAllService()
