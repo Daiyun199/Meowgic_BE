@@ -16,12 +16,11 @@ namespace Meowgic.Data.Models.Request.Service
         [Required]
         public required string Description { get; set; }
 
-        public string? Images { get; set; }
+        public string? ImgUrl { get; set; }
 
         [Required]
         public double Price { get; set; }
 
-        [Required]
-        public required string PromotionId { get; set; }
+        public string? PromotionId { get; set; }
     }
 }
