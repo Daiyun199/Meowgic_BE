@@ -152,7 +152,7 @@ namespace Meowgic.API.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
-         [HttpGet("byDateRangeAndAccount")]
+        [HttpGet("byDateRangeAndAccount")]
         public async Task<IActionResult> GetSchedulesByDateRangeAndAccountId([FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
         {
             try
@@ -186,7 +186,23 @@ namespace Meowgic.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-
+        [HttpGet("schedule-not-booked-of-reader")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetSchedulesByDateRangeAndReaderIdAndIsNotBooked([FromQuery] DateTime startDate, [FromQuery] DateTime endDate, [FromQuery] string readerId)
+        {
+            try
+            {
+                var schedules = await _scheduleReaderService.GetSchedulesByDateRangeAndReaderIdAndIsBookedAsync(readerId,DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate), false);
+                return Ok(schedules);
+            }
+            catch (UnauthorizedException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
     }
 }

@@ -17,5 +17,6 @@ namespace Meowgic.Business.Interface
         Task<bool> DeleteScheduleAsync(string id);
         Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAsync(DateOnly startDate, DateOnly endDate);
         Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndAccountIdAndIsBookedAsync(DateOnly startDate, DateOnly endDate,bool isBooked);
+        Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndReaderIdAndIsBookedAsync(string readerID, DateOnly startDate, DateOnly endDate, bool isBooked);
     }
 }
