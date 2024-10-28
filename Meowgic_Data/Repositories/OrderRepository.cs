@@ -27,7 +27,7 @@ namespace Meowgic.Data.Repositories
                 _ => o => o.Id
             };
         }
-        public async Task<PagedResultResponse<Order>> GetPagedOrders(QueryPageOrder request)
+        public async Task<List<Order>> GetPagedOrders(QueryPageOrder request)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -38,8 +38,21 @@ namespace Meowgic.Data.Repositories
             query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
                                         : query.OrderBy(GetSortProperty(request.SortColumn));
 
+            return await query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+        }
 
-            return await query.ToPagedResultResponseAsync(request.PageNumber, request.PageSize);
+        public async Task<int> GetPagedOrdersSize(QueryPageOrder request)
+        {
+            var query = _context.Orders.AsQueryable();
+
+
+            query = query.ApplyPagedOrdersFilter(request);
+
+
+            query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
+                                        : query.OrderBy(GetSortProperty(request.SortColumn));
+
+            return await query.CountAsync();
         }
 
         public async Task<Order?> GetOrderDetailsInfoById(string orderId)

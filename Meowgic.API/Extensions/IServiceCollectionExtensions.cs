@@ -12,6 +12,7 @@ using Meowgic.Shares;
 using System.Security.Claims;
 using Meowgic.Shares.Enum;
 using Meowgic.Business.Services;
+using System.Text.Json.Serialization;
 
 namespace Meowgic.API.Extensions
 {
@@ -127,6 +128,7 @@ namespace Meowgic.API.Extensions
                 .AddJsonOptions(options =>
                  { 
           options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
                 });
             return services;
         }
