@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Meowgic.Data.Models.Response.OrderDetail
+namespace Meowgic.Data.Models.Request.OrderDetail
 {
-    public class OrderDetailResponse
+    public class UpdateDetailInfor
     {
-        public string Id { get; set; } = null!;
-        public string ServiceName { get; set; } = null!;
         public string Date { get; set; } = null!;
         public string StartTime { get; set; } = null!;
         public string EndTime { get; set; } = null!;
-        public decimal Subtotal { get; set; }
     }
 }
