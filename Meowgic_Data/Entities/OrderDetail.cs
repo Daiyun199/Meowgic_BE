@@ -13,12 +13,14 @@ namespace Meowgic.Data.Entities
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
         [ForeignKey("Order")]
-        public string OrderId { get; set; }
+        public string? OrderId { get; set; }
         [ForeignKey("Service")]
-        public string ServiceId { get; set; }
+        public string ServiceId { get; set; } = null!;
+        public DateOnly Date { get; set; }
+        public TimeOnly StartTime { get; set; }
+        public TimeOnly EndTime { get; set; }
 
         public virtual Order Order { get; set; } = null!;
-
         public virtual TarotService Service { get; set; } = null!;
         public virtual Feedback? Feedback { get; set; }
 

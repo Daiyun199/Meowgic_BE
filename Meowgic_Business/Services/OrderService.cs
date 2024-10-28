@@ -5,6 +5,7 @@ using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
+using Meowgic.Data.Models.Response.OrderDetail;
 using Meowgic.Data.Repositories;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
@@ -23,7 +24,26 @@ namespace Meowgic.Business.Services
 
         public async Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request)
         {
-            return (await _unitOfWork.GetOrderRepository.GetPagedOrders(request)).Adapt<PagedResultResponse<OrderResponses>>();
+            var orders = await _unitOfWork.GetOrderRepository.GetPagedOrders(request);
+            var totalCount = await _unitOfWork.GetOrderRepository.GetPagedOrdersSize(request);
+            var orderResponses = new List<OrderResponses>();
+            foreach (var order in orders)
+            {
+                orderResponses.Add(new OrderResponses
+                {
+                    Id = order.Id,
+                    AccountName = order.Account.Name,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status,
+                });
+            }
+            return new PagedResultResponse<OrderResponses> { 
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = orderResponses
+            };
         }
 
         public async Task<Order> GetOrderDetailsInfoById(string orderId)
@@ -37,124 +57,66 @@ namespace Meowgic.Business.Services
 
             return order;
         }
-        public async Task<Order> GetCartInfo(ClaimsPrincipal claim)
+        public async Task<OrderResponses> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds)
         {
             var userId = claim.FindFirst("aid")?.Value;
-
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-
             if (account is null)
             {
                 throw new BadRequestException("Account not found");
             }
-            var order = await _unitOfWork.GetOrderRepository.GetCustomerCartInfo(userId);
-            if (order is null)
-            {
-                throw new NotFoundException("Empty cart");
-            }
-            return order;
-        }
-        public async Task ConfirmOrder(ClaimsPrincipal claim, string orderId, List<string> serviceIds)
-        {
-            var userId = claim.FindFirst("aid")?.Value;
+            var orders = await _unitOfWork.GetOrderRepository.GetAllAsync();
+            var id = orders.Count > 0 ? int.Parse(orders.Last().Id[2..]) + 1 : 1;
 
-            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+            double totalPrice = 0;
+            foreach (var detailId in detailIds)
+            {
+                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId.DetailId);
+                orderDetail.OrderId = "OD" + id.ToString("D4");
+                await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
 
-            if (account is null)
-            {
-                throw new BadRequestException("Account not found");
-            }
-            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-            order.TotalPrice = 0;
-
-            if (order.CreatedBy != userId)
-            {
-                throw new BadRequestException("The order does not belong to the customer.");
+                var service = orderDetail.Service;
+                totalPrice += service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
             }
 
-            if (order.Status != "InCart")
+            var order = new Order
             {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
+                Id = "OD" + id.ToString("D4"),
+                AccountId = userId,
+                TotalPrice = (decimal)totalPrice,
+                OrderDate = DateTime.Now,
+                Status = OrderStatus.Unpaid.ToString()
+            };
 
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == orderId);
-            if (orderDetails is [])
-            {
-                throw new NotFoundException("There are no items in cart.");
-            }
-
-            if (serviceIds is null || serviceIds is [])
-            {
-                throw new BadRequestException("There are no product confirmed for order.");
-            }
-
-            order.Status = OrderStatus.Unpaid.ToString();
-
-            foreach (var serviceId in serviceIds)
-            {
-                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
-                var serviceDetail = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(serviceId);
-
-                if (orderDetail is null)
-                {
-                    throw new BadRequestException("The service is not in cart.");
-                }
-                if (serviceDetail is null)
-                {
-                    throw new NotFoundException("Service not found.");
-                }
-                orderDetails.Remove(orderDetails.First(o => o.OrderId == orderDetail.OrderId && o.ServiceId == orderDetail.ServiceId));
-                order.TotalPrice += (orderDetail.Service.PromotionId != null
-                ? (decimal)(orderDetail.Service.Price * (1 - orderDetail.Service.Promotion.DiscountPercent))
-                : (decimal)orderDetail.Service.Price);
-            }
+            await _unitOfWork.GetOrderRepository.AddAsync(order);
             await _unitOfWork.SaveChangesAsync();
 
-            if (orderDetails is not [])
+            var result = new OrderResponses
             {
-                await _unitOfWork.GetOrderRepository.AddAsync(new Order
-                {
-                    AccountId = userId,
-                    Status = OrderStatus.Incart.ToString(),
-                    TotalPrice = 0,
-                    OrderDate = DateTime.Now
-                });
-                await _unitOfWork.SaveChangesAsync();
-
-                foreach (var item in orderDetails)
-                {
-                    await _unitOfWork.GetOrderDetailRepository.DeleteAsync(item);
-                    await _unitOfWork.GetOrderDetailRepository.AddAsync(new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ServiceId = item.ServiceId
-                    });
-                }
-            }
-
-            await _unitOfWork.SaveChangesAsync();
+                Id = order.Id,
+                AccountName = order.Account.Name,
+                TotalPrice = order.TotalPrice,
+                OrderDate = order.OrderDate,
+                Status = order.Status
+            };
+            return result;
         }
-        public async Task CancelOrder(ClaimsPrincipal claim, string orderId)
+        public async Task<OrderResponses> CancelOrder(ClaimsPrincipal claim, string orderId)
         {
             var userId = claim.FindFirst("aid")?.Value;
-
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-
             if (account is null)
             {
                 throw new BadRequestException("Account not found");
             }
+
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
                 throw new NotFoundException("Order not found");
             }
 
-            if (order.AccountId != userId && account.Role != Roles.Staff)
+            if (order.AccountId != userId)
             {
                 throw new BadRequestException("The order does not belong to this account.");
             }
@@ -165,98 +127,17 @@ namespace Meowgic.Business.Services
             }
 
             order.Status = OrderStatus.Cancel.ToString();
-
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
             await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task UpdateOrderDetail(ClaimsPrincipal claim, string orderId, string serviceId)
-        {
-            var userId = claim.FindFirst("aid")?.Value;
 
-            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-
-            if (account is null)
+            var result = new OrderResponses
             {
-                throw new BadRequestException("Account not found");
-            }
-            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-
-            if (order.Status != OrderStatus.Incart.ToString())
-            {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
-
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
-            if (orderDetail is null)
-            {
-                throw new NotFoundException("Service not found in the order.");
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task DeleteServiceFromCart(ClaimsPrincipal claim, string orderId, string serviceId)
-        {
-            var userId = claim.FindFirst("aid")?.Value;
-
-            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-
-            if (account is null)
-            {
-                throw new BadRequestException("Account not found");
-            }
-            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-
-            if (order.Status != OrderStatus.Incart.ToString())
-            {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
-
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
-            if (orderDetail is null)
-            {
-                throw new NotFoundException("Shirt not found in the order.");
-            }
-
-            await _unitOfWork.GetOrderDetailRepository.DeleteAsync(orderDetail);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task DeleteOrder(ClaimsPrincipal claim, string orderId)
-        {
-            var userId = claim.FindFirst("aid")?.Value;
-
-            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-
-            if (account is null)
-            {
-                throw new BadRequestException("Account not found");
-            }
-            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-
-            if (account.Role.Equals("Customer"))
-            {
-                if (order.AccountId != account.Id)
-                {
-                    throw new BadRequestException("The order does not belong to this account.");
-                }
-            }
-
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository.FindAsync(o => o.OrderId == order.Id);
-            order.Status = OrderStatus.Cancel.ToString();
-            await _unitOfWork.GetOrderRepository.UpdateAsync(order);
-
-            await _unitOfWork.SaveChangesAsync();
+                Id = order.Id,
+                AccountName = order.Account.Name,
+                TotalPrice = order.TotalPrice,
+                OrderDate = order.OrderDate,
+                Status = order.Status
+            };
+            return result;
         }
     }
 }

@@ -17,16 +17,8 @@ namespace Meowgic.Business.Interface
 
         Task<Order> GetOrderDetailsInfoById(string orderId);
 
-        Task<Order> GetCartInfo(ClaimsPrincipal claim);
+        Task<OrderResponses> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds);
 
-        Task ConfirmOrder(ClaimsPrincipal claim, string orderId, List<string> serviceId);
-
-        Task CancelOrder(ClaimsPrincipal calim, string orderId);
-
-        Task UpdateOrderDetail(ClaimsPrincipal claim, string orderId, string serviceId);
-
-        Task DeleteServiceFromCart(ClaimsPrincipal claim, string orderId, string serviceId);
-
-        Task DeleteOrder(ClaimsPrincipal claim, string orderId);
+        Task<OrderResponses> CancelOrder(ClaimsPrincipal calim, string orderId);
     }
 }
