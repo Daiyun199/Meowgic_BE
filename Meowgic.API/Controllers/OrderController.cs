@@ -41,7 +41,7 @@ namespace Meowgic.API.Controllers
 
         [HttpPost("add-to-cart")]
         [Authorize(Policy = "Customer")]
-        public async Task<ActionResult<OrderDetailResponse>> AddtoCart([FromBody] string serviceId, string date, string startTime, string endTime)
+        public async Task<ActionResult<OrderDetailResponse>> AddtoCart(string serviceId, string date, string startTime, string endTime)
         {
             var request = new AddToCartRequest
             {
