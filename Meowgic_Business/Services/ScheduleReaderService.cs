@@ -88,6 +88,19 @@ namespace Meowgic.Business.Services
                 throw new Exception("An error occurred while retrieving schedules.", ex);
             }
         }
+        public async Task<IEnumerable<ScheduleReader>> GetSchedulesByDateRangeAndReaderIdAndIsBookedAsync(string readerID,DateOnly startDate, DateOnly endDate, bool isBooked)
+        {
+            try
+            { 
+                return await _scheduleReaderRepository.GetSchedulesByDateRangeAccountIdAndStatusAsync(startDate, endDate, readerID, isBooked);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while retrieving schedules.", ex);
+            }
+        }
+
+
 
         public async Task<ScheduleReader> CreateScheduleAsync(ScheduleRequestDTO2 scheduleRequest)
         {
