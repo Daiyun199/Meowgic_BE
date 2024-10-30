@@ -4,6 +4,7 @@ using Meowgic.Data.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Meowgic.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241029210703_updateOrderDetail2")]
+    partial class updateOrderDetail2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -412,7 +415,8 @@ namespace Meowgic.Data.Migrations
 
                     b.HasIndex("OrderId");
 
-                    b.HasIndex("ScheduleReaderId");
+                    b.HasIndex("ScheduleReaderId")
+                        .IsUnique();
 
                     b.HasIndex("ServiceId");
 
@@ -866,8 +870,8 @@ namespace Meowgic.Data.Migrations
                         .OnDelete(DeleteBehavior.NoAction);
 
                     b.HasOne("Meowgic.Data.Entities.ScheduleReader", "ScheduleReader")
-                        .WithMany("OrderDetails")
-                        .HasForeignKey("ScheduleReaderId")
+                        .WithOne("OrderDetail")
+                        .HasForeignKey("Meowgic.Data.Entities.OrderDetail", "ScheduleReaderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -1023,7 +1027,8 @@ namespace Meowgic.Data.Migrations
 
             modelBuilder.Entity("Meowgic.Data.Entities.ScheduleReader", b =>
                 {
-                    b.Navigation("OrderDetails");
+                    b.Navigation("OrderDetail")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Meowgic.Data.Entities.TarotService", b =>
