@@ -8,8 +8,6 @@ namespace Meowgic.Data.Models.Request.OrderDetail
 {
     public class UpdateDetailInfor
     {
-        public string Date { get; set; } = null!;
-        public string StartTime { get; set; } = null!;
-        public string EndTime { get; set; } = null!;
+        public string ScheduleReaderId { get; set; } = null!;
     }
 }

@@ -12,10 +12,6 @@ namespace Meowgic.Data.Models.Request.OrderDetail
         [Required]
         public string ServiceId { get; set; } = null!;
         [Required]
-        public DateOnly Date { get; set; }
-        [Required]
-        public TimeOnly StartTime { get; set; }
-        [Required]
-        public TimeOnly EndTime { get; set; }
+        public string ScheduleReaderId { get; set; } = null!;
     }
 }

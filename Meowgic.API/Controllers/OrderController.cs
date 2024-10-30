@@ -22,13 +22,25 @@ namespace Meowgic.API.Controllers
             return await _serviceFactory.GetOrderService.GetPagedOrders(request);
         }
         [HttpGet]
-        [Route("get-cart")]
+        [Route("order-detail/get-cart")]
         [Authorize(Policy = "Customer")]
         public async Task<ActionResult<List<OrderDetailResponse>>> GetList()
         {
-            return await _serviceFactory.GetOrderDetailService.GetList(HttpContext.User);
+            return await _serviceFactory.GetOrderDetailService.GetCart(HttpContext.User);
         }
-        [HttpGet("order/{id}")]
+        [HttpGet]
+        [Route("order-detail/get-all")]
+        public async Task<ActionResult<List<OrderDetailResponse>>> GetAll()
+        {
+            return await _serviceFactory.GetOrderDetailService.GetAll();
+        }
+        [HttpGet]
+        [Route("order-detail/get-by-order-id/{orderId}")]
+        public async Task<ActionResult<List<OrderDetailResponse>>> GetByOrderId([FromRoute]string orderId)
+        {
+            return await _serviceFactory.GetOrderDetailService.GetAllByOrderId(orderId);
+        }
+        [HttpGet("{id}")]
         public async Task<ActionResult<Order>> GetOrderInfoById([FromRoute]string id)
         {
             return await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(id);
@@ -39,17 +51,10 @@ namespace Meowgic.API.Controllers
             return await _serviceFactory.GetOrderDetailService.GetOrderDetailById(id);
         }
 
-        [HttpPost("add-to-cart")]
+        [HttpPost("order-detail/add-to-cart")]
         [Authorize(Policy = "Customer")]
-        public async Task<ActionResult<OrderDetailResponse>> AddtoCart(string serviceId, string date, string startTime, string endTime)
+        public async Task<ActionResult<OrderDetailResponse>> AddtoCart(AddToCartRequest request)
         {
-            var request = new AddToCartRequest
-            {
-                ServiceId = serviceId,
-                Date = DateOnly.Parse(date),
-                StartTime = TimeOnly.Parse(startTime),
-                EndTime = TimeOnly.Parse(endTime)
-            };
             var item = await _serviceFactory.GetOrderDetailService.AddToCart(HttpContext.User, request);
             return Ok(item);
         }
@@ -68,7 +73,7 @@ namespace Meowgic.API.Controllers
             return Ok(item);
         }
 
-        [HttpPut("update-detail-infor/{detailId}")]
+        [HttpPut("order-detail/update-detail-infor/{detailId}")]
         [Authorize(Policy = "Customer")]
         public async Task<ActionResult<OrderDetailResponse>> UpdateOrderDetail([FromRoute] string detailId, UpdateDetailInfor request)
         {
@@ -76,7 +81,7 @@ namespace Meowgic.API.Controllers
             return Ok(item);
         }
 
-        [HttpDelete("remove-from-cart/{detailId}")]
+        [HttpDelete("order-detail/remove-from-cart/{detailId}")]
         [Authorize(Policy = "Customer")]
         public async Task<ActionResult<OrderDetailResponse>> DeleteOrder([FromRoute]string detailId)
         {

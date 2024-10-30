@@ -11,6 +11,7 @@ namespace Meowgic.Data.Models.Response.OrderDetail
     {
         public string Id { get; set; } = null!;
         public string ServiceName { get; set; } = null!;
+        public string? OrderId { get; set; }
         public string Date { get; set; } = null!;
         public string StartTime { get; set; } = null!;
         public string EndTime { get; set; } = null!;

@@ -13,7 +13,9 @@ namespace Meowgic.Business.Interface
     public interface IOrderDetailService
     {
         Task<OrderDetailResponse> AddToCart(ClaimsPrincipal claim, AddToCartRequest request);        
-        Task<List<OrderDetailResponse>> GetList(ClaimsPrincipal claim);
+        Task<List<OrderDetailResponse>> GetCart(ClaimsPrincipal claim);
+        Task<List<OrderDetailResponse>> GetAll();
+        Task<List<OrderDetailResponse>> GetAllByOrderId(string orderId);
         Task<OrderDetail> GetOrderDetailById(string id);
         Task<OrderDetailResponse> RemoveFromCart(ClaimsPrincipal claim, string detailId);
         Task<OrderDetailResponse> UpdateOrderDetail(ClaimsPrincipal claim, string detailId, UpdateDetailInfor request);
