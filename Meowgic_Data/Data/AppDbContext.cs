@@ -81,6 +81,10 @@ namespace Meowgic.Data.Data
                     .WithMany(s => s.OrderDetails)
                     .HasForeignKey(e => e.ServiceId)
                     .OnDelete(DeleteBehavior.NoAction);  // Đặt ON DELETE NO ACTION cho ServiceId
+                entity.HasOne(e => e.ScheduleReader)
+                    .WithMany(sr => sr.OrderDetails)
+                    .HasForeignKey(e => e.ScheduleReaderId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
         }
         public override int SaveChanges()

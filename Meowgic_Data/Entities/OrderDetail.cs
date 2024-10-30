@@ -16,12 +16,11 @@ namespace Meowgic.Data.Entities
         public string? OrderId { get; set; }
         [ForeignKey("Service")]
         public string ServiceId { get; set; } = null!;
-        public DateOnly Date { get; set; }
-        public TimeOnly StartTime { get; set; }
-        public TimeOnly EndTime { get; set; }
-
-        public virtual Order Order { get; set; } = null!;
+        [ForeignKey("ScheduleReader")]
+        public string ScheduleReaderId { get; set; } = null!;
+        public virtual Order? Order { get; set; } = null!;
         public virtual TarotService Service { get; set; } = null!;
+        public virtual ScheduleReader ScheduleReader { get; set; } = null!;
         public virtual Feedback? Feedback { get; set; }
 
     }

@@ -29,8 +29,7 @@ namespace Meowgic.Data.Repositories
         }
         public async Task<List<Order>> GetPagedOrders(QueryPageOrder request)
         {
-            var query = _context.Orders.AsQueryable();
-
+            var query = _context.Orders.AsNoTracking().Include(o => o.Account).Include(o => o.OrderDetails).AsQueryable();
 
             query = query.ApplyPagedOrdersFilter(request);
 
@@ -41,7 +40,7 @@ namespace Meowgic.Data.Repositories
             return await query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
         }
 
-        public async Task<int> GetPagedOrdersSize(QueryPageOrder request)
+        public async Task<int> GetOrdersSize(QueryPageOrder request)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -62,6 +61,10 @@ namespace Meowgic.Data.Repositories
                                         .Include(o => o.Account)
                                         .Include(o => o.OrderDetails)
                                         .ThenInclude(od => od.Service)
+                                        .Include(o => o.OrderDetails)
+                                        .ThenInclude(od => od.ScheduleReader)
+                                        .Include(o => o.OrderDetails)
+                                        .ThenInclude(od => od.Feedback)
                                         .AsSplitQuery()
                                         .SingleOrDefaultAsync();
         }

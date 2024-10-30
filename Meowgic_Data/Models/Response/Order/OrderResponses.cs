@@ -13,6 +13,6 @@ namespace Meowgic.Data.Models.Response.Order
         public decimal TotalPrice { get; set; }
         public DateTime OrderDate { get; set; }
         public string Status { get; set; } = null!;
-        public string AccountName { get; set; } = null!;
+        public string CustomerName { get; set; } = null!;
     }
 }

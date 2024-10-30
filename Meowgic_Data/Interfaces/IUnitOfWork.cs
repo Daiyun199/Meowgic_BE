@@ -14,10 +14,14 @@ namespace Meowgic.Data.Interfaces
         ICardMeaningRepository GetCardMeaningRepository { get; }
         ICardRepository GetCardRepository { get; }
         ICategoryRepository GetCategoryRepository {  get; }
+        IFeedbackRepository GetFeedbackRepository { get; }
         IOrderDetailRepository GetOrderDetailRepository { get; }
         IOrderRepository GetOrderRepository { get; }
         IPromotionRepository GetPromotionRepository { get; }
         IQuestionRepository GetQuestionRepository { get; }
         IServiceRepository GetServiceRepository { get; }
+        IScheduleReaderRepository GetScheduleReaderRepository { get; }
+        IZodiacColorRepository GetZodiacColorRepository { get; }
+        IZodiacRepository GetZodiacRepository { get; }
     }
 }

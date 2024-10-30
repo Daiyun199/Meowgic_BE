@@ -24,5 +24,6 @@ namespace Meowgic.Data.Entities
         public string AccountId { get; set; }
         
         public virtual Account Account { get; set; } = null!;
+        public virtual ICollection<OrderDetail> OrderDetails { get; set; } = null!;
     }
 }

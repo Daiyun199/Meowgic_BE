@@ -25,20 +25,22 @@ namespace Meowgic.Business.Services
         public async Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request)
         {
             var orders = await _unitOfWork.GetOrderRepository.GetPagedOrders(request);
-            var totalCount = await _unitOfWork.GetOrderRepository.GetPagedOrdersSize(request);
+            var totalCount = await _unitOfWork.GetOrderRepository.GetOrdersSize(request);
             var orderResponses = new List<OrderResponses>();
             foreach (var order in orders)
             {
-                orderResponses.Add(new OrderResponses
+                var orderResponse = new OrderResponses
                 {
                     Id = order.Id,
-                    AccountName = order.Account.Name,
+                    CustomerName = order.Account.Name,
                     TotalPrice = order.TotalPrice,
                     OrderDate = order.OrderDate,
-                    Status = order.Status,
-                });
+                    Status = order.Status
+                };
+                orderResponses.Add(orderResponse);
             }
-            return new PagedResultResponse<OrderResponses> { 
+            return new PagedResultResponse<OrderResponses>
+            {
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
@@ -69,16 +71,6 @@ namespace Meowgic.Business.Services
             var id = orders.Count > 0 ? int.Parse(orders.Last().Id[2..]) + 1 : 1;
 
             double totalPrice = 0;
-            foreach (var detailId in detailIds)
-            {
-                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId.DetailId);
-                orderDetail.OrderId = "OD" + id.ToString("D4");
-                await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
-
-                var service = orderDetail.Service;
-                totalPrice += service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
-            }
-
             var order = new Order
             {
                 Id = "OD" + id.ToString("D4"),
@@ -87,14 +79,32 @@ namespace Meowgic.Business.Services
                 OrderDate = DateTime.Now,
                 Status = OrderStatus.Unpaid.ToString()
             };
-
             await _unitOfWork.GetOrderRepository.AddAsync(order);
+            await _unitOfWork.SaveChangesAsync();
+
+            foreach (var detailId in detailIds)
+            {
+                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId.DetailId);
+                orderDetail.OrderId = "OD" + id.ToString("D4");
+                await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
+
+                var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
+                schedule.IsBooked = true;
+                await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
+
+                var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(orderDetail.ServiceId);
+                totalPrice += service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
+            }
+
+            order.TotalPrice = (decimal)totalPrice;
+
+            await _unitOfWork.GetOrderRepository.UpdateAsync(order);
             await _unitOfWork.SaveChangesAsync();
 
             var result = new OrderResponses
             {
                 Id = order.Id,
-                AccountName = order.Account.Name,
+                CustomerName = account.Name,
                 TotalPrice = order.TotalPrice,
                 OrderDate = order.OrderDate,
                 Status = order.Status
@@ -127,12 +137,20 @@ namespace Meowgic.Business.Services
             }
 
             order.Status = OrderStatus.Cancel.ToString();
+            
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetAllOrderDetailsByOrderId(orderId);
+            foreach (var orderDetail in orderDetails)
+            {
+                var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
+                schedule.IsBooked = false;
+                await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
+            }
             await _unitOfWork.SaveChangesAsync();
 
             var result = new OrderResponses
             {
                 Id = order.Id,
-                AccountName = order.Account.Name,
+                CustomerName = account.Name,
                 TotalPrice = order.TotalPrice,
                 OrderDate = order.OrderDate,
                 Status = order.Status

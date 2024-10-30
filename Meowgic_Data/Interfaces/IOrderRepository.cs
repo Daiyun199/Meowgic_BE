@@ -12,7 +12,7 @@ namespace Meowgic.Data.Interfaces
     public interface IOrderRepository : IGenericRepository<Order>
     {
         Task<List<Order>> GetPagedOrders(QueryPageOrder request);
-        Task<int> GetPagedOrdersSize(QueryPageOrder request);
+        Task<int> GetOrdersSize(QueryPageOrder request);
         Task<Order?> GetOrderDetailsInfoById(string orderId);
         Task<Order?> GetCustomerCartInfo(string accountId);
         Task<int> FindEmptyPositionWithBinarySearch(List<Order> list, int low, int high, string entityName, string entityIndex);
