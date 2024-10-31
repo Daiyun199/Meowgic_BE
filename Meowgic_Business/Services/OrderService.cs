@@ -89,6 +89,10 @@ namespace Meowgic.Business.Services
                 await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
 
                 var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
+                if (schedule.IsBooked)
+                {
+                    throw new BadRequestException("This schedule not availabe");
+                }
                 schedule.IsBooked = true;
                 await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
 

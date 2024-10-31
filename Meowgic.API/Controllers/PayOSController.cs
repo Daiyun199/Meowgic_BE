@@ -1,6 +1,7 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Business.Services;
 using Meowgic.Data.Models.Response.PayOS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Net.payOS.Types;
@@ -13,6 +14,7 @@ namespace Meowgic.API.Controllers
     {
         private readonly IPayOSService _payOSService = payOSService;
 
+        [Authorize(Policy = "Customer")]
         [HttpPost("create")]
         public async Task<CreatePaymentResult> CreatePaymentLink(string orderId)
         {

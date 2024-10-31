@@ -58,39 +58,45 @@ namespace Meowgic.Business.Services
                 throw new BadRequestException("Account not found");
             }
             int orderCode = int.Parse(orderId[2..]);
-            var order = await _unitOfWork.GetOrderRepository.GetByIdAsync(orderId);
+            var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
             var orderDetails = order.OrderDetails;
             List<ItemData> items = [];
             foreach (var orderDetail in orderDetails)
             {
-                var price = orderDetail.Service.PromotionId == null ? (int)orderDetail.Service.Price : (int)orderDetail.Service.Price * (int)orderDetail.Service.Promotion.DiscountPercent;
-                items.Add(new ItemData(orderDetail.Service.Name, 1, price));
+                var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(orderDetail.ServiceId);
+                var promotion = await _unitOfWork.GetPromotionRepository.GetByIdAsync(service.PromotionId);
+                var price = service.PromotionId == null ? (int)service.Price : (int)service.Price * (int)promotion.DiscountPercent;
+                items.Add(new ItemData(service.Name, 1, price));
             }
             long expiredAt = (long)(DateTime.UtcNow.AddMinutes(15) - new DateTime(1970, 1, 1)).TotalSeconds;
             string signature = "amount="+ (int)order.TotalPrice 
-                             + "buyerEmail=" + account.Email
-                             + "buyerName=" + account.Name
-                             + "buyerPhone=" + account.Phone
-                             + "cancelUrl=https://www.youtube.com/watch?v=XLr8rWFduUU"
-                             + "description=" + orderId
-                             + "expiredAt=" + expiredAt
-                             + "items=" + items
-                             + "orderCode=" + orderCode
-                             + "returnUrl=https://www.facebook.com/";
+                             + "&buyerEmail=" + account.Email
+                             + "&buyerName=" + account.Name
+                             + "&buyerPhone=" + account.Phone
+                             + "&cancelUrl=https://www.meowgic.online/"
+                             + "&description=Thanh toan don " + orderId
+                             + "&expiredAt=" + expiredAt
+                             + "&items=" + items
+                             + "&orderCode=" + orderCode
+                             + "&returnUrl=https://www.meowgic.online/";
+            byte[] key = Encoding.UTF8.GetBytes(_configuration["payOS:ChecksumKey"]);
+            byte[] source = Encoding.UTF8.GetBytes(signature);
+            using HMACSHA256 hmac = new(key);
+            byte[] hashValue = hmac.ComputeHash(source);
 
             PaymentData paymentData = new(
                 orderCode: orderCode,
                 amount: (int)order.TotalPrice,
-                description: orderId,
+                description: "Thanh toan don " + orderId,
                 items: items,
-                cancelUrl: "https://www.youtube.com/watch?v=XLr8rWFduUU",
-                returnUrl: "https://www.facebook.com/",
+                cancelUrl: "https://www.meowgic.online/",
+                returnUrl: "https://www.meowgic.online/",
                 expiredAt: expiredAt,
                 buyerName: account.Name,
                 buyerPhone: account.Phone,
                 buyerEmail: account.Email,
-                signature: signature
-                );
+                signature: BitConverter.ToString(hashValue).Replace("-", "").ToLower()
+            );
 
             CreatePaymentResult createPayment = await _payOS.createPaymentLink(paymentData);
 
@@ -134,7 +140,8 @@ namespace Meowgic.Business.Services
                 WebhookData data = _payOS.verifyPaymentWebhookData(body);
 
                 string responseCode = data.code;
-                var order = await _unitOfWork.GetOrderRepository.GetByIdAsync("OD" + data.orderCode.ToString("D4"));
+                string orderCode = data.orderCode.ToString("D4");
+                var order = await _unitOfWork.GetOrderRepository.GetByIdAsync("OD" + orderCode);
 
                 if (order != null && responseCode == "00")
                 {
