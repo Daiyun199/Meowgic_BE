@@ -16,5 +16,6 @@ namespace Meowgic.Data.Models.Response.OrderDetail
         public string StartTime { get; set; } = null!;
         public string EndTime { get; set; } = null!;
         public decimal Subtotal { get; set; }
+        public string CreateBy { get; set; } = null!;
     }
 }

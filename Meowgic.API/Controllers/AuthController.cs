@@ -26,26 +26,38 @@ namespace Meowgic.API.Controllers
         [HttpPost("register")]
         public async Task<ActionResult> RegisterAccount([FromBody] Register request)
         {
-            await _serviceFactory.GetAuthService.Register(request);
+            var result = await _serviceFactory.GetAuthService.Register(request);
+            if (result == null)
+            {
+                return BadRequest("Account with email: " + result.Email + " has aldready exist!!!");
+            }
             await _emailService.SendConfirmEmailAsync(request.Email);
-            return Ok(request);
+            return Ok(result);
         }
 
         [HttpPost("login")]
         public async Task<ActionResult<GetAuthTokens>> Login([FromBody] Login loginDto)
         {
             var user = await _serviceFactory.GetAuthService.Login(loginDto);
+            if (user == null)
+            {
+                return BadRequest("Wrong email or password!!!");
+            }
             if (user.Status == UserStatus.Unactive.ToString())
             {
                 return BadRequest("Your Account have been banned!!!");
             }
-            return Created(nameof(Login), user) ;
+            return user ;
         }
 
         [HttpPost("loginWithouPassword")]
         public async Task<ActionResult<GetAuthTokens>> LoginWithoutPassword(string email)
         {
             var user = await _serviceFactory.GetAuthService.LoginWithoutPassword(email);
+            if (user == null)
+            {
+                return BadRequest("Wrong email or password!!!");
+            }
             if (user.Status == UserStatus.Unactive.ToString())
             {
                 return BadRequest("Your Account have been banned!!!");
@@ -57,7 +69,12 @@ namespace Meowgic.API.Controllers
         [Authorize]
         public async Task<ActionResult<AccountResponse>> WhoAmI()
         {
-            return await _serviceFactory.GetAuthService.GetAuthAccountInfo(HttpContext.User);
+            var result = await _serviceFactory.GetAuthService.GetAuthAccountInfo(HttpContext.User);
+            if (result == null)
+            {
+                return BadRequest("Please login");
+            }
+            return result;
         }
     }
 }

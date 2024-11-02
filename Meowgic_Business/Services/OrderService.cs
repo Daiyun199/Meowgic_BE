@@ -6,6 +6,7 @@ using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
 using Meowgic.Data.Models.Response.OrderDetail;
+using Meowgic.Data.Models.Response.PayOS;
 using Meowgic.Data.Repositories;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
@@ -22,7 +23,7 @@ namespace Meowgic.Business.Services
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request)
+        public async Task<ResultModel> GetPagedOrders(QueryPageOrder request)
         {
             var orders = await _unitOfWork.GetOrderRepository.GetPagedOrders(request);
             var totalCount = await _unitOfWork.GetOrderRepository.GetOrdersSize(request);
@@ -39,33 +40,34 @@ namespace Meowgic.Business.Services
                 };
                 orderResponses.Add(orderResponse);
             }
-            return new PagedResultResponse<OrderResponses>
+            var result = new PagedResultResponse<OrderResponses>
             {
                 TotalCount = totalCount,
                 PageNumber = request.PageNumber,
                 PageSize = request.PageSize,
                 Items = orderResponses
             };
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = result};
         }
 
-        public async Task<Order> GetOrderDetailsInfoById(string orderId)
+        public async Task<ResultModel> GetOrderDetailsInfoById(string orderId)
         {
             var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
 
             if (order is null)
             {
-                throw new NotFoundException("Order not found");
+                return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
             }
 
-            return order;
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = order };
         }
-        public async Task<OrderResponses> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds)
+        public async Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
             var orders = await _unitOfWork.GetOrderRepository.GetAllAsync();
             var id = orders.Count > 0 ? int.Parse(orders.Last().Id[2..]) + 1 : 1;
@@ -91,7 +93,7 @@ namespace Meowgic.Business.Services
                 var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
                 if (schedule.IsBooked)
                 {
-                    throw new BadRequestException("This schedule not availabe");
+                    return new ResultModel { IsSuccess = false, Message = "Schedule not available!!" };
                 }
                 schedule.IsBooked = true;
                 await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
@@ -113,31 +115,31 @@ namespace Meowgic.Business.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status
             };
-            return result;
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data= result };
         }
-        public async Task<OrderResponses> CancelOrder(ClaimsPrincipal claim, string orderId)
+        public async Task<ResultModel> CancelOrder(ClaimsPrincipal claim, string orderId)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
 
             var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
-                throw new NotFoundException("Order not found");
+                return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
             }
 
             if (order.AccountId != userId)
             {
-                throw new BadRequestException("The order does not belong to this account.");
+                return new ResultModel { IsSuccess = false, Message = "The order does not belong to this account." };
             }
 
             if (order.Status != OrderStatus.Unpaid.ToString())
             {
-                throw new BadRequestException("The order status must be 'Unpaid' to cancel.");
+                return new ResultModel { IsSuccess = false, Message = "The order status must be 'Unpaid' to cancel." };
             }
 
             order.Status = OrderStatus.Cancel.ToString();
@@ -159,7 +161,7 @@ namespace Meowgic.Business.Services
                 OrderDate = order.OrderDate,
                 Status = order.Status
             };
-            return result;
+            return new ResultModel { IsSuccess = true, Message = "successfully!!", Data = result };
         }
     }
 }

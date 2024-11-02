@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Security.Claims;
 using Meowgic.Shares.Exceptions;
+using Org.BouncyCastle.Ocsp;
 
 namespace Meowgic.Business.Services
 {
@@ -25,40 +26,54 @@ namespace Meowgic.Business.Services
         private readonly IConfiguration _configuration = configuration;
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<CreatePaymentResult> CreatePaymentLink(string orderId, ClaimsPrincipal claim)
+        public async Task<ResultModel> CreatePaymentLink(string orderId, ClaimsPrincipal claim)
         //public async Task<CreatePaymentResult> CreatePaymentLink(string name, decimal price)
         {
+            var clientId = _configuration["payOS:ClientId"];
+            if (clientId == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ClientId not found" };
+            }
+            var apiKey = _configuration["payOS:ApiKey"];
+            if (apiKey == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ApiKey not found" };
+            }
+            var checksumKey = _configuration["payOS:ChecksumKey"];
+            if (checksumKey == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ChecksumKey not found" };
+            }
+
             PayOS _payOS = new(
-                _configuration["payOS:ClientId"] ?? throw new Exception("Cannot find client"),
-                _configuration["payOS:ApiKey"] ?? throw new Exception("Cannot find api key"),
-                _configuration["payOS:ChecksumKey"] ?? throw new Exception("Cannot find Checksum Key")
+                clientId,
+                apiKey,
+                checksumKey
             );
 
-            //int orderCode = int.Parse(DateTime.Now.ToString("fffff"));
-            //ItemData item = new(name, 1, (int)price );
-            //List<ItemData> items = [item];
-            //int expiredAt =  (int) (DateTime.UtcNow.AddMinutes(15) - DateTime.Now).TotalSeconds;
-
-            //PaymentData paymentData = new(
-            //    orderCode: orderCode,
-            //    amount: (int)price,
-            //    description: name,
-            //    items: items,
-            //    cancelUrl: "https://www.youtube.com/watch?v=XLr8rWFduUU",
-            //    returnUrl: "https://www.facebook.com/",
-            //    buyerName: "abc",
-            //    buyerEmail: "abc",
-            //    buyerPhone: "abc",
-            //    expiredAt: expiredAt
-            //    );
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false , Message = "Account not found!!"};
+            }
+            
+            //var paymentLinkInformation = await _payOS.getPaymentLinkInformation(orderCode);
+            //if (paymentLinkInformation is not null)
+            //{
+            //    return null;
+            //}
+            var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
+            if (order is null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
+            }
+            if (order.AccountId != userId)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Account not have permission!!" };
             }
             int orderCode = int.Parse(orderId[2..]);
-            var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
+
             var orderDetails = order.OrderDetails;
             List<ItemData> items = [];
             foreach (var orderDetail in orderDetails)
@@ -69,64 +84,68 @@ namespace Meowgic.Business.Services
                 items.Add(new ItemData(service.Name, 1, price));
             }
             long expiredAt = (long)(DateTime.UtcNow.AddMinutes(15) - new DateTime(1970, 1, 1)).TotalSeconds;
-            string signature = "amount="+ (int)order.TotalPrice 
-                             + "&buyerEmail=" + account.Email
-                             + "&buyerName=" + account.Name
-                             + "&buyerPhone=" + account.Phone
-                             + "&cancelUrl=https://www.meowgic.online/"
-                             + "&description=Thanh toan don " + orderId
-                             + "&expiredAt=" + expiredAt
-                             + "&items=" + items
-                             + "&orderCode=" + orderCode
-                             + "&returnUrl=https://www.meowgic.online/";
-            byte[] key = Encoding.UTF8.GetBytes(_configuration["payOS:ChecksumKey"]);
-            byte[] source = Encoding.UTF8.GetBytes(signature);
-            using HMACSHA256 hmac = new(key);
-            byte[] hashValue = hmac.ComputeHash(source);
 
             PaymentData paymentData = new(
                 orderCode: orderCode,
                 amount: (int)order.TotalPrice,
                 description: "Thanh toan don " + orderId,
                 items: items,
-                cancelUrl: "https://www.meowgic.online/",
-                returnUrl: "https://www.meowgic.online/",
+                cancelUrl: "https://www.meowgic.online/fail",
+                returnUrl: "https://www.meowgic.online/success",
                 expiredAt: expiredAt,
                 buyerName: account.Name,
                 buyerPhone: account.Phone,
-                buyerEmail: account.Email,
-                signature: BitConverter.ToString(hashValue).Replace("-", "").ToLower()
+                buyerEmail: account.Email
             );
 
             CreatePaymentResult createPayment = await _payOS.createPaymentLink(paymentData);
 
-            return createPayment;
+            return new ResultModel { IsSuccess = true, Message = "Create payment successfully!!", Data = createPayment};
         }
 
-        public async Task<PaymentLinkInformation> GetPaymentLinkInformation(int orderCode)
+        public async Task<ResultModel> GetPaymentLinkInformation(long orderCode)
         {
-            PayOS _payOS = new(
-                _configuration["payOS:ClientId"] ?? throw new Exception("Cannot find client"),
-                _configuration["payOS:ApiKey"] ?? throw new Exception("Cannot find api key"),
-                _configuration["payOS:ChecksumKey"] ?? throw new Exception("Cannot find Checksum Key")
-            );
+            var clientId = _configuration["payOS:ClientId"];
+            if (clientId == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ClientId not found" };
+            }
+            var apiKey = _configuration["payOS:ApiKey"];
+            if (apiKey == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ApiKey not found" };
+            }
+            var checksumKey = _configuration["payOS:ChecksumKey"];
+            if (checksumKey == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "ChecksumKey not found" };
+            }
+
+            PayOS _payOS = new(clientId,apiKey,checksumKey);
             PaymentLinkInformation paymentLinkInformation = await _payOS.getPaymentLinkInformation(orderCode);
-            return paymentLinkInformation;
+            return paymentLinkInformation == null ? 
+                new ResultModel { IsSuccess = false, Message = "Payment not found!!" } 
+                : new ResultModel { IsSuccess = true, Message = "Get payment successfully!!!!", Data = paymentLinkInformation }; ;
         }
-        public async Task<PaymentLinkInformation> CancelOrder(int orderCode)
+        public async Task<ResultModel> CancelOrder(int orderCode)
         {
             PayOS _payOS = new(
                     _configuration["payOS:ClientId"] ?? throw new Exception("Cannot find client"),
                     _configuration["payOS:ApiKey"] ?? throw new Exception("Cannot find api key"),
                     _configuration["payOS:ChecksumKey"] ?? throw new Exception("Cannot find Checksum Key")
                 );
+            var getPaymentLinkInformation = await _payOS.getPaymentLinkInformation((long)orderCode);
+            if (getPaymentLinkInformation == null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Payment not found!!" };
+            }
             PaymentLinkInformation paymentLinkInformation = await _payOS.cancelPaymentLink(orderCode);
 
             var order = await _unitOfWork.GetOrderRepository.GetByIdAsync("OD" + orderCode.ToString("D4"));
             order.Status = OrderStatus.Cancel.ToString();
             await _unitOfWork.GetOrderRepository.UpdateAsync(order);
 
-            return paymentLinkInformation;
+            return new ResultModel { IsSuccess = true, Message = "Canceled payment successfully!!" , Data = paymentLinkInformation};
         }
         public async Task<ResultModel> VerifyPaymentWebhookData(WebhookType body)
         {

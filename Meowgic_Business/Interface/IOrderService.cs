@@ -2,6 +2,7 @@
 using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
+using Meowgic.Data.Models.Response.PayOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,12 +14,12 @@ namespace Meowgic.Business.Interface
 {
     public interface IOrderService
     {
-        Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request);
+        Task<ResultModel> GetPagedOrders(QueryPageOrder request);
 
-        Task<Order> GetOrderDetailsInfoById(string orderId);
+        Task<ResultModel> GetOrderDetailsInfoById(string orderId);
 
-        Task<OrderResponses> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds);
+        Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds);
 
-        Task<OrderResponses> CancelOrder(ClaimsPrincipal calim, string orderId);
+        Task<ResultModel> CancelOrder(ClaimsPrincipal calim, string orderId);
     }
 }

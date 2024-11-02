@@ -1,6 +1,7 @@
 ﻿using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.OrderDetail;
 using Meowgic.Data.Models.Response.OrderDetail;
+using Meowgic.Data.Models.Response.PayOS;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,12 +13,12 @@ namespace Meowgic.Business.Interface
 {
     public interface IOrderDetailService
     {
-        Task<OrderDetailResponse> AddToCart(ClaimsPrincipal claim, AddToCartRequest request);        
-        Task<List<OrderDetailResponse>> GetCart(ClaimsPrincipal claim);
-        Task<List<OrderDetailResponse>> GetAll();
-        Task<List<OrderDetailResponse>> GetAllByOrderId(string orderId);
-        Task<OrderDetail> GetOrderDetailById(string id);
-        Task<OrderDetailResponse> RemoveFromCart(ClaimsPrincipal claim, string detailId);
-        Task<OrderDetailResponse> UpdateOrderDetail(ClaimsPrincipal claim, string detailId, UpdateDetailInfor request);
+        Task<ResultModel> AddToCart(ClaimsPrincipal claim, AddToCartRequest request);        
+        Task<ResultModel> GetCart(ClaimsPrincipal claim);
+        Task<ResultModel> GetAll();
+        Task<ResultModel> GetAllByOrderId(string orderId);
+        Task<ResultModel> GetOrderDetailById(string id);
+        Task<ResultModel> RemoveFromCart(ClaimsPrincipal claim, string detailId);
+        Task<ResultModel> UpdateOrderDetail(ClaimsPrincipal claim, string detailId, UpdateDetailInfor request);
     }
 }

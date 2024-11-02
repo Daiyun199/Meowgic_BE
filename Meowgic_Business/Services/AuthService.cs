@@ -22,7 +22,7 @@ namespace Meowgic.Business.Services
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
         private readonly IServiceFactory _serviceFactory = serviceFactory;
 
-        public async Task<GetAuthTokens> Login(Login loginDto)
+        public async Task<GetAuthTokens?> Login(Login loginDto)
         {
             var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == loginDto.Email
             && a.Password == HashPassword(loginDto.Password));
@@ -40,10 +40,10 @@ namespace Meowgic.Business.Services
                 };
             }
 
-            throw new UnauthorizedException("Wrong email or password");
+            return null;
 
         }
-        public async Task<GetAuthTokens> LoginWithoutPassword(string email)
+        public async Task<GetAuthTokens?> LoginWithoutPassword(string email)
         {
             var account = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == email);
 
@@ -60,16 +60,16 @@ namespace Meowgic.Business.Services
                 };
             }
 
-            throw new UnauthorizedException("Wrong email or password");
+            return null;
 
         }
 
-        public async Task<Register> Register(Register registerDto)
+        public async Task<Register?> Register(Register registerDto)
         {
             var accountWithEmail = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == registerDto.Email);
             if (accountWithEmail is not null)
             {
-                throw new BadRequestException($"Account with email {registerDto.Email} is already exists");
+                return null;
             }
 
             var account = new Account
@@ -104,7 +104,7 @@ namespace Meowgic.Business.Services
             return registerDto;
         }
 
-        public async Task<AccountResponse> GetAuthAccountInfo(ClaimsPrincipal claims)
+        public async Task<AccountResponse?> GetAuthAccountInfo(ClaimsPrincipal claims)
         {
             var accountId = claims.FindFirst(c => c.Type == "aid")?.Value;
 
@@ -117,7 +117,7 @@ namespace Meowgic.Business.Services
 
             if (account is null)
             {
-                throw new UnauthorizedException("Account not found");
+                return null;
             }
 
             return account.Adapt<AccountResponse>();

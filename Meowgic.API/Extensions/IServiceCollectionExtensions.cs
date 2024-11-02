@@ -136,7 +136,7 @@ namespace Meowgic.API.Extensions
         private static IServiceCollection AddCorsConfigurations(this IServiceCollection services)
         {
             services.AddCors(options =>
-                options.AddPolicy("AllowAll", b => b.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod()));
+                options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             return services;
         }
 

@@ -18,6 +18,8 @@ using Meowgic.Data.Repositories;
 using Meowgic.Data.Models.Request.OrderDetail;
 using Org.BouncyCastle.Asn1.Ocsp;
 using Meowgic.Data.Models.Response.Order;
+using Meowgic.Data.Models.Response.PayOS;
+using Microsoft.Identity.Client;
 
 namespace Meowgic.Business.Services
 {
@@ -25,7 +27,7 @@ namespace Meowgic.Business.Services
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<OrderDetailResponse> AddToCart(ClaimsPrincipal claim, AddToCartRequest request)
+        public async Task<ResultModel> AddToCart(ClaimsPrincipal claim, AddToCartRequest request)
         {
             var userId = claim.FindFirst("aid")?.Value;
 
@@ -33,23 +35,30 @@ namespace Meowgic.Business.Services
 
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
 
             var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(request.ServiceId);
 
             if (service is null)
             {
-                throw new NotFoundException("Service not found");
+                return new ResultModel { IsSuccess = false, Message = "Service not found!!" };
             }
             var availableSchedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(request.ScheduleReaderId);
-
+            if (availableSchedule is null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Schedule not found!!" };
+            }
             if (availableSchedule.IsBooked)
             {
-                throw new BadRequestException("This schedule not availabe");
+                return new ResultModel { IsSuccess = false, Message = "This schedule is not available!!" };
             }
 
-            var existingService = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.ServiceId == request.ServiceId && od.OrderId == null);
+            var existingService = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => 
+                    od.ServiceId == request.ServiceId 
+                    && od.OrderId == null 
+                    && od.CreatedBy == userId 
+                    && od.DeletedTime == null);
 
             if (existingService is null)
             {
@@ -68,23 +77,24 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = userId,
                 };
-                return result;
+                return new ResultModel { IsSuccess = true, Message = "Add to card success!!", Data = result }; ;
             }
             else
             {
-                throw new BadRequestException("Cart already has this service");
+                return new ResultModel { IsSuccess = false, Message = "Cart already has this service" };
             }
         }
 
-        public async Task<List<OrderDetailResponse>> GetCart(ClaimsPrincipal claim)
+        public async Task<ResultModel> GetCart(ClaimsPrincipal claim)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
 
             var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetCart(userId);
@@ -102,27 +112,28 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = userId
                 };
                 result.Add(orderDetailResponse);
             }
-            return result;
+            return new ResultModel { IsSuccess = true, Message = "Get cart successfully!!", Data = result }; ;
         }
 
-        public async Task<OrderDetailResponse> RemoveFromCart(ClaimsPrincipal claim, string detailId)
+        public async Task<ResultModel> RemoveFromCart(ClaimsPrincipal claim, string detailId)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found" };
             }
 
             var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId);
 
             if (orderDetail is null)
             {
-                throw new BadRequestException("Cart not has this service");
+                return new ResultModel { IsSuccess = false, Message = "Cart not has this service" };
             }
             else
             {
@@ -136,27 +147,28 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = orderDetail.CreatedBy
                 };
                 await _unitOfWork.GetOrderDetailRepository.DeleteAsync(orderDetail);
                 await _unitOfWork.SaveChangesAsync();
-                return result;
+                return new ResultModel { IsSuccess = true, Message = "Remove successfully!!", Data = result };
             }
         }
-        public async Task<OrderDetailResponse> UpdateOrderDetail(ClaimsPrincipal claim, string detailId, UpdateDetailInfor request)
+        public async Task<ResultModel> UpdateOrderDetail(ClaimsPrincipal claim, string detailId, UpdateDetailInfor request)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
             if (account is null)
             {
-                throw new BadRequestException("Account not found");
+                return new ResultModel { IsSuccess = false, Message = "Account not found" };
             }
 
             var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId);
 
             if (orderDetail is null)
             {
-                throw new BadRequestException("Cart not has this service");
+                return new ResultModel { IsSuccess = false, Message = "Cart not has this service" };
             }
             else
             {
@@ -174,23 +186,24 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = orderDetail.CreatedBy
                 };
-                return result;
+                return new ResultModel { IsSuccess = true, Message = "Update successfully!!", Data = result };
             }
         }
-        public async Task<OrderDetail> GetOrderDetailById(string id)
+        public async Task<ResultModel> GetOrderDetailById(string id)
         {
             var orderDetail = await _unitOfWork.GetOrderDetailRepository.GetOrderDetailByIdAsync(id);
 
             if (orderDetail is null)
             {
-                throw new BadRequestException("Not found!!!");
+                return new ResultModel { IsSuccess = false, Message = "Not found!!" };
             }
-                return orderDetail;
+            return new ResultModel { IsSuccess = true, Message = "Get successfully!", Data = orderDetail };
         }
 
-        public async Task<List<OrderDetailResponse>> GetAll()
+        public async Task<ResultModel> GetAll()
         {
             var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetAllOrderDetails();
 
@@ -207,13 +220,14 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = orderDetail.CreatedBy
                 };
                 result.Add(orderDetailResponse);
             }
-            return result;
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = result };
         }
-        public async Task<List<OrderDetailResponse>> GetAllByOrderId(string orderId)
+        public async Task<ResultModel> GetAllByOrderId(string orderId)
         {
             var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetAllOrderDetailsByOrderId(orderId);
 
@@ -230,11 +244,12 @@ namespace Meowgic.Business.Services
                     Date = schedule.DayOfWeek.ToString("dd/MM/yyyy"),
                     StartTime = schedule.StartTime.ToString("hh:mm:ss tt"),
                     EndTime = schedule.EndTime.ToString("hh:mm:ss tt"),
-                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price
+                    Subtotal = service.PromotionId != null ? (decimal)(service.Price * (1 - service.Promotion.DiscountPercent)) : (decimal)service.Price,
+                    CreateBy = orderDetail.CreatedBy
                 };
                 result.Add(orderDetailResponse);
             }
-            return result;
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!" , Data = result};
         }
     }
 }

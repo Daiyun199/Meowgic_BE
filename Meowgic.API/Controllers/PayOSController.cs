@@ -14,22 +14,26 @@ namespace Meowgic.API.Controllers
     {
         private readonly IPayOSService _payOSService = payOSService;
 
-        [Authorize(Policy = "Customer")]
+        
         [HttpPost("create")]
-        public async Task<CreatePaymentResult> CreatePaymentLink(string orderId)
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> CreatePaymentLink(string orderId)
         {
-            return await _payOSService.CreatePaymentLink(orderId, HttpContext.User);
+            var result = await _payOSService.CreatePaymentLink(orderId, HttpContext.User);
+            return Ok(result);
         }
-        [HttpGet("{orderCode}")]
-        public async Task<PaymentLinkInformation> GetPaymentLinkInfomation([FromRoute] int orderCode)
-        {
-            return await _payOSService.GetPaymentLinkInformation(orderCode);
-        }
-        [HttpPut("{orderCode}")]
-        public async Task<PaymentLinkInformation> CancelOrder([FromRoute] int orderCode)
-        {
-            return await _payOSService.CancelOrder(orderCode);
-        }
+        //[HttpGet("{orderCode}")]
+        //public async Task<ActionResult<ResultModel>> GetPaymentLinkInfomation([FromRoute] long orderCode)
+        //{
+        //    var result = await _payOSService.GetPaymentLinkInformation(orderCode);
+        //    return Ok(result);
+        //}
+        //[HttpPut("{orderCode}")]
+        //public async Task<ActionResult<ResultModel>> CancelOrder([FromRoute] int orderCode)
+        //{
+        //    var result = await _payOSService.CancelOrder(orderCode);
+        //    return Ok(result);
+        //}
         [HttpPost("payos_transfer_handler")]
         public async Task<IActionResult> PayOSTransferHandler(WebhookType body)
         {
