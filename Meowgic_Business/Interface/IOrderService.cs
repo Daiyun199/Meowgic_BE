@@ -18,7 +18,7 @@ namespace Meowgic.Business.Interface
 
         Task<ResultModel> GetOrderDetailsInfoById(string orderId);
 
-        Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds);
+        Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<string> detailIds);
 
         Task<ResultModel> CancelOrder(ClaimsPrincipal calim, string orderId);
     }

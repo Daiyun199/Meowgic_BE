@@ -51,12 +51,7 @@ namespace Meowgic.Business.Services
                 checksumKey
             );
 
-            var userId = claim.FindFirst("aid")?.Value;
-            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
-            if (account is null)
-            {
-                return new ResultModel { IsSuccess = false , Message = "Account not found!!"};
-            }
+            
             
             //var paymentLinkInformation = await _payOS.getPaymentLinkInformation(orderCode);
             //if (paymentLinkInformation is not null)
@@ -68,10 +63,21 @@ namespace Meowgic.Business.Services
             {
                 return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
             }
-            if (order.AccountId != userId)
+            var userId = claim.FindFirst("aid")?.Value;
+            var account = await _unitOfWork.GetAccountRepository.GetByIdAsync(userId);
+            if (account is null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
+            }
+            if (order.AccountId != account.Id)
             {
                 return new ResultModel { IsSuccess = false, Message = "Account not have permission!!" };
             }
+
+            //order.Status = OrderStatus.Paid.ToString(); // Success
+            //await _unitOfWork.GetOrderRepository.UpdateAsync(order);
+            //await _unitOfWork.SaveChangesAsync();
+
             int orderCode = int.Parse(orderId[2..]);
 
             var orderDetails = order.OrderDetails;

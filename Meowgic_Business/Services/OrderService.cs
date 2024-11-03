@@ -61,7 +61,7 @@ namespace Meowgic.Business.Services
 
             return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = order };
         }
-        public async Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<BookingRequest> detailIds)
+        public async Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<string> detailIds)
         {
             var userId = claim.FindFirst("aid")?.Value;
             var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
@@ -86,7 +86,11 @@ namespace Meowgic.Business.Services
 
             foreach (var detailId in detailIds)
             {
-                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId.DetailId);
+                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId);
+                if (orderDetail is null)
+                {
+                    return new ResultModel { IsSuccess = false, Message = "Not found detail with id: "+ detailId + "!!!" };
+                }
                 orderDetail.OrderId = "OD" + id.ToString("D4");
                 await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
 

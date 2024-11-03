@@ -61,7 +61,7 @@ namespace Meowgic.API.Controllers
         }
         [HttpPost("booking-order")]
         [Authorize(Policy = "Customer")]
-        public async Task<ActionResult<ResultModel>> CreateOrder(List<BookingRequest> request)
+        public async Task<ActionResult<ResultModel>> CreateOrder(List<string> request)
         {
             var item = await _serviceFactory.GetOrderService.BookingOrder(HttpContext.User, request);
             return Ok(item);
