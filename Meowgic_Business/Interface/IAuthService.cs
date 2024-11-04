@@ -9,6 +9,7 @@ namespace Meowgic.Business.Interface
     {
         Task<GetAuthTokens?> Login(Login loginDto);
         Task<Register?> Register(Register registerDto);
+        Task<RegisterByGG?> RegisterByGG(string email);
         Task<AccountResponse?> GetAuthAccountInfo(ClaimsPrincipal claims);
         Task<GetAuthTokens?> LoginWithoutPassword(string email);
 

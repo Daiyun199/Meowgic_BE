@@ -29,9 +29,20 @@ namespace Meowgic.API.Controllers
             var result = await _serviceFactory.GetAuthService.Register(request);
             if (result == null)
             {
-                return BadRequest("Account with email: " + result.Email + " has aldready exist!!!");
+                return BadRequest("Account with email: " + request.Email + " has aldready exist!!!");
             }
             await _emailService.SendConfirmEmailAsync(request.Email);
+            return Ok(result);
+        }
+        [HttpPost("register-without-password")]
+        public async Task<ActionResult> RegisterAccountByGG(string email)
+        {
+            var result = await _serviceFactory.GetAuthService.RegisterByGG(email);
+            if (result == null)
+            {
+                return BadRequest("Account with email: " + email + " has aldready exist!!!");
+            }
+            await _emailService.SendConfirmEmailAsync(email);
             return Ok(result);
         }
 

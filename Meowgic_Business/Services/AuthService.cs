@@ -103,6 +103,41 @@ namespace Meowgic.Business.Services
 
             return registerDto;
         }
+        public async Task<RegisterByGG?> RegisterByGG(string email)
+        {
+            var accountWithEmail = await _unitOfWork.GetAccountRepository.FindOneAsync(a => a.Email == email);
+            if (accountWithEmail is not null)
+            {
+                return null;
+            }
+            var emailElement = email.Split('@');
+
+            var account = new Account
+            {
+                Email = email,
+                Name = emailElement[0],
+                Role = Roles.Customer
+            };
+
+            //account.Role = Roles.Customer.ToString();
+            account.Premium = false;
+            account.IsDeleted = false;
+            account.isConfirmed = false;
+            account.EmailConfirmed = false;
+            account.PhoneNumberConfirmed = true;
+            account.TwoFactorEnabled = true;
+            account.LockoutEnabled = true;
+            account.Status = UserStatus.Active.ToString();
+
+            await _unitOfWork.GetAccountRepository.AddAsync(account);
+            await _unitOfWork.SaveChangesAsync();
+
+            return new RegisterByGG { 
+                Name = account.Name,
+                Email = account.Email,
+                Roles = account.Role
+            };
+        }
 
         public async Task<AccountResponse?> GetAuthAccountInfo(ClaimsPrincipal claims)
         {
