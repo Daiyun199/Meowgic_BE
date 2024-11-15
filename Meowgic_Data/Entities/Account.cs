@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Meowgic.Shares.Enum;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -17,7 +18,7 @@ namespace Meowgic.Data.Entities
 
         public string Email { get; set; } = null!;
 
-        public string Password { get; set; } = null!;
+        public string? Password { get; set; } = null!;
 
         public string Name { get; set; } = null!;
 
@@ -27,7 +28,7 @@ namespace Meowgic.Data.Entities
 
         public string? Phone { get; set; }
 
-        public string Role { get; set; } = null!;
+        public Roles Role { get; set; } 
 
         public string Status { get; set; } = null!;
 
@@ -36,7 +37,13 @@ namespace Meowgic.Data.Entities
         public bool Premium { get; set; }
 
         public string? ImgUrl { get; set; }
+        public string? Description { get; set; }
+        public string? bankAccount { get; set; }
+        public double? yearsOfExperience { get; set; }
+        public string? Specialization {  get; set; }
+        public int? countTarot { get; set; } 
         public bool IsDeleted { get; set; } = false;
+        public string? otpResetPassword { get; set; }
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [DefaultValue("GETDATE()")]
         public DateTime? CreatedTime { get; set; } = DateTime.Now;
@@ -53,5 +60,6 @@ namespace Meowgic.Data.Entities
 
         public virtual ICollection<TarotService> Services { get; set; } = new List<TarotService>();
         public virtual ICollection<ScheduleReader> ScheduleReaders { get; set; } = new List<ScheduleReader>();
+        public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
     }
 }

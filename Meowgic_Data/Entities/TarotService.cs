@@ -28,6 +28,7 @@ namespace Meowgic.Data.Entities
 
         [ForeignKey("Promotion")]
         public string? PromotionId { get; set; }
+        public bool isSpecial { get; set; }
 
         public virtual Account Account { get; set; } = null!;
 

@@ -5,6 +5,9 @@ using Meowgic.Data.Interfaces;
 using Meowgic.Data.Models.Request.Order;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
+using Meowgic.Data.Models.Response.OrderDetail;
+using Meowgic.Data.Models.Response.PayOS;
+using Meowgic.Data.Repositories;
 using Meowgic.Shares.Enum;
 using Meowgic.Shares.Exceptions;
 using System;
@@ -20,200 +23,169 @@ namespace Meowgic.Business.Services
     {
         private readonly IUnitOfWork _unitOfWork = unitOfWork;
 
-        public async Task<PagedResultResponse<OrderResponses>> GetPagedOrders(QueryPageOrder request)
+        public async Task<ResultModel> GetPagedOrders(QueryPageOrder request)
         {
-            return (await _unitOfWork.GetOrderRepository().GetPagedOrders(request)).Adapt<PagedResultResponse<OrderResponses>>();
+            var orders = await _unitOfWork.GetOrderRepository.GetPagedOrders(request);
+            var totalCount = await _unitOfWork.GetOrderRepository.GetOrdersSize(request);
+            var orderResponses = new List<OrderResponses>();
+            foreach (var order in orders)
+            {
+                var orderResponse = new OrderResponses
+                {
+                    Id = order.Id,
+                    CustomerName = order.Account.Name,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status
+                };
+                orderResponses.Add(orderResponse);
+            }
+            var result = new PagedResultResponse<OrderResponses>
+            {
+                TotalCount = totalCount,
+                PageNumber = request.PageNumber,
+                PageSize = request.PageSize,
+                Items = orderResponses
+            };
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = result};
         }
 
-        public async Task<Order> GetOrderDetailsInfoById(string orderId)
+        public async Task<ResultModel> GetAll()
         {
-            var order = await _unitOfWork.GetOrderRepository().GetOrderDetailsInfoById(orderId);
+            var orders = await _unitOfWork.GetOrderRepository.GetAll();
+            var orderResponses = new List<OrderResponses>();
+            foreach (var order in orders)
+            {
+                var orderResponse = new OrderResponses
+                {
+                    Id = order.Id,
+                    CustomerName = order.Account.Name,
+                    TotalPrice = order.TotalPrice,
+                    OrderDate = order.OrderDate,
+                    Status = order.Status
+                };
+                orderResponses.Add(orderResponse);
+            }
+            
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = orderResponses };
+        }
+
+        public async Task<ResultModel> GetOrderDetailsInfoById(string orderId)
+        {
+            var order = await _unitOfWork.GetOrderRepository.GetOrderDetailsInfoById(orderId);
 
             if (order is null)
             {
-                throw new NotFoundException("Order not found");
+                return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
             }
 
-            return order;
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data = order };
         }
-        public async Task<Order> GetCartInfo(string userId)
+        public async Task<ResultModel> BookingOrder(ClaimsPrincipal claim, List<string> detailIds)
         {
-            var order = await _unitOfWork.GetOrderRepository().GetCustomerCartInfo(userId);
-            if (order is null)
+            var userId = claim.FindFirst("aid")?.Value;
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+            if (account is null)
             {
-                throw new NotFoundException("Empty cart");
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
-            return order;
-        }
-        public async Task ConfirmOrder(string userId, string orderId, List<string> serviceIds)
-        {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            if (order is null)
+            var orders = await _unitOfWork.GetOrderRepository.GetAllAsync();
+            var id = orders.Count > 0 ? int.Parse(orders.Last().Id[2..]) + 1 : 1;
+
+            double totalPrice = 0;
+            var order = new Order
             {
-                throw new NotFoundException("Order not found");
-            }
-            order.TotalPrice = 0;
+                Id = "OD" + id.ToString("D4"),
+                AccountId = userId,
+                TotalPrice = (decimal)totalPrice,
+                OrderDate = DateTime.Now,
+                Status = OrderStatus.Paid.ToString()
+            };
+            await _unitOfWork.GetOrderRepository.AddAsync(order);
+            await _unitOfWork.SaveChangesAsync();
 
-            if (order.CreatedBy != userId)
+            foreach (var detailId in detailIds)
             {
-                throw new BadRequestException("The order does not belong to the customer.");
-            }
-
-            if (order.Status != "InCart")
-            {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
-
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == orderId);
-            if (orderDetails is [])
-            {
-                throw new NotFoundException("There are no items in cart.");
-            }
-
-            if (serviceIds is null || serviceIds is [])
-            {
-                throw new BadRequestException("There are no product confirmed for order.");
-            }
-
-            order.Status = OrderStatus.Unpaid.ToString();
-
-            foreach (var serviceId in serviceIds)
-            {
-                var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(o => o.OrderId == orderId && o.ServiceId == serviceId);
-                var serviceDetail = await _unitOfWork.GetServiceRepository().GetService(serviceId);
-
+                var orderDetail = await _unitOfWork.GetOrderDetailRepository.FindOneAsync(od => od.Id == detailId);
                 if (orderDetail is null)
                 {
-                    throw new BadRequestException("The service is not in cart.");
+                    return new ResultModel { IsSuccess = false, Message = "Not found detail with id: "+ detailId + "!!!" };
                 }
-                if (serviceDetail is null)
+                orderDetail.OrderId = "OD" + id.ToString("D4");
+                await _unitOfWork.GetOrderDetailRepository.UpdateAsync(orderDetail);
+
+                var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
+                if (schedule.IsBooked)
                 {
-                    throw new NotFoundException("Service not found.");
+                    return new ResultModel { IsSuccess = false, Message = "Schedule not available!!" };
                 }
-                orderDetails.Remove(orderDetails.First(o => o.OrderId == orderDetail.OrderId && o.ServiceId == orderDetail.ServiceId));
-                order.TotalPrice += orderDetail.Service.PromotionId != null ? orderDetail.Service.Price*(1 - orderDetail.Service.Promotion.DiscountPercent) : orderDetail.Service.Price;
+                schedule.IsBooked = true;
+                await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
+
+                var service = await _unitOfWork.GetServiceRepository.GetTarotServiceByIdAsync(orderDetail.ServiceId);
+                totalPrice += service.PromotionId != null ? service.Price * (1 - service.Promotion.DiscountPercent) : service.Price;
             }
+
+            order.TotalPrice = (decimal)totalPrice;
+
+            await _unitOfWork.GetOrderRepository.UpdateAsync(order);
             await _unitOfWork.SaveChangesAsync();
 
-            if (orderDetails is not [])
+            var result = new OrderResponses
             {
-                await _unitOfWork.GetOrderRepository().AddAsync(new Order
-                {
-                    AccountId = userId,
-                    Status = OrderStatus.Incart.ToString(),
-                    TotalPrice = 0,
-                    OrderDate = DateTime.Now
-                });
-                await _unitOfWork.SaveChangesAsync();
-
-                foreach (var item in orderDetails)
-                {
-                    await _unitOfWork.GetOrderDetailRepository().DeleteAsync(item);
-                    await _unitOfWork.GetOrderDetailRepository().AddAsync(new OrderDetail
-                    {
-                        OrderId = order.Id,
-                        ServiceId = item.ServiceId
-                    });
-                }
+                Id = order.Id,
+                CustomerName = account.Name,
+                TotalPrice = order.TotalPrice,
+                OrderDate = order.OrderDate,
+                Status = order.Status
+            };
+            return new ResultModel { IsSuccess = true, Message = "Successfully!!", Data= result };
+        }
+        public async Task<ResultModel> CancelOrder(ClaimsPrincipal claim, string orderId)
+        {
+            var userId = claim.FindFirst("aid")?.Value;
+            var account = await _unitOfWork.GetAccountRepository.GetCustomerDetailsInfo(userId);
+            if (account is null)
+            {
+                return new ResultModel { IsSuccess = false, Message = "Account not found!!" };
             }
 
-            await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task CancelOrder(string userId, string orderId)
-        {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == userId);
+            var order = await _unitOfWork.GetOrderRepository.FindOneAsync(o => o.Id == orderId);
             if (order is null)
             {
-                throw new NotFoundException("Order not found");
+                return new ResultModel { IsSuccess = false, Message = "Order not found!!" };
             }
 
-            if (order.AccountId != userId && account.Role != "Staff")
+            if (order.AccountId != userId)
             {
-                throw new BadRequestException("The order does not belong to this account.");
+                return new ResultModel { IsSuccess = false, Message = "The order does not belong to this account." };
             }
 
             if (order.Status != OrderStatus.Unpaid.ToString())
             {
-                throw new BadRequestException("The order status must be 'Unpaid' to cancel.");
+                return new ResultModel { IsSuccess = false, Message = "The order status must be 'Unpaid' to cancel." };
             }
 
             order.Status = OrderStatus.Cancel.ToString();
-
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == order.Id);
+            
+            var orderDetails = await _unitOfWork.GetOrderDetailRepository.GetAllOrderDetailsByOrderId(orderId);
+            foreach (var orderDetail in orderDetails)
+            {
+                var schedule = await _unitOfWork.GetScheduleReaderRepository.GetByIdAsync(orderDetail.ScheduleReaderId);
+                schedule.IsBooked = false;
+                await _unitOfWork.GetScheduleReaderRepository.UpdateAsync(schedule);
+            }
             await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task UpdateOrderDetail(string userId, string orderId, string serviceId)
-        {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
 
-            if (order.Status != OrderStatus.Incart.ToString())
+            var result = new OrderResponses
             {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
-
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
-            if (orderDetail is null)
-            {
-                throw new NotFoundException("Service not found in the order.");
-            }
-
-            await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task DeleteServiceFromCart(string userId, string orderId, string serviceId)
-        {
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-
-            if (order.Status != OrderStatus.Incart.ToString())
-            {
-                throw new BadRequestException("The order status must be 'InCart'.");
-            }
-
-            var orderDetail = await _unitOfWork.GetOrderDetailRepository().FindOneAsync(od => od.OrderId == orderId && od.ServiceId == serviceId);
-            if (orderDetail is null)
-            {
-                throw new NotFoundException("Shirt not found in the order.");
-            }
-
-            await _unitOfWork.GetOrderDetailRepository().DeleteAsync(orderDetail);
-            await _unitOfWork.SaveChangesAsync();
-        }
-        public async Task DeleteOrder(string userId, string orderId)
-        {    
-            var order = await _unitOfWork.GetOrderRepository().FindOneAsync(o => o.Id == orderId);
-            var account = await _unitOfWork.GetAccountRepository().FindOneAsync(a => a.Id == userId);
-            if (order is null)
-            {
-                throw new NotFoundException("Order not found");
-            }
-
-            if (account.Role.Equals("Customer"))
-            {
-                if (order.AccountId != account.Id)
-                {
-                    throw new BadRequestException("The order does not belong to this account.");
-                }
-            }
-
-            var orderDetails = await _unitOfWork.GetOrderDetailRepository().FindAsync(o => o.OrderId == order.Id);
-            if (orderDetails is not [])
-            {
-                foreach (var item in orderDetails)
-                {
-                    await _unitOfWork.GetOrderDetailRepository().DeleteAsync(item);
-                }
-            }
-            await _unitOfWork.GetOrderRepository().DeleteAsync(order);
-
-            await _unitOfWork.SaveChangesAsync();
+                Id = order.Id,
+                CustomerName = account.Name,
+                TotalPrice = order.TotalPrice,
+                OrderDate = order.OrderDate,
+                Status = order.Status
+            };
+            return new ResultModel { IsSuccess = true, Message = "successfully!!", Data = result };
         }
     }
 }

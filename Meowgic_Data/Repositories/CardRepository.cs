@@ -63,5 +63,55 @@ namespace Meowgic.Data.Repositories
         {
             _context.Cards.Update(card);
         }
+        public async Task<Card> CreateCardAsync(Card card)
+        {
+            _context.Cards.Add(card);
+            await _context.SaveChangesAsync();
+            return card;
+        }
+
+        public async Task<Card?> GetCardByIdAsync(string id)
+        {
+            return await _context.Cards
+                                 .AsNoTracking()
+                                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<IEnumerable<Card>> GetAllCardsAsync()
+        {
+            return await _context.Cards
+                                 .AsNoTracking()
+                                 .Include(c => c.CardMeanings)
+                                 .ToListAsync();
+        }
+
+        public async Task<Card?> UpdateCardAsync(string id, Card card)
+        {
+            var existingCard = await _context.Cards.FindAsync(id);
+            if (existingCard == null)
+            {
+                return null;
+            }
+
+            existingCard.ImgUrl = card.ImgUrl;
+            existingCard.Name = card.Name;
+
+            _context.Cards.Update(existingCard);
+            await _context.SaveChangesAsync();
+            return existingCard;
+        }
+
+        public async Task<bool> DeleteCardAsync(string id)
+        {
+            var card = await _context.Cards.FindAsync(id);
+            if (card == null)
+            {
+                return false;
+            }
+
+            _context.Cards.Remove(card);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -10,6 +10,7 @@ namespace Meowgic.Shares.Enum
     {
         Customer,
         Admin,
-        Reader
+        Reader,
+        Staff
     }
 }

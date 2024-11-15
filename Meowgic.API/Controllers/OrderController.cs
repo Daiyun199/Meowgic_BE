@@ -1,9 +1,12 @@
 ﻿using Meowgic.Business.Interface;
 using Meowgic.Data.Entities;
 using Meowgic.Data.Models.Request.Order;
+using Meowgic.Data.Models.Request.OrderDetail;
 using Meowgic.Data.Models.Response;
 using Meowgic.Data.Models.Response.Order;
 using Meowgic.Data.Models.Response.OrderDetail;
+using Meowgic.Data.Models.Response.PayOS;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,62 +18,82 @@ namespace Meowgic.API.Controllers
     {
         private readonly IServiceFactory _serviceFactory = serviceFactory;
         [HttpGet]
-        public async Task<ActionResult<PagedResultResponse<OrderResponses>>> GetOrders([FromQuery] QueryPageOrder request)
+        public async Task<ActionResult<ResultModel>> GetOrders([FromQuery] QueryPageOrder request)
         {
-            return await _serviceFactory.GetOrderService().GetPagedOrders(request);
+            return await _serviceFactory.GetOrderService.GetPagedOrders(request);
+        }
+        [HttpGet("all-in")]
+        [Authorize(Policy = "Admin")]
+        public async Task<ActionResult<ResultModel>> GetOrderAll()
+        {
+            return await _serviceFactory.GetOrderService.GetAll();
         }
         [HttpGet]
-        [Route("get-all-orderdetails")]
-        public async Task<ActionResult<List<OrderDetailResponse>>> GetList()
+        [Route("order-detail/get-cart")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> GetList()
         {
-            return await _serviceFactory.GetOrderDetailService().GetList();
+            return await _serviceFactory.GetOrderDetailService.GetCart(HttpContext.User);
+        }
+        [HttpGet]
+        [Route("order-detail/get-all")]
+        public async Task<ActionResult<ResultModel>> GetAll()
+        {
+            return await _serviceFactory.GetOrderDetailService.GetAll();
+        }
+        [HttpGet]
+        [Route("order-detail/get-by-order-id/{orderId}")]
+        public async Task<ActionResult<ResultModel>> GetByOrderId([FromRoute]string orderId)
+        {
+            return await _serviceFactory.GetOrderDetailService.GetAllByOrderId(orderId);
         }
         [HttpGet("{id}")]
-        public async Task<ActionResult<Order>> GetOrderDetailsInfoById([FromRoute]string id)
+        public async Task<ActionResult<ResultModel>> GetOrderInfoById([FromRoute]string id)
         {
-            return await _serviceFactory.GetOrderService().GetOrderDetailsInfoById(id);
+            return await _serviceFactory.GetOrderService.GetOrderDetailsInfoById(id);
         }
-        [HttpGet("get-cart")]
-        public async Task<ActionResult<Order>> GetCartInfo([FromForm] string userId)
+        [HttpGet("order-detail/{id}")]
+        public async Task<ActionResult<ResultModel>> GetOrderDetailInfoById([FromRoute] string id)
         {
-            return await _serviceFactory.GetOrderService().GetCartInfo(userId);
+            return await _serviceFactory.GetOrderDetailService.GetOrderDetailById(id);
         }
-        [HttpPost("add-to-cart")]
-        public async Task<ActionResult> AddtoCart([FromBody] string serviceId, string userId)
-        {
 
-            await _serviceFactory.GetOrderDetailService().AddToCart(userId, serviceId);
-            return Ok();
-        }
-        [HttpPost("{orderId}")]
-        public async Task<IActionResult> CreateOrder([FromRoute]string orderId, [FromBody] List<string> shirts, [FromForm] string userId)
+        [HttpPost("order-detail/add-to-cart")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> AddtoCart(AddToCartRequest request)
         {
-            await _serviceFactory.GetOrderService().ConfirmOrder(userId, orderId, shirts);
-            return Ok();
+            var item = await _serviceFactory.GetOrderDetailService.AddToCart(HttpContext.User, request);
+            return Ok(item);
         }
-        [HttpPatch("{orderId}")]
-        public async Task<IActionResult> CancelOrder([FromRoute]string orderId, [FromForm] string userId)
+        [HttpPost("booking-order")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> CreateOrder(List<string> request)
         {
-            await _serviceFactory.GetOrderService().CancelOrder(userId, orderId);
-            return Ok();
+            var item = await _serviceFactory.GetOrderService.BookingOrder(HttpContext.User, request);
+            return Ok(item);
         }
-        [HttpPut("{orderId}")]
-        public async Task<IActionResult> UpdateOrderDetail([FromRoute]string orderId, [FromForm] string userId, string serviceId)
+        [HttpPatch("canceld-order/{orderId}")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> CancelOrder([FromRoute]string orderId)
         {
-            await _serviceFactory.GetOrderService().UpdateOrderDetail(userId, orderId, serviceId);
-            return Ok();
+            var item = await _serviceFactory.GetOrderService.CancelOrder(HttpContext.User, orderId);
+            return Ok(item);
         }
-        [HttpDelete("{orderId}/services/{shirtId}")]
-        public async Task<IActionResult> DeleteShirtFromCart([FromRoute]string orderId, string shirtId, [FromForm] string userId)
+
+        [HttpPut("order-detail/update-detail-infor/{detailId}")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> UpdateOrderDetail([FromRoute] string detailId, UpdateDetailInfor request)
         {
-            await _serviceFactory.GetOrderService().DeleteServiceFromCart(userId, orderId, shirtId);
-            return Ok();
+            var item = await _serviceFactory.GetOrderDetailService.UpdateOrderDetail(HttpContext.User, detailId, request);
+            return Ok(item);
         }
-        [HttpDelete("{orderId}")]
-        public async Task<IActionResult> DeleteOrder([FromRoute]string orderId, [FromForm] string userId)
+
+        [HttpDelete("order-detail/remove-from-cart/{detailId}")]
+        [Authorize(Policy = "Customer")]
+        public async Task<ActionResult<ResultModel>> DeleteOrder([FromRoute]string detailId)
         {
-            await _serviceFactory.GetOrderService().DeleteOrder(userId, orderId);
-            return NoContent();
+            var item = await _serviceFactory.GetOrderDetailService.RemoveFromCart(HttpContext.User, detailId);
+            return Ok(item);
         }
     }
 }

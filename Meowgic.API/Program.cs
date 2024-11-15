@@ -11,37 +11,34 @@ using Meowgic.Data.Extension;
 using Meowgic.API.Middlewares;
 using Meowgic.Business.Mapper;
 using Meowgic.Business.Services;
+using Meowgic.Data.Models.Response.Account;
+using Meowgic.Data.Models;
 
-namespace Meowgic.API
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
             var builder = WebApplication.CreateBuilder(args);
          
-            builder.Services.AddControllers();
-            builder.Services.AddHttpContextAccessor();
+            //builder.Services.AddControllers();
+            //builder.Services.AddHttpContextAccessor();
 
             var configuration = builder.Configuration;
-            builder.Services.AddApiDependencies(configuration)
+builder.Services.AddIdentity<Account, Role>()
+.AddEntityFrameworkStores<AppDbContext>()
+.AddDefaultTokenProviders();
+
+builder.Services.AddApiDependencies(configuration)
                             .AddBusinessLogicDependencies()
                             .AddDataAccessDependencies();
 
-            //Add serilog
-            builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
+    var emailConfig = builder.Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>();
+    builder.Services.AddSingleton(emailConfig);     
+//Add serilog
+builder.Host.UseSerilog((ctx, lc) => lc.WriteTo.Console().ReadFrom.Configuration(ctx.Configuration));
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-            builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
-            builder.Services.AddIdentity<Account, IdentityRole>()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddDefaultTokenProviders();
+            //builder.Services.AddDbContext<AppDbContext>(options =>
+            //    options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
+            
             // Add services to the container.
 
-            builder.Services.AddControllers();
-            // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-            builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+           //builder.Services.AddControllers();
             //builder.Services.Configure<IdentityOptions>(options =>
             //{
             //    options.Password.RequireDigit = true;
@@ -56,26 +53,24 @@ namespace Meowgic.API
             //}).Configure<DataProtectionTokenProviderOptions>(options => options.TokenLifespan = TimeSpan.FromMinutes(15));
             //builder.Services.AddDataProtection();
 
-            builder.Services.AddSignalR();
+            //builder.Services.AddSignalR();
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            //if (app.Environment.IsDevelopment())
+            //{
+            app.UseSwagger();
+            app.UseSwaggerUI();
+            //}
             app.UseCors("AllowAll");
 
             app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+app.UseAuthentication();
+app.UseRouting();
 
-            app.UseMiddleware<GlobalExceptionMiddleware>();
+            app.UseAuthorization();
 
             app.MapControllers();
 
             app.Run();
-        }
-    }
-}

@@ -8,18 +8,20 @@ namespace Meowgic.Business.Interface
 {
     public interface IServiceFactory
     {
-        IAccountService GetAccountService();
-        IAuthService GetAuthService();
-        ICardService GetCardService();
-        ICardMeaningService GetCardMeaningService();
-        ICategoryService GetCategoryService();
-        IOrderDetailService GetOrderDetailService();
-        IOrderService GetOrderService();
-        IPromotionService GetPromotionService();
-        IQuestionService GetQuestionService();
-        IServiceService GetServiceService();
+        IAccountService GetAccountService { get; }
+        IAuthService GetAuthService { get; }
+        //ICardService GetCardService { get; }
+        //ICardMeaningService GetCardMeaningService { get; }
+        //ICategoryService GetCategoryService { get; }
+        IOrderDetailService GetOrderDetailService { get; }
+        IOrderService GetOrderService { get; }
+        IPromotionService GetPromotionService { get; }
+        IQuestionService GetQuestionService { get; }
+        //IServiceService GetServiceService { get; }
         //IFirebaseStorageService GetFirebaseStorageService();
-        ITokenService GetTokenService();
+        ITokenService GetTokenService { get; }
+        IPayOSService GetPayOSService { get; }
+  
 
     }
 }

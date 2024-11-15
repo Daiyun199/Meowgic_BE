@@ -17,11 +17,16 @@ namespace Meowgic.Data
         private readonly Lazy<ICardRepository> _cardRepository;
         private readonly Lazy<ICardMeaningRepository> _cardMeaningRepository;
         private readonly Lazy<ICategoryRepository> _categoryRepository;
+        private readonly Lazy<IFeedbackRepository> _feedbackRepository;
         private readonly Lazy<IOrderDetailRepository> _orderDetailRepository;
         private readonly Lazy<IOrderRepository> _orderRepository;
         private readonly Lazy<IPromotionRepository> _promotionRepository;
         private readonly Lazy<IQuestionRepository> _questionRepository;
         private readonly Lazy<IServiceRepository> _serviceRepository;
+        private readonly Lazy<IScheduleReaderRepository> _scheduleReaderRepository;
+        private readonly Lazy<IZodiacColorRepository> _colorRepository;
+        private readonly Lazy<IZodiacRepository> _zodiacRepository;
+
 
         public UnitOfWork(AppDbContext context)
         {
@@ -30,53 +35,34 @@ namespace Meowgic.Data
             _cardRepository = new Lazy<ICardRepository>(() => new CardRepository(context));
             _cardMeaningRepository = new Lazy<ICardMeaningRepository>(() => new CardMeaningRepository(context));
             _categoryRepository = new Lazy<ICategoryRepository>(() => new CategoryRepository(context));
+            _feedbackRepository = new Lazy<IFeedbackRepository>(() => new FeedbackRepository(context));
             _orderDetailRepository = new Lazy<IOrderDetailRepository>(() => new OrderDetailRepository(context));
             _orderRepository = new Lazy<IOrderRepository>(() => new OrderRepository(context));
             _promotionRepository = new Lazy<IPromotionRepository>(() => new PromotionRepository(context));
             _questionRepository = new Lazy<IQuestionRepository>(() => new QuestionRepository(context));
             _serviceRepository = new Lazy<IServiceRepository>(() => new ServiceRepository(context));
+            _scheduleReaderRepository = new Lazy<IScheduleReaderRepository>(() => new ScheduleReaderRepository(context));
+            _zodiacRepository = new Lazy<IZodiacRepository>(() => new ZodiacRepository(context));
+            _colorRepository = new Lazy<IZodiacColorRepository>(() => new ZodiacColorRepository(context));
         }
 
-        public IAccountRepository GetAccountRepository()
-        {
-            return _accountRepository.Value;
-        }
+        public IAccountRepository GetAccountRepository => _accountRepository.Value;
 
-        public ICardRepository GetCardRepository()
-        {
-            return _cardRepository.Value;
-        }
+        public ICardRepository GetCardRepository => _cardRepository.Value;
 
-        public ICardMeaningRepository GetCardMeaningRepository()
-        {
-            return _cardMeaningRepository.Value;
-        }
+        public ICardMeaningRepository GetCardMeaningRepository => _cardMeaningRepository.Value;
 
-        public ICategoryRepository GetCategoryRepository()
-        {
-            return _categoryRepository.Value;
-        }
+        public ICategoryRepository GetCategoryRepository =>  _categoryRepository.Value;
+        public IFeedbackRepository GetFeedbackRepository => _feedbackRepository.Value;
 
-        public IOrderDetailRepository GetOrderDetailRepository()
-        {
-            return _orderDetailRepository.Value;
-        }
-        public IOrderRepository GetOrderRepository()
-        {
-            return _orderRepository.Value;
-        }
-        public IPromotionRepository GetPromotionRepository()
-        {
-            return _promotionRepository.Value;
-        }
-        public IQuestionRepository GetQuestionRepository()
-        {
-            return _questionRepository.Value;
-        }
-        public IServiceRepository GetServiceRepository()
-        {
-            return _serviceRepository.Value;
-        }
+        public IOrderDetailRepository GetOrderDetailRepository => _orderDetailRepository.Value;
+        public IOrderRepository GetOrderRepository => _orderRepository.Value;
+        public IPromotionRepository GetPromotionRepository => _promotionRepository.Value;
+        public IQuestionRepository GetQuestionRepository => _questionRepository.Value;
+        public IServiceRepository GetServiceRepository => _serviceRepository.Value;
+        public IScheduleReaderRepository GetScheduleReaderRepository => _scheduleReaderRepository.Value;
+        public IZodiacColorRepository GetZodiacColorRepository => _colorRepository.Value;
+        public IZodiacRepository GetZodiacRepository => _zodiacRepository.Value;
 
         public async Task<int> SaveChangesAsync()
         {

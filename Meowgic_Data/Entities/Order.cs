@@ -11,7 +11,7 @@ namespace Meowgic.Data.Entities
     public partial class Order :AbstractEntity
     {
         [Key]
-        public string Id { get; set; } = Guid.NewGuid().ToString();
+        public string Id { get; set; }
         [ForeignKey("Account")]
         public string AccountId { get; set; }
 

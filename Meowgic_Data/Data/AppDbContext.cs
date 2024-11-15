@@ -41,6 +41,7 @@ namespace Meowgic.Data.Data
         public virtual DbSet<Zodiac> Zodiac { get; set; }
         public virtual DbSet<ZodiacColor> ZodiacColor { get; set; }
         public virtual DbSet<ScheduleReader> ScheduleReaders { get; set; }
+        public virtual DbSet<Feedback> Feedbacks { get; set; }
 
         public DatabaseFacade DatabaseFacade => throw new NotImplementedException();
 
@@ -80,6 +81,10 @@ namespace Meowgic.Data.Data
                     .WithMany(s => s.OrderDetails)
                     .HasForeignKey(e => e.ServiceId)
                     .OnDelete(DeleteBehavior.NoAction);  // Đặt ON DELETE NO ACTION cho ServiceId
+                entity.HasOne(e => e.ScheduleReader)
+                    .WithMany(sr => sr.OrderDetails)
+                    .HasForeignKey(e => e.ScheduleReaderId)
+                    .OnDelete(DeleteBehavior.NoAction);
             });
         }
         public override int SaveChanges()

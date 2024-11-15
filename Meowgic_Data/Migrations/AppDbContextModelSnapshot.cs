@@ -41,6 +41,9 @@ namespace Meowgic.Data.Migrations
                     b.Property<DateTime?>("DeletedTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateOnly?>("Dob")
                         .HasColumnType("date");
 
@@ -84,7 +87,6 @@ namespace Meowgic.Data.Migrations
                         .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("Password")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PasswordHash")
@@ -111,11 +113,13 @@ namespace Meowgic.Data.Migrations
                     b.Property<DateTime?>("ResetTokenExpires")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
 
                     b.Property<string>("SecurityStamp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Specialization")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
@@ -135,8 +139,20 @@ namespace Meowgic.Data.Migrations
                     b.Property<DateTime?>("VerificationTokenExpires")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("bankAccount")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("countTarot")
+                        .HasColumnType("int");
+
                     b.Property<bool>("isConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("otpResetPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double?>("yearsOfExperience")
+                        .HasColumnType("float");
 
                     b.HasKey("Id");
 
@@ -269,6 +285,48 @@ namespace Meowgic.Data.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Meowgic.Data.Entities.Feedback", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("CreatedTime")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("DeletedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("DeletedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("LastUpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("LastUpdatedTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OrderDetailId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.HasIndex("OrderDetailId")
+                        .IsUnique();
+
+                    b.ToTable("Feedbacks");
+                });
+
             modelBuilder.Entity("Meowgic.Data.Entities.Order", b =>
                 {
                     b.Property<string>("Id")
@@ -332,9 +390,6 @@ namespace Meowgic.Data.Migrations
                     b.Property<DateTime?>("DeletedTime")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Feedback")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("LastUpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -342,11 +397,11 @@ namespace Meowgic.Data.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("OrderId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<double?>("Rate")
-                        .HasColumnType("float");
+                    b.Property<string>("ScheduleReaderId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ServiceId")
                         .IsRequired()
@@ -355,6 +410,8 @@ namespace Meowgic.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId");
+
+                    b.HasIndex("ScheduleReaderId");
 
                     b.HasIndex("ServiceId");
 
@@ -460,8 +517,8 @@ namespace Meowgic.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime>("DayOfWeek")
-                        .HasColumnType("datetime2");
+                    b.Property<DateOnly>("DayOfWeek")
+                        .HasColumnType("date");
 
                     b.Property<string>("DeletedBy")
                         .HasColumnType("nvarchar(max)");
@@ -519,6 +576,9 @@ namespace Meowgic.Data.Migrations
 
                     b.Property<double>("Rate")
                         .HasColumnType("float");
+
+                    b.Property<bool>("isSpecial")
+                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
@@ -770,6 +830,25 @@ namespace Meowgic.Data.Migrations
                     b.Navigation("Category");
                 });
 
+            modelBuilder.Entity("Meowgic.Data.Entities.Feedback", b =>
+                {
+                    b.HasOne("Meowgic.Data.Entities.Account", "Account")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Meowgic.Data.Entities.OrderDetail", "OrderDetail")
+                        .WithOne("Feedback")
+                        .HasForeignKey("Meowgic.Data.Entities.Feedback", "OrderDetailId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+
+                    b.Navigation("OrderDetail");
+                });
+
             modelBuilder.Entity("Meowgic.Data.Entities.Order", b =>
                 {
                     b.HasOne("Meowgic.Data.Entities.Account", "Account")
@@ -786,6 +865,11 @@ namespace Meowgic.Data.Migrations
                     b.HasOne("Meowgic.Data.Entities.Order", "Order")
                         .WithMany("OrderDetails")
                         .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
+                    b.HasOne("Meowgic.Data.Entities.ScheduleReader", "ScheduleReader")
+                        .WithMany("OrderDetails")
+                        .HasForeignKey("ScheduleReaderId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
@@ -796,6 +880,8 @@ namespace Meowgic.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Order");
+
+                    b.Navigation("ScheduleReader");
 
                     b.Navigation("Service");
                 });
@@ -901,6 +987,8 @@ namespace Meowgic.Data.Migrations
 
             modelBuilder.Entity("Meowgic.Data.Entities.Account", b =>
                 {
+                    b.Navigation("Feedbacks");
+
                     b.Navigation("Orders");
 
                     b.Navigation("ScheduleReaders");
@@ -925,9 +1013,19 @@ namespace Meowgic.Data.Migrations
                     b.Navigation("OrderDetails");
                 });
 
+            modelBuilder.Entity("Meowgic.Data.Entities.OrderDetail", b =>
+                {
+                    b.Navigation("Feedback");
+                });
+
             modelBuilder.Entity("Meowgic.Data.Entities.Promotion", b =>
                 {
                     b.Navigation("Services");
+                });
+
+            modelBuilder.Entity("Meowgic.Data.Entities.ScheduleReader", b =>
+                {
+                    b.Navigation("OrderDetails");
                 });
 
             modelBuilder.Entity("Meowgic.Data.Entities.TarotService", b =>

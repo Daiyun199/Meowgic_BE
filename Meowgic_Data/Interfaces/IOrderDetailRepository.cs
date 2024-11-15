@@ -9,5 +9,9 @@ namespace Meowgic.Data.Interfaces
 {
     public interface IOrderDetailRepository : IGenericRepository<OrderDetail>
     {
+        Task<List<OrderDetail>> GetCart(string accountId);
+        Task<List<OrderDetail>> GetAllOrderDetails();
+        Task<List<OrderDetail>> GetAllOrderDetailsByOrderId(string orderId);
+        Task<OrderDetail?> GetOrderDetailByIdAsync(string detailId);
     }
 }

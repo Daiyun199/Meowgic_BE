@@ -1,4 +1,5 @@
 ﻿using Meowgic.Business.Interface;
+using Meowgic.Shares.Enum;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -16,21 +17,24 @@ namespace Meowgic.Business.Services
     {
         private readonly IConfiguration _configuration = configuration;
 
-        public string GenerateAccessToken(string accountId, string role)
+        public string GenerateAccessToken(string accountId, Roles role, string name)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("MeowgicTeamASPAPIEntityFrameworkCore"));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtAuth:Key"]!));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new List<Claim>(){
-                new("role", role),
+                new(ClaimTypes.Role,role.ToString()),
+                new(ClaimTypes.Name,name),
                 new("aid", accountId)
             };
 
             var token = new JwtSecurityToken(
+                issuer: _configuration["JwtAuth:Issuer"],
+                audience: _configuration["JwtAuth:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddHours(1)
+                expires: DateTime.Now.AddHours(1),
+                signingCredentials: credentials
             );
-
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 

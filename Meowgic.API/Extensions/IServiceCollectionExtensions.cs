@@ -1,5 +1,4 @@
-﻿using Meowgic.API.Attribute;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -10,6 +9,10 @@ using System.Text;
 using Newtonsoft.Json.Serialization;
 using Meowgic.Data.Data;
 using Meowgic.Shares;
+using System.Security.Claims;
+using Meowgic.Shares.Enum;
+using Meowgic.Business.Services;
+using System.Text.Json.Serialization;
 
 namespace Meowgic.API.Extensions
 {
@@ -19,6 +22,7 @@ namespace Meowgic.API.Extensions
         {
             services.AddControllersWithConfigurations()
                     .AddDbContextWithConfigurations(configuration)
+                    .AddAuthenticationServicesWithConfigurations(configuration)
                     .AddSwaggerConfigurations()
                     .AddCorsConfigurations();
 
@@ -29,7 +33,7 @@ namespace Meowgic.API.Extensions
         {
             string connectionString = configuration.GetConnectionString("Default")!;
             services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseSqlServer(connectionString, b => b.EnableRetryOnFailure()));
             return services;
         }
 
@@ -47,13 +51,26 @@ namespace Meowgic.API.Extensions
                     Name = "Authorization",
                     In = ParameterLocation.Header,
                     Type = SecuritySchemeType.ApiKey,
-                    Scheme = "Bearer"
+                    Scheme = "Bearer",
                 });
+                //options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+                //{
+                //    {
+                //        new OpenApiSecurityScheme
+                //        {
 
+                //    Reference = new OpenApiReference
+                //    {
+                //        Id = "Bearer",
+                //        Type = ReferenceType.SecurityScheme
+                //    }
+                //        },
+                //        new List<string>()
+                //    }
+                //});
 
 
                 options.OperationFilter<SecurityRequirementsOperationFilter>();
-                options.SchemaFilter<ApplyKebabCaseNamingConvention>();
             });
 
             return services;
@@ -67,79 +84,61 @@ namespace Meowgic.API.Extensions
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                //options.SaveToken = true;
+                //options.RequireHttpsMetadata = false;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
                     ValidateIssuer = true,
                     ValidateAudience = true,
+                    ValidAudience = configuration["JwtAuth:Audience"],
+                    ValidIssuer = configuration["JwtAuth:Issuer"],
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.Zero,
-                    ValidIssuer = configuration["JwtAuth:Issuer"],
-                    ValidAudience = configuration["JwtAuth:Audience"],
-                    IssuerSigningKey =
-                        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtAuth:Key"]!))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtAuth:Key"]!))
                 };
             });
+            services.AddAuthorizationBuilder()
+                .AddPolicy("Admin", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Admin.ToString());
+                })
+                .AddPolicy("Customer", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Customer.ToString());
+                })
+                .AddPolicy("Staff", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Staff.ToString());
+                })
+                .AddPolicy("Reader", policy =>
+                {
+                    policy.RequireClaim(ClaimTypes.Role, Roles.Reader.ToString());
+                });
             return services;
         }
 
         private static IServiceCollection AddControllersWithConfigurations(this IServiceCollection services)
         {
-            services.AddControllers(
-                options => options.ModelBinderProviders.Insert(0, new CurrentAccountModelBinderProvider())
-            ).AddNewtonsoftJson(options =>
+            services.AddControllers().AddNewtonsoftJson(options =>
             {
                 options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
-                options.SerializerSettings.Converters.Add(new DateOnlyJsonConverter());
-                options.SerializerSettings.ContractResolver = new DefaultContractResolver
-                {
-                    NamingStrategy = new KebabCaseNamingStrategy()
-                };
             });
+            services.AddControllers()
+                .AddJsonOptions(options =>
+                 { 
+          options.JsonSerializerOptions.Converters.Add(new TimeOnlyJsonConverter());
+                     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+                });
             return services;
         }
 
         private static IServiceCollection AddCorsConfigurations(this IServiceCollection services)
         {
             services.AddCors(options =>
-                options.AddPolicy("AllowAll", b => b.AllowAnyHeader().AllowAnyOrigin().AllowAnyMethod()));
+                options.AddPolicy("AllowAll", b => b.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
             return services;
         }
 
-    }
-
-    internal class ApplyKebabCaseNamingConvention : ISchemaFilter
-    {
-        public void Apply(OpenApiSchema schema, SchemaFilterContext context)
-        {
-            if (schema?.Properties?.Count == 0)
-            {
-                return;
-            }
-
-            if (schema is null)
-            {
-                return;
-            }
-
-            var properties = schema.Properties;
-            schema.Properties = new Dictionary<string, OpenApiSchema>();
-
-            foreach (var property in properties)
-            {
-                var kebabCaseProperty = ToKebabCase(property.Key);
-                schema.Properties.Add(kebabCaseProperty, property.Value);
-            }
-        }
-
-        private string ToKebabCase(string value)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                return value;
-            }
-
-            return Regex.Replace(value, "(?<!^)([A-Z][a-z]|(?<=[a-z])[A-Z])", "-$1").ToLower();
-        }
     }
 }

@@ -12,5 +12,8 @@ namespace Meowgic.Data.Models.Request.Category
         [Required]
         [MaxLength(100, ErrorMessage = "Name is too long")]
         public required string Name { get; set; }
+
+        [Required]
+        public required string UserId { get; set; }
     }
 }

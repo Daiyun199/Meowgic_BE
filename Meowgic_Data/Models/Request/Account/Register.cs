@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Meowgic.Data.Entities;
 
 namespace Meowgic.Data.Models.Request.Account
 {
@@ -17,11 +18,10 @@ namespace Meowgic.Data.Models.Request.Account
         public required string Name { get; set; }
 
         [Required]
-        [DataType(DataType.EmailAddress, ErrorMessage = "Please input a right email address")]
+        [EmailAddress(ErrorMessage = "Please input a right email address")]
         public required string Email { get; set; }
 
         [Required]
-        [DataType(DataType.Password)]
         public required string Password { get; set; }
 
         public required DateTime? Dob { get; set; }
@@ -32,6 +32,9 @@ namespace Meowgic.Data.Models.Request.Account
 
         public string? Phone { get; set; }
 
-        public string? Images { get; set; }
+        [Required]
+        [EnumDataType(typeof(Roles), ErrorMessage = "Invalid role")]
+        public Roles Roles { get; set; }
+        //public IFormFile? Images { get; set; }
     }
 }

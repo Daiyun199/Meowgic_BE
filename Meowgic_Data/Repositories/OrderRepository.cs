@@ -27,7 +27,27 @@ namespace Meowgic.Data.Repositories
                 _ => o => o.Id
             };
         }
-        public async Task<PagedResultResponse<Order>> GetPagedOrders(QueryPageOrder request)
+        public async Task<List<Order>> GetPagedOrders(QueryPageOrder request)
+        {
+            var query = _context.Orders.AsNoTracking().Include(o => o.Account).Include(o => o.OrderDetails).AsQueryable();
+
+            query = query.ApplyPagedOrdersFilter(request);
+
+
+            query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
+                                        : query.OrderBy(GetSortProperty(request.SortColumn));
+
+            return await query.Skip((request.PageNumber - 1) * request.PageSize).Take(request.PageSize).ToListAsync();
+        }
+
+        public async Task<List<Order>> GetAll()
+        {
+            var query = _context.Orders.AsNoTracking().Include(o => o.Account).Include(o => o.OrderDetails).AsQueryable();
+
+            return await query.ToListAsync();
+        }
+
+        public async Task<int> GetOrdersSize(QueryPageOrder request)
         {
             var query = _context.Orders.AsQueryable();
 
@@ -38,8 +58,7 @@ namespace Meowgic.Data.Repositories
             query = request.OrderByDesc ? query.OrderByDescending(GetSortProperty(request.SortColumn))
                                         : query.OrderBy(GetSortProperty(request.SortColumn));
 
-
-            return await query.ToPagedResultResponseAsync(request.PageNumber, request.PageSize);
+            return await query.CountAsync();
         }
 
         public async Task<Order?> GetOrderDetailsInfoById(string orderId)
@@ -49,6 +68,15 @@ namespace Meowgic.Data.Repositories
                                         .Include(o => o.Account)
                                         .Include(o => o.OrderDetails)
                                         .ThenInclude(od => od.Service)
+                                        .ThenInclude(s => s.Account)
+                                        .Include(o => o.OrderDetails)
+                                        .ThenInclude(od => od.Service)
+                                        .ThenInclude(s => s.Promotion)
+                                        .Include(o => o.OrderDetails)
+                                        .ThenInclude(od => od.ScheduleReader)
+                                        .ThenInclude(sc => sc.Account)
+                                        .Include(o => o.OrderDetails)
+                                        .ThenInclude(od => od.Feedback)
                                         .AsSplitQuery()
                                         .SingleOrDefaultAsync();
         }
@@ -64,6 +92,31 @@ namespace Meowgic.Data.Repositories
                 .FirstOrDefaultAsync();
 
             return order;
+        }
+
+        public async Task<int> FindEmptyPositionWithBinarySearch(List<Order> list, int low, int high, string entityName, string entityIndex)
+        {
+            var mid = (low + high) / 2;
+            var Id = $"{entityName}{mid.ToString("D4")}";
+            var entity = await _context.Set<Order>()
+                .Where(e => EF.Property<string>(e, entityIndex) == Id)
+                .FirstOrDefaultAsync();
+            if (entity is null)
+            {
+                return mid;
+            }
+            else
+            {
+                var index = list.IndexOf(entity) + 1;
+                if (index < mid)
+                {
+                    return await FindEmptyPositionWithBinarySearch(list, low, mid, entityName, entityIndex);
+                }
+                else
+                {
+                    return await FindEmptyPositionWithBinarySearch(list, mid, high, entityName, entityIndex);
+                }
+            }
         }
     }
 }

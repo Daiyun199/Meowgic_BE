@@ -14,7 +14,7 @@ namespace Meowgic.Data.Models.Request.Card
         public required string Name { get; set; }
 
         [Required(ErrorMessage = "Image is required")]
-        public IFormFile Image { get; set; } = null!;
+        public string Image { get; set; } = null!;
 
     }
 }

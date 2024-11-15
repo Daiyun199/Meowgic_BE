@@ -1,5 +1,4 @@
-﻿using Google.Cloud.Storage.V1;
-using Mapster;
+﻿using Mapster;
 using Meowgic.Business.Interface;
 using Meowgic.Business.Services;
 using Meowgic.Data.Entities;
@@ -26,22 +25,10 @@ namespace Meowgic.Business.Extension
     {
         public static IServiceCollection AddBusinessLogicDependencies(this IServiceCollection services)
         {
-            services.AddMapsterConfigurations()
-                    .AddServices();
-            return services;
-        }
-
-        private static IServiceCollection AddMapsterConfigurations(this IServiceCollection services)
-        {
-            services.AddMapster();
-            return services;
-        }
-
-        public static IServiceCollection AddServices(this IServiceCollection services)
-        {
             services.AddHostedService<BackgroundWorkerService>();
             services.AddScoped<IServiceFactory, ServiceFactory>();
             services.AddScoped<IAccountService, AccountService>();
+            services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<ICardMeaningService, CardMeaningService>();
             //services.AddScoped<IFirebaseStorageService, FirebaseStorageService>();
@@ -51,9 +38,13 @@ namespace Meowgic.Business.Extension
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IPromotionService, PromotionService>();
             services.AddScoped<IQuestionService, QuestionService>();
-            services.AddScoped<IServiceService, ServiceService>();
+            services.AddScoped<IServiceService, TarotServiceService>();
             services.AddScoped<IZodiacService, ZodiacService>();
-            services.AddScoped<IZodiacColorService, ZodiacColorService>();
+            services.AddScoped<IZodiacColorService, ZodiacColorService>();  
+            services.AddScoped<IFeedbackService, FeedbackService>();
+            services.AddScoped<IEmailService, EmailService>();  
+            services.AddScoped<IScheduleReaderService, ScheduleReaderService>();
+            services.AddScoped<IPayOSService, PayOSService>();
             return services;
         }
     }

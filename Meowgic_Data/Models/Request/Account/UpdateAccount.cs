@@ -17,9 +17,6 @@ namespace Meowgic.Data.Models.Request.Account
         [Required]
         public required string Name { get; set; }
 
-        [DataType(DataType.Password)]
-        public string? Password { get; set; }
-
         public DateTime? Dob { get; set; }
 
         [EnumDataType(typeof(Gender), ErrorMessage = "Invalid gender")]
@@ -27,9 +24,5 @@ namespace Meowgic.Data.Models.Request.Account
 
         public string? Phone { get; set; }
 
-        public string? Images { get; set; }
-
-        [EnumDataType(typeof(Roles), ErrorMessage = "Invalid role")]
-        public string Role { get; set; } = null!;
     }
 }

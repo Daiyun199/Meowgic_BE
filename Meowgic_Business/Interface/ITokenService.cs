@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Meowgic.Shares.Enum;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -9,8 +10,9 @@ namespace Meowgic.Business.Interface
 {
     public interface ITokenService
     {
-        string GenerateAccessToken(string accountId, string role);
+        string GenerateAccessToken(string accountId, Roles role, string name);
 
         string GenerateRefreshToken();
+
     }
 }

@@ -76,18 +76,18 @@ namespace Meowgic.Data.Extension
             }
             return query;
         }
-        public static IQueryable<TarotService> ApplyPagedTarotServiceFilter(this IQueryable<TarotService> query, QueryPagedService request)
-        {
-            if (!string.IsNullOrEmpty(request.Name))
-            {
-                query = query.Where(s => s.Name != null && s.Name.ToLower().Contains(request.Name.ToLower()));
-            }
-            if (!string.IsNullOrEmpty(request.Description))
-            {
-                query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Description.ToLower()));
-            }
-            return query;
-        }
+        //public static IQueryable<TarotService> ApplyPagedTarotServiceFilter(this IQueryable<TarotService> query, QueryPagedService request)
+        //{
+        //    if (!string.IsNullOrEmpty(request.Name))
+        //    {
+        //        query = query.Where(s => s.Name != null && s.Name.ToLower().Contains(request.Name.ToLower()));
+        //    }
+        //    if (!string.IsNullOrEmpty(request.Description))
+        //    {
+        //        query = query.Where(s => s.Description != null && s.Description.ToLower().Contains(request.Description.ToLower()));
+        //    }
+        //    return query;
+        //}
         public static IQueryable<Order> ApplyPagedOrdersFilter(this IQueryable<Order> query, QueryPageOrder request)
         {
             query = query.Where(o => o.Status != OrderStatus.Incart.ToString());
@@ -111,9 +111,6 @@ namespace Meowgic.Data.Extension
             {
                 query = query.Where(o => request.Status == o.Status);
             }
-
-
-
             return query;
         }
     }

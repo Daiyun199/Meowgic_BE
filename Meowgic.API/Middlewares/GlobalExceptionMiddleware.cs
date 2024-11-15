@@ -6,21 +6,20 @@ using System.Net;
 
 namespace Meowgic.API.Middlewares
 {
-    public class GlobalExceptionMiddleware
+    public class GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
     {
-        private readonly RequestDelegate _next;
-        private readonly ILogger<GlobalExceptionMiddleware> _logger;
-
-        public GlobalExceptionMiddleware(RequestDelegate next, ILogger<GlobalExceptionMiddleware> logger)
-        {
-            _next = next;
-            _logger = logger;
-        }
+        private readonly RequestDelegate _next = next;
+        private readonly ILogger<GlobalExceptionMiddleware> _logger = logger;
 
         public async Task Invoke(HttpContext context)
         {
             try
             {
+                //var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+                //if (token != null)
+                //{
+                //    context.Items["User"] = token;
+                //}
                 await _next(context);
             }
             catch (Exception ex)
